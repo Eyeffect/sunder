@@ -17,6 +17,11 @@ export default function App() {
     socketRef.current?.send(msg);
   }, []);
 
+  const requestEndTurn = useCallback(() => {
+    if (!snapshot?.can_act) return;
+    send({ type: "end_turn", turn: snapshot.turn });
+  }, [snapshot, send]);
+
   useEffect(() => {
     const sock = new GameSocket();
     socketRef.current = sock;
@@ -91,7 +96,7 @@ export default function App() {
         return;
       }
       if (e.key === "e") {
-        send({ type: "end_turn" });
+        requestEndTurn();
         return;
       }
       if (e.key === "c") {
@@ -105,7 +110,7 @@ export default function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [view, snapshot, send, playCard]);
+  }, [view, snapshot, requestEndTurn, playCard]);
 
   const status =
     notice ||
@@ -159,7 +164,7 @@ export default function App() {
             onClickMine={onClickMine}
             onClickFoe={onClickFoe}
             onClickFace={onClickFace}
-            onEndTurn={() => send({ type: "end_turn" })}
+            onEndTurn={requestEndTurn}
             onRestart={() => send({ type: "restart" })}
           />
         )}

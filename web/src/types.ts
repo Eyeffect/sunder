@@ -138,5 +138,5 @@ export type ClientMsg =
   | { type: "restart"; seed?: number }
   | { type: "play"; hand: number; target?: number | null }
   | { type: "attack"; board: number; target: "face" | number }
-  | { type: "end_turn" }
+  | { type: "end_turn"; turn: number }
   | { type: "ping" };

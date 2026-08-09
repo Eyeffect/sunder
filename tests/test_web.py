@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from sunder.server.app import create_app
 
-client = TestClient(create_app())
+client = TestClient(create_app(ai_think=0, ai_delay=0))
 
 
 def test_health():
@@ -44,13 +44,59 @@ def test_bad_play_rejected():
         assert msg["type"] == "error"
 
 
+def _next_stable(ws):
+    """Drain staged AI snapshots until it's the human's turn or game over."""
+    while True:
+        s = ws.receive_json()["snapshot"]
+        if s["winner"] is not None or s["can_act"]:
+            return s
+
+
 def test_end_turn_runs_ai():
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "start", "seed": 1})
         s1 = ws.receive_json()["snapshot"]
         assert s1["current"] == 0
-        ws.send_json({"type": "end_turn"})
+        ws.send_json({"type": "end_turn", "turn": s1["turn"]})
+        s2 = _next_stable(ws)
+        assert s2["current"] == 0
+        assert s2["turn"] == 3
+        assert s2["winner"] is None
+
+
+def test_end_turn_acks_immediately():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        s1 = ws.receive_json()["snapshot"]
+        ws.send_json({"type": "end_turn", "turn": s1["turn"]})
         s2 = ws.receive_json()["snapshot"]
+        assert s2["current"] == 1
+        assert s2["can_act"] is False
+        s3 = _next_stable(ws)
+        assert s3["current"] == 0
+        assert s3["turn"] == 3
+
+
+def test_end_turn_rejects_stale_turn():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        s1 = ws.receive_json()["snapshot"]
+        assert s1["turn"] == 1
+        ws.send_json({"type": "end_turn", "turn": 99})
+        s2 = ws.receive_json()["snapshot"]
+        assert s2["turn"] == 1
+        assert s2["current"] == 0
+        assert s2["winner"] is None
+
+
+def test_rapid_end_turn_skips_one_turn_only():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        s1 = ws.receive_json()["snapshot"]
+        assert s1["turn"] == 1
+        for _ in range(3):
+            ws.send_json({"type": "end_turn", "turn": 1})
+        s2 = _next_stable(ws)
         assert s2["current"] == 0
         assert s2["turn"] == 3
         assert s2["winner"] is None
@@ -61,7 +107,7 @@ def test_scripted_match_terminates():
         ws.send_json({"type": "start", "seed": 1})
         final = None
         for _ in range(300):
-            s = ws.receive_json()["snapshot"]
+            s = _next_stable(ws)
             if s["winner"] is not None:
                 final = s
                 break
@@ -83,5 +129,5 @@ def test_scripted_match_terminates():
                 ws.send_json({"type": "attack", "board": s["me"]["board"].index(attacker),
                               "target": target})
                 continue
-            ws.send_json({"type": "end_turn"})
+            ws.send_json({"type": "end_turn", "turn": s["turn"]})
         assert final is not None and final["winner"] in (0, 1)

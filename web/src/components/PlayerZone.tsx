@@ -29,6 +29,7 @@ export function DeckStack({
 export interface FxState {
   hurt: number[];
   revealed: number[];
+  summoned: number[];
 }
 
 interface BoardRowProps {
@@ -73,6 +74,7 @@ export function BoardRow({
               onLeave={() => onHover?.(null)}
               fxHurt={fx.hurt.includes(card.serial)}
               fxRevealed={fx.revealed.includes(card.serial)}
+              fxSummoned={fx.summoned.includes(card.serial)}
             />
           );
         })}

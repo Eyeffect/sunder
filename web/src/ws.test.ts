@@ -44,7 +44,7 @@ describe("GameSocket", () => {
     fake.onopen?.();
     expect(fake.sent).toEqual([JSON.stringify({ type: "start" })]);
     expect(onOpen).toHaveBeenCalled();
-    sock.send({ type: "end_turn" });
+    sock.send({ type: "end_turn", turn: 3 });
     expect(fake.sent).toHaveLength(2);
     sock.close();
   });

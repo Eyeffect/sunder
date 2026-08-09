@@ -184,14 +184,21 @@ describe("App", () => {
     });
   });
 
-  it("sends end_turn via the button and the e key", () => {
+  it("sends end_turn with the turn id via the button and the e key", () => {
     render(<App />);
     pump(snapshot());
     fireEvent.click(screen.getByRole("button", { name: "END BROADCAST" }));
-    expect(ws.sendMock).toHaveBeenCalledWith({ type: "end_turn" });
+    expect(ws.sendMock).toHaveBeenCalledWith({ type: "end_turn", turn: 1 });
     ws.sendMock.mockClear();
     fireEvent.keyDown(window, { key: "e" });
-    expect(ws.sendMock).toHaveBeenCalledWith({ type: "end_turn" });
+    expect(ws.sendMock).toHaveBeenCalledWith({ type: "end_turn", turn: 1 });
+  });
+
+  it("does not send end_turn while the rival is playing", () => {
+    render(<App />);
+    pump(snapshot({ can_act: false, current: 1 }));
+    fireEvent.keyDown(window, { key: "e" });
+    expect(ws.sendMock).not.toHaveBeenCalled();
   });
 
   it("plays hand card 1 with the 1 key", () => {
@@ -220,5 +227,43 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "CARDS" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "DUEL" }));
     expect(screen.getByText(/Your turn/)).toBeInTheDocument();
+  });
+
+  it("applies the summon effect to a card that just aired", () => {
+    const { container } = render(<App />);
+    pump(snapshot({ turn: 2, current: 1, can_act: false }));
+    pump(
+      snapshot({
+        turn: 2,
+        current: 1,
+        can_act: false,
+        foe: player({ index: 1, board: [boardCard({ serial: 7, name: "Rival Scraper" })] }),
+      }),
+    );
+    const cardEl = container.querySelector(".board-row .card");
+    expect(cardEl).toBeInTheDocument();
+    expect(cardEl).toHaveClass("fx-summoned");
+  });
+
+  it("does not apply the summon effect to cards already on the board", () => {
+    const { container } = render(<App />);
+    pump(
+      snapshot({
+        turn: 2,
+        current: 1,
+        can_act: false,
+        foe: player({ index: 1, board: [boardCard({ serial: 7, name: "Rival Scraper" })] }),
+      }),
+    );
+    pump(
+      snapshot({
+        turn: 2,
+        current: 1,
+        can_act: false,
+        foe: player({ index: 1, board: [boardCard({ serial: 7, name: "Rival Scraper" })] }),
+      }),
+    );
+    const cardEl = container.querySelector(".board-row .card");
+    expect(cardEl).not.toHaveClass("fx-summoned");
   });
 });

@@ -19,7 +19,7 @@ interface GameViewProps {
 
 export function GameView(props: GameViewProps) {
   const { snapshot, mode, status } = props;
-  const [fx, setFx] = useState<FxState>({ hurt: [], revealed: [] });
+  const [fx, setFx] = useState<FxState>({ hurt: [], revealed: [], summoned: [] });
   const prevRef = useRef<Snapshot | null>(null);
   const [inspectedBoard, setInspectedBoard] = useState<BoardCard | null>(null);
   const [inspectedHand, setInspectedHand] = useState<HandCard | null>(null);
@@ -27,12 +27,22 @@ export function GameView(props: GameViewProps) {
   useEffect(() => {
     const prev = prevRef.current;
     if (prev) {
+      if (snapshot.turn < prev.turn) {
+        prevRef.current = snapshot;
+        setFx({ hurt: [], revealed: [], summoned: [] });
+        return;
+      }
       const cur = new Map<number, BoardCard>();
+      const prevSerials = new Set<number>();
       for (const p of [snapshot.me, snapshot.foe]) {
         for (const c of p.board) cur.set(c.serial, c);
       }
+      for (const p of [prev.me, prev.foe]) {
+        for (const c of p.board) prevSerials.add(c.serial);
+      }
       const hurt: number[] = [];
       const revealed: number[] = [];
+      const summoned: number[] = [];
       for (const p of [prev.me, prev.foe]) {
         for (const c of p.board) {
           const now = cur.get(c.serial);
@@ -43,7 +53,14 @@ export function GameView(props: GameViewProps) {
           }
         }
       }
-      if (hurt.length || revealed.length) setFx({ hurt, revealed });
+      for (const p of [snapshot.me, snapshot.foe]) {
+        for (const c of p.board) {
+          if (!prevSerials.has(c.serial)) summoned.push(c.serial);
+        }
+      }
+      if (hurt.length || revealed.length || summoned.length) {
+        setFx({ hurt, revealed, summoned });
+      }
     }
     prevRef.current = snapshot;
   }, [snapshot]);

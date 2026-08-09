@@ -83,6 +83,7 @@ interface CardProps {
   sleeve?: string;
   fxHurt?: boolean;
   fxRevealed?: boolean;
+  fxSummoned?: boolean;
 }
 
 export function Card({
@@ -95,6 +96,7 @@ export function Card({
   sleeve,
   fxHurt,
   fxRevealed,
+  fxSummoned,
 }: CardProps) {
   const cls = [
     "card",
@@ -104,6 +106,7 @@ export function Card({
     className ?? "",
     fxHurt ? "fx-hurt" : "",
     fxRevealed ? "fx-revealed" : "",
+    fxSummoned ? "fx-summoned" : "",
   ]
     .filter(Boolean)
     .join(" ");

@@ -1,6 +1,6 @@
 [project]
 name = "sunder"
-version = "0.3.0"
+version = "0.3.2"
 description = "Procedural duel card game — the Sundered spectrum"
 requires-python = ">=3.11"
 dependencies = [

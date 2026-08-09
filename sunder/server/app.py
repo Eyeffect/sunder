@@ -7,7 +7,9 @@ full state snapshot plus the newly appended log lines.
 
 from __future__ import annotations
 
+import asyncio
 import json
+import random
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -38,7 +40,10 @@ def _card_json(c) -> dict:
     }
 
 
-def create_app(decks=None) -> FastAPI:
+def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> FastAPI:
+    """Build the app. `ai_think`/`ai_delay` are the base seconds for the
+    rival's thinking pause and per-action delay (randomized around them);
+    pass 0 to make AI turns instant (tests)."""
     decks = tuple(decks) if decks else default_decks()
     app = FastAPI(title="SUNDER", docs_url="/api/docs")
 
@@ -131,10 +136,15 @@ def create_app(decks=None) -> FastAPI:
                         await send_error(str(exc))
 
                 elif mtype == "end_turn":
-                    if gs.winner is None and gs.current == 0:
+                    if gs.winner is None and gs.current == 0 and msg.get("turn") == gs.turn:
                         gs.end_turn()
-                    if gs.winner is None and gs.current == 1:
-                        ai_mod.play_turn(gs)
+                        await send_state()
+                        if gs.winner is None and gs.current == 1:
+                            await asyncio.sleep(ai_think * random.uniform(0.8, 1.2))
+                            for _ in ai_mod.iter_turn(gs):
+                                await send_state()
+                                await asyncio.sleep(ai_delay * random.uniform(0.6, 1.3))
+                            await asyncio.sleep(ai_delay * random.uniform(0.4, 0.8))
                     await send_state()
 
                 elif mtype == "ping":

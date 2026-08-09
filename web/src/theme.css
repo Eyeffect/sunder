@@ -325,6 +325,12 @@ input:focus-visible {
   0% { opacity: 0; transform: scale(0.6); filter: brightness(2.5); }
   100% { opacity: 1; transform: scale(1); }
 }
+.fx-summoned { animation: summon 0.5s ease-out; }
+@keyframes summon {
+  0% { opacity: 0; transform: scale(0.75) translateY(-6px); filter: brightness(2.2); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
 .hand-card { animation: drop-in 0.3s ease-out; }
 @keyframes drop-in {
   0% { opacity: 0; transform: translateY(-8px); }

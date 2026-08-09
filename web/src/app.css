@@ -290,7 +290,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 6px 254px 4px 8px;
-  min-height: 30px;
+  min-height: 167px;
 }
 .hand-row.fan {
   flex-wrap: nowrap;

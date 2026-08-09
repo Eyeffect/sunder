@@ -10,10 +10,18 @@ from .primitives import CardType, Effect, Scaling, Target, Trigger
 
 
 def play_turn(gs) -> None:
-    _main_phase(gs)
+    """Run the heuristic AI turn synchronously (drain iter_turn)."""
+    for _ in iter_turn(gs):
+        pass
+
+
+def iter_turn(gs):
+    """Run the heuristic AI turn, yielding after each discrete action so the
+    server can pace/stage the moves (one snapshot per action)."""
+    yield from _main_phase(gs)
     if gs.winner:
         return
-    _combat(gs)
+    yield from _combat(gs)
     if gs.winner:
         return
     gs.end_turn()
@@ -21,7 +29,7 @@ def play_turn(gs) -> None:
 
 # ------------------------------------------------------------------ main
 
-def _main_phase(gs) -> None:
+def _main_phase(gs):
     while not gs.winner:
         play = _choose_play(gs)
         if play is None:
@@ -31,6 +39,7 @@ def _main_phase(gs) -> None:
             gs.play_card(gs.cur.hand.index(inst), chosen)
         except ValueError:
             return
+        yield
 
 
 def _choose_play(gs):
@@ -86,7 +95,7 @@ def _track_target(gs, inst):
 
 # ------------------------------------------------------------------ combat
 
-def _combat(gs) -> None:
+def _combat(gs):
     p = gs.cur
     for attacker in list(p.board):
         if gs.winner:
@@ -99,6 +108,7 @@ def _combat(gs) -> None:
         target = _combat_target(gs, attacker, targets)
         if target is not None:
             gs.attack(attacker, target)
+            yield
 
 
 def _combat_target(gs, attacker, targets):
