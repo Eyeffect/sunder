@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { BoardCard, HandCard, Mode, Snapshot } from "../types";
 import { Hand } from "./Hand";
 import { History } from "./History";
-import { EndGameOverlay } from "./Overlays";
+import { EndGameOverlay, Inspector, type CardInfo } from "./Overlays";
 import { BoardRow, PlayerZone, type FxState } from "./PlayerZone";
 
 interface GameViewProps {
@@ -21,6 +21,8 @@ export function GameView(props: GameViewProps) {
   const { snapshot, mode, status } = props;
   const [fx, setFx] = useState<FxState>({ hurt: [], revealed: [] });
   const prevRef = useRef<Snapshot | null>(null);
+  const [inspectedBoard, setInspectedBoard] = useState<BoardCard | null>(null);
+  const [inspectedHand, setInspectedHand] = useState<HandCard | null>(null);
 
   useEffect(() => {
     const prev = prevRef.current;
@@ -60,9 +62,12 @@ export function GameView(props: GameViewProps) {
   const selectedSerial = mode.kind === "attack" ? mode.card.serial : null;
   const activeHandSerial = mode.kind === "play" ? mode.card.serial : null;
 
+  const inspected: CardInfo | null = inspectedBoard ?? inspectedHand;
+
   return (
     <div className="duel-screen">
       <History history={snapshot.history} />
+      <Inspector card={inspected} />
       <div className="duel-board">
         <PlayerZone
           title="RIVAL STATION"
@@ -74,6 +79,7 @@ export function GameView(props: GameViewProps) {
           player={snapshot.foe}
           targetable={targetableFoe}
           onCardClick={(c) => props.onClickFoe(c)}
+          onHover={(c) => setInspectedBoard(c)}
           fx={fx}
         />
         <div className="broadcast-line" role="status">
@@ -84,6 +90,7 @@ export function GameView(props: GameViewProps) {
           targetable={new Set()}
           selectedSerial={selectedSerial}
           onCardClick={(c) => props.onClickMine(c)}
+          onHover={(c) => setInspectedBoard(c)}
           fx={fx}
         />
         <PlayerZone
@@ -97,6 +104,7 @@ export function GameView(props: GameViewProps) {
           hand={snapshot.hand}
           activeSerial={activeHandSerial}
           onCardClick={(c) => props.onPlayCard(c)}
+          onHover={(c) => setInspectedHand(c)}
         />
       </div>
       {snapshot.winner !== null && (
