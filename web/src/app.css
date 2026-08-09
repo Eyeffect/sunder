@@ -33,7 +33,8 @@
   gap: 14px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--void-deep), var(--void));
+  background: linear-gradient(180deg, rgba(3, 3, 4, 0.7), rgba(6, 7, 9, 0.7));
+  backdrop-filter: blur(2px);
 }
 
 .wordmark {
@@ -112,7 +113,7 @@
 
 .duel-screen {
   display: grid;
-  grid-template-columns: 56px 280px minmax(0, 1fr);
+  grid-template-columns: 56px 196px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -120,7 +121,7 @@
 .duel-board {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -138,14 +139,14 @@
   position: sticky;
   top: 16px;
   align-self: stretch;
-  max-height: min(calc(100vh - 32px), calc(100% - 177px));
+  max-height: min(calc(100vh - 32px), calc(100% - 170px));
 }
 
 .duel-screen .inspector {
   position: sticky;
   top: 16px;
   align-self: stretch;
-  max-height: min(calc(100vh - 32px), calc(100% - 177px));
+  max-height: min(calc(100vh - 32px), calc(100% - 170px));
   overflow-y: auto;
 }
 
@@ -153,12 +154,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   border: 1px solid var(--line);
   background: rgba(13, 15, 19, 0.3);
   border-radius: 3px;
-  max-width: 690px;
-  width: min(690px, 100%);
+  max-width: 774px;
+  width: min(774px, 100%);
   align-self: flex-start;
 }
 
@@ -212,7 +213,7 @@
 .board-row {
   display: flex;
   gap: 6px;
-  padding: 5px 8px 5px 0;
+  padding: 3px 8px 3px 0;
   justify-content: flex-start;
   align-items: flex-start;
 }
@@ -220,7 +221,7 @@
 .board-row > .slot {
   flex: 1 1 0;
   min-width: 0;
-  max-width: 110px;
+  max-width: 124px;
 }
 .board-row .card {
   padding: 7px;
@@ -245,9 +246,9 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--amber), transparent);
   box-shadow: 0 0 8px rgba(255, 181, 69, 0.5);
-  margin: 2px 0;
+  margin: 1px 0;
   margin-left: 0;
-  margin-right: calc(100% - 690px);
+  margin-right: calc(100% - 774px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,7 +299,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 10px 270px 4px 8px;
+  padding: 6px 254px 4px 8px;
   min-height: 30px;
 }
 .hand-row.fan {
