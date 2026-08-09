@@ -107,8 +107,7 @@ input:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .crt-scanlines,
-  .wordmark {
+  .crt-scanlines {
     animation: none !important;
   }
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { version } from "../package.json";
 import { BackgroundShader } from "./components/BackgroundShader";
 import { CodexView } from "./components/CodexView";
 import { GameView } from "./components/GameView";
@@ -122,7 +123,7 @@ export default function App() {
       <div className="layout">
       <header className="sunder-header">
         <div className="wordmark">
-          SUNDER <span className="freq">91.4</span>
+          SUNDER <span className="freq">v{version}</span>
         </div>
         <nav className="tabs">
           <button

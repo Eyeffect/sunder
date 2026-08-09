@@ -44,21 +44,11 @@
   letter-spacing: 3px;
   color: var(--amber);
   text-shadow: 0 0 6px rgba(255, 181, 69, 0.6), 0 0 18px rgba(255, 181, 69, 0.25);
-  animation: wordmarkGlitch 7s infinite;
-}
-@keyframes wordmarkGlitch {
-  0%, 92%, 100% {
-    text-shadow: 0 0 6px rgba(255, 181, 69, 0.6), 0 0 18px rgba(255, 181, 69, 0.25);
-    transform: none;
-  }
-  93% { text-shadow: -2px 0 var(--magenta), 2px 0 var(--cyan); transform: translate(-1px, 0); }
-  94% { text-shadow: 2px 0 var(--cyan), -2px 0 var(--magenta); transform: translate(1px, 0); }
-  95% { text-shadow: 0 0 6px rgba(255, 181, 69, 0.6), 0 0 18px rgba(255, 181, 69, 0.25); transform: none; }
 }
 .wordmark .freq {
   color: var(--text-dim);
   font-size: 18px;
-  margin-left: 8px;
+  margin-left: -10px;
 }
 
 .tabs { display: flex; gap: 8px; justify-self: center; }
