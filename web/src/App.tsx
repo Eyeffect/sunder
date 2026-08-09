@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BackgroundShader } from "./components/BackgroundShader";
 import { CodexView } from "./components/CodexView";
 import { GameView } from "./components/GameView";
 import type { BoardCard, ClientMsg, HandCard, Mode, Snapshot } from "./types";
@@ -116,7 +117,9 @@ export default function App() {
           : "The rival is playing…");
 
   return (
-    <div className="layout">
+    <>
+      <BackgroundShader turnSide={snapshot?.can_act ?? null} />
+      <div className="layout">
       <header className="sunder-header">
         <div className="wordmark">
           SUNDER <span className="freq">91.4</span>
@@ -160,6 +163,7 @@ export default function App() {
           />
         )}
       </main>
-    </div>
+      </div>
+    </>
   );
 }

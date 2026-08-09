@@ -119,19 +119,17 @@ export function PlayerZone({
         <VuMeter value={player.signal} max={20} colorVar={mine ? "--amber" : "--magenta"} />
         <div className="side-meta">
           <span>HAND {player.hand_count}</span>
-          {mine && (
-            <span className="bandwidth">
-              <span className="bw-label">BANDWIDTH</span>
-              <span className="bw-cells">
-                {Array.from({ length: Math.max(0, player.max_bandwidth) }).map((_, i) => (
-                  <span key={i} className={i < player.bandwidth ? "on" : ""} />
-                ))}
-              </span>
-              <span className="bw-readout">
-                {player.bandwidth}/{player.max_bandwidth}
-              </span>
+          <span className="bandwidth">
+            <span className="bw-label">BANDWIDTH</span>
+            <span className="bw-cells">
+              {Array.from({ length: Math.max(0, player.max_bandwidth) }).map((_, i) => (
+                <span key={i} className={i < player.bandwidth ? "on" : ""} />
+              ))}
             </span>
-          )}
+            <span className="bw-readout">
+              {player.bandwidth}/{player.max_bandwidth}
+            </span>
+          </span>
         </div>
       </div>
       {mine && (

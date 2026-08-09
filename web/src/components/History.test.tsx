@@ -70,7 +70,7 @@ describe("History", () => {
     expect(screen.queryByText(/plays Neon Drifter/)).not.toBeInTheDocument();
   });
 
-  it("caps the column to the newest 12 icons", () => {
+  it("caps the column to the newest 10 icons", () => {
     const many: HistoryEvent[] = Array.from({ length: 15 }, (_, i) => ({
       kind: "system",
       text: `event ${i}`,
@@ -78,7 +78,7 @@ describe("History", () => {
     }));
     const { container } = render(<History history={many} />);
     const badges = container.querySelectorAll(".history-badge");
-    expect(badges.length).toBe(12);
+    expect(badges.length).toBe(10);
     expect(badges[0].getAttribute("aria-label")).toBe("event 14");
   });
 

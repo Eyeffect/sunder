@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { planeMeta } from "../planes";
 import type { HistoryCard, HistoryEvent } from "../types";
 
-const MAX_ICONS = 12;
+const MAX_ICONS = 10;
 
 function glyph(kind: HistoryEvent["kind"]): string {
   switch (kind) {

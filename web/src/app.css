@@ -27,9 +27,9 @@
 .sunder-header {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 14px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--line);
@@ -37,6 +37,7 @@
 }
 
 .wordmark {
+  justify-self: start;
   font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: 3px;
@@ -59,7 +60,7 @@
   margin-left: 8px;
 }
 
-.tabs { display: flex; gap: 8px; }
+.tabs { display: flex; gap: 8px; justify-self: center; }
 .tab-btn {
   background: transparent;
   border: 1px solid var(--line);
@@ -85,6 +86,7 @@
 }
 
 .turn-readout {
+  justify-self: end;
   font-family: var(--font-display);
   font-size: 20px;
   color: var(--text-dim);
@@ -126,7 +128,6 @@
   display: flex;
   align-items: center;
   gap: 28px;
-  margin-left: calc(var(--card-w) + 28px);
 }
 .board-row-wrap .board-row {
   flex: 1;
@@ -136,13 +137,15 @@
 .duel-screen .history {
   position: sticky;
   top: 16px;
-  max-height: calc(100vh - 32px);
+  align-self: stretch;
+  max-height: min(calc(100vh - 32px), calc(100% - 177px));
 }
 
 .duel-screen .inspector {
   position: sticky;
   top: 16px;
-  max-height: calc(100vh - 32px);
+  align-self: stretch;
+  max-height: min(calc(100vh - 32px), calc(100% - 177px));
   overflow-y: auto;
 }
 
@@ -152,11 +155,11 @@
   gap: 12px;
   padding: 6px 12px;
   border: 1px solid var(--line);
-  background: var(--panel);
+  background: rgba(13, 15, 19, 0.3);
   border-radius: 3px;
-  max-width: 640px;
-  width: min(640px, 100%);
-  align-self: center;
+  max-width: 690px;
+  width: min(690px, 100%);
+  align-self: flex-start;
 }
 
 .avatar-frame {
@@ -209,8 +212,8 @@
 .board-row {
   display: flex;
   gap: 6px;
-  padding: 5px 8px;
-  justify-content: center;
+  padding: 5px 8px 5px 0;
+  justify-content: flex-start;
   align-items: flex-start;
 }
 .board-row > .card,
@@ -243,15 +246,13 @@
   background: linear-gradient(90deg, transparent, var(--amber), transparent);
   box-shadow: 0 0 8px rgba(255, 181, 69, 0.5);
   margin: 2px 0;
+  margin-left: 0;
+  margin-right: calc(100% - 690px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .broadcast-line span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: var(--void);
   padding: 2px 10px;
   font-family: var(--font-mono);
@@ -297,7 +298,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 10px 8px 4px;
+  padding: 10px 270px 4px 8px;
   min-height: 30px;
 }
 .hand-row.fan {
@@ -327,12 +328,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 10.5px;
   padding: 8px 6px;
   border: 1px solid var(--line);
-  background: var(--void-deep);
+  background: rgba(13, 15, 19, 0.3);
   border-radius: 3px;
   overflow-y: auto;
+  justify-content: flex-start;
 }
 .history-empty {
   color: var(--text-dim);
@@ -349,7 +351,7 @@
   justify-content: center;
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 3px;
+  border-radius: 0;
 }
 .history-glyph {
   font-size: 15px;
@@ -581,7 +583,7 @@
   width: 100%;
   flex-shrink: 0;
   border: 1px solid var(--line);
-  background: var(--panel);
+  background: rgba(13, 15, 19, 0.3);
   border-radius: 3px;
   padding: 10px 14px;
   min-height: 90px;
@@ -894,6 +896,10 @@
   .duel-screen .inspector {
     position: static;
     max-height: none;
+    align-self: auto;
+  }
+  .hand-row {
+    padding-right: 8px;
   }
 }
 
@@ -901,6 +907,7 @@
   .sunder-header { flex-wrap: wrap; gap: 10px; }
   .board-row-wrap { flex-wrap: wrap; justify-content: flex-start; margin-left: 0; }
   .board-row { overflow-x: auto; flex-wrap: nowrap; }
+  .broadcast-line { margin-left: 0; margin-right: 0; }
   .side-panel { flex-wrap: wrap; }
   .hand-row { overflow-x: auto; justify-content: flex-start; }
   .end-turn-btn { width: 100%; margin-top: 8px; }

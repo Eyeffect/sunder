@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 web/node_modules/
 web/dist/
+DESIGN.md
+PHASE1.md
+PHASE2.md
+PHASE3.md

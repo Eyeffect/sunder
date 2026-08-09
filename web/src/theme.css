@@ -80,88 +80,34 @@ input:focus-visible {
   );
   animation: flicker 6s infinite;
 }
-.crt-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 35%,
-    rgba(0, 0, 0, 0.6) 72%,
-    rgba(0, 0, 0, 0.88) 100%
-  );
-}
 @keyframes flicker {
   0%, 96%, 100% { opacity: 1; }
   97% { opacity: 0.82; }
   98% { opacity: 1; }
 }
 
-.ambient-bg {
+.shader-bg {
   position: fixed;
   inset: 0;
-  overflow: hidden;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
+  background: var(--void);
 }
-.ambient-spotlight {
+.shader-bg canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.shader-bg::after {
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120vw;
-  height: 120vh;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 181, 69, 0.07) 0%,
-    rgba(255, 62, 168, 0.03) 40%,
-    transparent 68%
-  );
-}
-.ambient-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(88px);
-  animation: floatGlow ease-in-out infinite alternate;
-}
-@keyframes floatGlow {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(var(--dx), var(--dy)); }
-}
-.drift-shape {
-  position: absolute;
-  top: 0;
-  border: 1px solid var(--shape-color, var(--amber));
-  background: var(--shape-fill, transparent);
-  opacity: 0;
-  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-  animation: driftUp linear infinite;
-}
-@keyframes driftUp {
-  0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-  8%   { opacity: 0.34; }
-  92%  { opacity: 0.34; }
-  100% { transform: translateY(-15vh) translateX(50px) rotate(35deg); opacity: 0; }
-}
-.card-float {
-  position: absolute;
-  aspect-ratio: 3/4;
-  border: 1px solid var(--fc, rgba(255, 181, 69, 0.2));
-  background: linear-gradient(155deg, var(--ff, rgba(255, 181, 69, 0.04)) 0%, transparent 65%);
-  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-  box-shadow: 0 0 14px var(--fc, rgba(255, 181, 69, 0.1)),
-    inset 0 0 22px rgba(255, 255, 255, 0.025);
-  animation: floatCardBob ease-in-out infinite alternate;
-}
-@keyframes floatCardBob {
-  0%   { transform: translateY(-14px) rotate(var(--ra, 10deg)); opacity: 0.32; }
-  100% { transform: translateY(14px) rotate(var(--rb, 15deg)); opacity: 0.62; }
+  inset: 0;
+  background: rgba(6, 7, 9, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .crt-scanlines,
-  .ambient-glow,
-  .drift-shape,
-  .card-float,
   .wordmark {
     animation: none !important;
   }
@@ -358,7 +304,8 @@ input:focus-visible {
 }
 
 /* hand card states */
-.hand-card.hand-busy { opacity: 0.45; }
+.hand-card { opacity: 0.98; }
+.hand-card.hand-busy { opacity: 0.65; }
 .hand-card.hand-playable {
   border-color: var(--line-strong);
   filter: drop-shadow(0 0 8px rgba(95, 242, 224, 0.3));
