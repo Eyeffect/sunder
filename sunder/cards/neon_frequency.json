@@ -1,0 +1,68 @@
+[
+  {
+    "id": "vg_001", "name": "Vinyl Golem", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "COMMON", "cost": 4, "type": "BROADCAST", "stats": {"atk": 3, "def": 5},
+    "keywords": ["ECHO"],
+    "abilities": [{"trigger": "ON_DEATH", "effect": "GAIN_LIFE", "target": "SELF", "scaling": "FLAT", "value": 3}],
+    "flavor": "Spin it long enough and every groove remembers its needle."
+  },
+  {
+    "id": "vg_002", "name": "Neon Drifter", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "COMMON", "cost": 3, "type": "BROADCAST", "stats": {"atk": 3, "def": 2},
+    "keywords": ["RUSH"], "abilities": [],
+    "flavor": "Rides the bassline into the wall."
+  },
+  {
+    "id": "vg_003", "name": "Disco Inferno", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "UNCOMMON", "cost": 2, "type": "TRACK",
+    "abilities": [{"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE", "target": "CHOSEN", "scaling": "FLAT", "value": 3}],
+    "flavor": "The floor is lava. The ceiling is lava. The DJ is fine."
+  },
+  {
+    "id": "vg_004", "name": "Roller Rink Serenade", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "COMMON", "cost": 2, "type": "BROADCAST", "stats": {"atk": 1, "def": 1},
+    "abilities": [{"trigger": "ON_TURN_END", "effect": "BUFF_STAT", "target": "SELF", "scaling": "FLAT", "value": 1, "value_def": 1}],
+    "flavor": "Slow songs, fast wheels, zero regrets."
+  },
+  {
+    "id": "vg_005", "name": "Static Bloom", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "UNCOMMON", "cost": 3, "type": "LOOP", "keywords": ["CARRIER"],
+    "abilities": [{"trigger": "STATIC", "effect": "BUFF_STAT", "target": "ALL_YOUR_BROADCASTS", "scaling": "FLAT", "value": 1, "value_def": 0}],
+    "flavor": "A hum that never quite resolves."
+  },
+  {
+    "id": "vg_006", "name": "Laser Harp", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "RARE", "cost": 4, "type": "BROADCAST", "stats": {"atk": 3, "def": 4},
+    "keywords": ["DRAIN"], "abilities": [],
+    "flavor": "Plays itself. Feeds off the applause."
+  },
+  {
+    "id": "vg_007", "name": "The Mixer", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "RARE", "cost": 5, "type": "BROADCAST", "stats": {"atk": 3, "def": 4},
+    "keywords": ["AMP"],
+    "abilities": [{"trigger": "ON_ANY_BROADCAST_PLAYED", "effect": "BUFF_STAT", "target": "SELF", "scaling": "FLAT", "value": 1, "value_def": 1}],
+    "flavor": "Every drop makes it stronger."
+  },
+  {
+    "id": "vg_011", "name": "Midnight Request", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "COMMON", "cost": 2, "type": "LOOP", "keywords": ["B_SIDE"],
+    "abilities": [{"trigger": "ON_ANY_BROADCAST_PLAYED", "effect": "DEAL_DAMAGE", "target": "ENEMY_FACE", "scaling": "FLAT", "value": 1, "condition": {"not_self": true}}],
+    "flavor": "You hear it faintly, between tracks. You were always going to answer."
+  },
+  {
+    "id": "vg_009", "name": "Echo Chamber", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "UNCOMMON", "cost": 6, "type": "BROADCAST", "stats": {"atk": 2, "def": 6},
+    "keywords": ["ECHO"],
+    "abilities": [{"trigger": "ON_DEATH", "effect": "SUMMON_TOKEN", "target": "SELF", "scaling": "FLAT", "value": 1}],
+    "flavor": "What you heard was a million copies of itself."
+  },
+  {
+    "id": "vg_010", "name": "Final Wave", "set": "neon_frequency", "plane": "neon_frequency",
+    "rarity": "SUNDERED", "cost": 5, "type": "TRACK",
+    "abilities": [
+      {"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE", "target": "ALL_ENEMY_BROADCASTS", "scaling": "FLAT", "value": 5},
+      {"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE", "target": "ENEMY_FACE", "scaling": "FLAT", "value": 5}
+    ],
+    "flavor": "The last thing the party hears."
+  }
+]

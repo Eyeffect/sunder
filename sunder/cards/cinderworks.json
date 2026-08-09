@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cw_001", "name": "Scrapheap", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "COMMON", "cost": 1, "type": "BROADCAST", "stats": {"atk": 0, "def": 3},
+    "keywords": ["BEACON"], "abilities": [],
+    "flavor": "Not a wall. A suggestion."
+  },
+  {
+    "id": "cw_002", "name": "Cinder Hound", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "COMMON", "cost": 2, "type": "BROADCAST", "stats": {"atk": 2, "def": 2},
+    "keywords": ["LOUD"], "abilities": [],
+    "flavor": "Already awake. Already here."
+  },
+  {
+    "id": "cw_003", "name": "Molten Core", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "UNCOMMON", "cost": 3, "type": "TRACK",
+    "abilities": [{"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE", "target": "ALL_ENEMY_BROADCASTS", "scaling": "FLAT", "value": 2}],
+    "flavor": "Every foundry keeps a spare star."
+  },
+  {
+    "id": "cw_004", "name": "Covert Recorder", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "COMMON", "cost": 2, "type": "BROADCAST", "stats": {"atk": 2, "def": 2},
+    "keywords": ["MASKED"], "abilities": [],
+    "flavor": "It was filming the whole time."
+  },
+  {
+    "id": "cw_005", "name": "Furnace Vent", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "UNCOMMON", "cost": 4, "type": "LOOP",
+    "abilities": [{"trigger": "ON_TURN_START", "effect": "DEAL_DAMAGE", "target": "ENEMY_FACE", "scaling": "FLAT", "value": 1}],
+    "flavor": "The foundry breathes in your direction."
+  },
+  {
+    "id": "cw_006", "name": "Juggernaut", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "RARE", "cost": 6, "type": "BROADCAST", "stats": {"atk": 5, "def": 5},
+    "keywords": ["FEEDBACK"], "abilities": [],
+    "flavor": "Twice as loud, half as sorry."
+  },
+  {
+    "id": "cw_007", "name": "Filtered Capacitor", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "UNCOMMON", "cost": 3, "type": "BROADCAST", "stats": {"atk": 1, "def": 4},
+    "keywords": ["FILTER"], "abilities": [],
+    "flavor": "Clean signal in. Cleaner signal out."
+  },
+  {
+    "id": "cw_008", "name": "Jamming Tower", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "UNCOMMON", "cost": 3, "type": "BROADCAST", "stats": {"atk": 2, "def": 4},
+    "keywords": ["DISTORT"], "abilities": [],
+    "flavor": "What you hear next is the last thing you hear."
+  },
+  {
+    "id": "cw_009", "name": "The Foundry Never Sleeps", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "RARE", "cost": 3, "type": "BROADCAST", "stats": {"atk": 1, "def": 1},
+    "abilities": [{"trigger": "ON_ANY_BROADCAST_PLAYED", "effect": "BUFF_STAT", "target": "SELF", "scaling": "FLAT", "value": 1, "value_def": 1}],
+    "flavor": "There is no off switch. There is no night shift."
+  },
+  {
+    "id": "cw_011", "name": "Static Replay", "set": "cinderworks", "plane": "cinderworks",
+    "rarity": "UNCOMMON", "cost": 2, "type": "LOOP", "keywords": ["B_SIDE"],
+    "abilities": [{"trigger": "ON_TURN_END", "effect": "RETURN_FROM_DISCARD", "target": "SELF", "scaling": "FLAT", "value": 1}],
+    "flavor": "The dead tracks come back, note for note, wearing different faces."
+  }
+]
