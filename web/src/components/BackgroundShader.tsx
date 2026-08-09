@@ -16,42 +16,112 @@ uniform float uTurnT;
 
 out vec4 fragColor;
 
+// ============================================================
+// Hash function — generates pseudo-random 2D noise from a 2D input.
+// Used for grain/dithering and cell-based randomness.
+// ============================================================
 vec2 hash(vec2 p) {
-    return fract(sin(mod(p.xy * 2.94 - p.yx * 2.77, 99. + p.x)) * 691.5);
+    return fract(sin(mod(p.xy * 2.94 - p.yx * 2.77, 99.0 + p.x)) * 691.5);
 }
 
 void mainImage(out vec4 Color, in vec2 Coord) {
+
+    // ------------------------------------------------------------
+    // 1. PIXELATION
+    // Snap the screen coordinate to a coarse grid to get a
+    // chunky/retro pixel look instead of smooth per-pixel detail.
+    // ------------------------------------------------------------
     float pixelSize = 3.0;
-    vec2 pixCoord = floor(Coord / pixelSize) * pixelSize + (pixelSize * 0.5);
+    vec2 pixelatedCoord = floor(Coord / pixelSize) * pixelSize + (pixelSize * 0.5);
 
-    vec2 center = iResolution.xy * 0.5;
-    vec2 toCenter = pixCoord - center;
-    float dist = length(toCenter) / iResolution.y;
 
-    float pulseSpeed = 0.1;
-    float swirlPulse = sin(iTime * pulseSpeed);
+    // ------------------------------------------------------------
+    // 2. DISTANCE FROM CENTER
+    // Used later to drive the swirl amount and the glow falloff.
+    // ------------------------------------------------------------
+    float centerOffsetY = 0.1; // increase to move up, decrease to move down
+    vec2 center = iResolution.xy * 0.5 + vec2(0.1, 0.1 + centerOffsetY);
+    vec2 offsetFromCenter = pixelatedCoord - center;
+    float normalizedDist = length(offsetFromCenter) / iResolution.y;
+
+
+    // ------------------------------------------------------------
+    // 3. SWIRL / ROTATION
+    // Twists coordinates around the center. The twist amount pulses
+    // over time (swirlPulse) and grows stronger further from center
+    // (via normalizedDist squared).
+    // ------------------------------------------------------------
+    float swirlPulseSpeed = 0.1;
+    float swirlPulse = sin(iTime * swirlPulseSpeed);   // oscillates -1..1
 
     float swirlStrength = 5.0;
-    float angle = pow(dist, 2.0) * swirlStrength * swirlPulse;
+    float swirlAngle = pow(normalizedDist, 2.0) * swirlStrength * swirlPulse;
 
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-    mat2 rotationMat = mat2(cosA, -sinA, sinA, cosA);
+    float cosA = cos(swirlAngle);
+    float sinA = sin(swirlAngle);
+    mat2 rotation = mat2(cosA, -sinA, sinA, cosA);
 
-    vec2 swirledCoord = center + rotationMat * toCenter;
+    vec2 swirledCoord = center + rotation * offsetFromCenter;
 
-    vec2 u = swirledCoord / iResolution.xy + hash(swirledCoord) * .02;
-    float s = hash(floor(u * mat2(9, -3, 7, -4))).x;
-    float l = length(swirledCoord - center) / iResolution.y;
 
-    vec3 b = .5 + .5 * cos(l * vec3(40. - l * l, 40.5, 41.) - iTime + s * 4.) / (.2 + l * 3.);
+    // ------------------------------------------------------------
+    // 4. NOISE / GRAIN
+    // Small random jitter + a cell-based random value (s), used to
+    // break up flat color and add sparkle/texture.
+    // ------------------------------------------------------------
+    vec2 uv = swirledCoord / iResolution.xy + hash(swirledCoord) * 0.02;
+    float grain = hash(floor(uv * mat2(9, -3, 7, -4))).x;
 
-    vec3 baseColor = 0.5 + 0.5 * cos(iTime * 0.5 + vec3(0.0, 2.0, 4.0));
-    vec3 glowColor = 0.7 + 0.3 * sin(iTime * 0.3 + vec3(1.5, 3.0, 0.0));
+    float swirledDist = length(swirledCoord - center) / iResolution.y;
 
-    vec3 g = mix(hash(floor(swirledCoord / 2.)).xxx * baseColor, glowColor, pow(s, 5.) * .2);
 
-    Color = vec4(pow(g, .5 + b * b * 80.) / (.5 + l), 1.);
+    // ------------------------------------------------------------
+    // 5. RING / RIPPLE PATTERN
+    // Concentric cosine rings based on distance from center,
+    // animated over time. This is what creates the "ripple" look.
+    // Feeds into the brightness exponent below, so it has a big
+    // effect on contrast even though it looks like a color term.
+    // ------------------------------------------------------------
+    vec3 ringPattern =
+        0.4 + 0.5 * cos(
+            swirledDist * vec3(40.0 - swirledDist * swirledDist, 40.5, 41.0)
+            - iTime
+            + grain * 4.0
+        ) / (0.2 + swirledDist * 3.0);
+
+
+    // ------------------------------------------------------------
+    // 6. COLOR — Amber on your turn, Magenta (theme pink) on the rival's
+    // uTurnT is eased toward 1.0 (your turn) or 0.0 (rival's turn)
+    // in JS each frame, so the blend transitions smoothly.
+    // ------------------------------------------------------------
+    vec3 amber   = vec3(1.0, 0.75, 0.0);    // your turn
+    vec3 magenta = vec3(1.0, 0.24, 0.66);  // rival's turn (--magenta #ff3ea8)
+
+    float colorShift = 1.0 - uTurnT;       // 0 = your turn (amber), 1 = rival (magenta)
+
+    vec3 baseColor = mix(amber, magenta, colorShift);
+    vec3 glowColor = mix(magenta, amber, colorShift) * 1.1; // offset phase, slightly brighter
+
+
+    // ------------------------------------------------------------
+    // 7. COMBINE COLOR + GRAIN + GLOW
+    // Blend the grainy base color with the glow color, weighted by
+    // how "hot" the grain value is (grain^5 pushes only the
+    // brightest noise cells toward the glow color).
+    // ------------------------------------------------------------
+    vec3 grainColor = hash(floor(swirledCoord / 2.0)).xxx * baseColor;
+    float glowWeight = pow(grain, 5.0) * 0.2;
+    vec3 finalColor = mix(grainColor, glowColor, glowWeight);
+
+
+    // ------------------------------------------------------------
+    // 8. FINAL OUTPUT
+    // Ring pattern controls contrast via the exponent; overall
+    // brightness fades out with distance from center.
+    // ------------------------------------------------------------
+    vec3 shaded = pow(finalColor, 0.5 + ringPattern * ringPattern * 80.0);
+    Color = vec4(shaded / (0.5 + swirledDist), 1.0);
 }
 
 void main() {
@@ -124,6 +194,7 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
 
     let hidden = document.hidden;
     let stopped = false;
+    let turnVal = 0.5;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -142,7 +213,9 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
       if (stopped || hidden) return;
       gl.uniform1f(timeLoc, performance.now() / 1000);
       const ts = turnRef.current;
-      gl.uniform1f(turnLoc, ts === null ? 0.5 : ts ? 1 : 0);
+      const target = ts === null ? 0.5 : ts ? 1 : 0;
+      turnVal += (target - turnVal) * 0.025;
+      gl.uniform1f(turnLoc, turnVal);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       if (!reduced) rafRef.current = requestAnimationFrame(frame);
     };
