@@ -8,7 +8,7 @@ def test_distort_does_not_one_shot_station():
     put_board(gs, 0, tower)
     inst = gs.players[0].board[0]
     gs.attack(inst, ("FACE", None))
-    assert gs.players[1].signal == 18  # 2 noise, not lethal
+    assert gs.players[1].signal == 28  # 2 noise, not lethal
 
 
 def test_distort_one_shots_broadcast_ignoring_def():

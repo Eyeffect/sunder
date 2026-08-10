@@ -47,6 +47,7 @@ export interface PlayerState {
   index: number;
   sleeve: string;
   signal: number;
+  max_signal: number;
   bandwidth: number;
   max_bandwidth: number;
   hand_count: number;

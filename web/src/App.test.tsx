@@ -40,6 +40,7 @@ function player(overrides: Partial<PlayerState> = {}): PlayerState {
     index: 0,
     sleeve: "ember",
     signal: 20,
+    max_signal: 30,
     bandwidth: 1,
     max_bandwidth: 1,
     hand_count: 0,
@@ -56,7 +57,7 @@ function snapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     current: 0,
     phase: "MAIN",
     winner: null,
-    status: "Turn 1 | Station 1 | Signal 20/20 vs 20/20",
+    status: "Turn 1 | Station 1 | Signal 20/30 vs 20/30",
     viewer: 0,
     can_act: true,
     players: {},
@@ -225,6 +226,16 @@ describe("App", () => {
     pump(snapshot());
     fireEvent.keyDown(window, { key: "c" });
     expect(screen.getByRole("button", { name: "CARDS" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "DUEL" }));
+    expect(screen.getByText(/Your turn/)).toBeInTheDocument();
+  });
+
+  it("opens the changelog when clicking the version and returns via DUEL", () => {
+    render(<App />);
+    pump(snapshot());
+    fireEvent.click(screen.getByRole("button", { name: /v0\.3\.4/ }));
+    expect(screen.getByText("VERSION LOG")).toBeInTheDocument();
+    expect(screen.getByText("ON THE DIAL — ROADMAP")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "DUEL" }));
     expect(screen.getByText(/Your turn/)).toBeInTheDocument();
   });

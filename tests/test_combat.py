@@ -25,7 +25,7 @@ def test_attack_face_reduces_signal():
     gs = make_gs()
     put_board(gs, 0, card(type="BROADCAST", stats={"atk": 3, "def": 3}))
     gs.attack(gs.players[0].board[0], ("FACE", None))
-    assert gs.players[1].signal == 17
+    assert gs.players[1].signal == 27
 
 
 def test_trade_kills_both():
@@ -73,16 +73,16 @@ def test_feedback_attacks_twice():
     put_board(gs, 0, jugg)
     inst = gs.players[0].board[0]
     gs.attack(inst, ("FACE", None))
-    assert gs.players[1].signal == 18
+    assert gs.players[1].signal == 28
     assert gs.can_attack(inst)
     gs.attack(inst, ("FACE", None))
-    assert gs.players[1].signal == 16
+    assert gs.players[1].signal == 26
     assert not gs.can_attack(inst)
 
 
 def test_win_by_signal_zero():
     gs = make_gs()
-    b = card(type="BROADCAST", stats={"atk": 25, "def": 5})
+    b = card(type="BROADCAST", stats={"atk": 35, "def": 5})
     put_board(gs, 0, b)
     gs.attack(gs.players[0].board[0], ("FACE", None))
     assert gs.winner == 0

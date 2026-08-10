@@ -11,7 +11,7 @@ from .primitives import CardType, Effect, Scaling, Target, Trigger
 from .schema import Card
 from . import engine
 
-MAX_SIGNAL = 20
+MAX_SIGNAL = 30
 MAX_BANDWIDTH = 10
 BOARD_CAP = 6
 

@@ -61,7 +61,7 @@ export function VuMeter({
           style={{ width: `${pct}%`, background: critical ? "var(--danger)" : `var(${colorVar})` }}
         />
         <div className="vu-ticks">
-          {Array.from({ length: 20 }).map((_, i) => (
+          {Array.from({ length: max }).map((_, i) => (
             <span key={i} />
           ))}
         </div>

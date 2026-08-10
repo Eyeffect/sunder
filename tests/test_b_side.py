@@ -34,7 +34,7 @@ def test_bside_hidden_on_play():
     gs.play_card(0)
     inst = gs.players[0].board[0]
     assert inst.hidden
-    assert gs.players[1].signal == 20
+    assert gs.players[1].signal == 30
 
 
 def test_bside_reveals_when_another_broadcast_airs():
@@ -50,7 +50,7 @@ def test_bside_reveals_when_another_broadcast_airs():
     put_hand(gs, 0, hound)
     gs.play_card(0)
     assert not inst.hidden
-    assert gs.players[1].signal == 19
+    assert gs.players[1].signal == 29
     assert any("B-SIDE" in line for line in gs.log)
 
 

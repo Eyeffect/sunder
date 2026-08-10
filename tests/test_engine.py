@@ -41,8 +41,8 @@ def test_drain_heals_on_face_damage():
     put_board(gs, 0, harp)
     inst = gs.players[0].board[0]
     gs.attack(inst, ("FACE", None))
-    assert gs.players[1].signal == 17
-    assert gs.players[0].signal == 23
+    assert gs.players[1].signal == 27
+    assert gs.players[0].signal == 33
 
 
 def test_filter_negates_first_damage():
@@ -81,7 +81,7 @@ def test_echo_death_gains_life():
     gs.current = 1
     gs.attack(killer_inst, ("BROADCAST", golem_inst))
     assert golem_inst not in gs.players[0].board
-    assert gs.players[0].signal == 23
+    assert gs.players[0].signal == 33
 
 
 def test_echo_chamber_summons_token_on_death():
@@ -139,7 +139,7 @@ def test_counter_track_cuts():
     gs.cur.bandwidth = 5
     play(gs)
     assert disco in [i.card for i in gs.players[0].static]
-    assert gs.players[1].signal == 20
+    assert gs.players[1].signal == 30
 
 
 # ---------------------------------------------------------------- doubles
@@ -157,7 +157,7 @@ def test_double_next_trigger():
     play(gs, chosen=drip_inst)
     assert drip_inst.pending_doubles == 1
     engine.fire(gs, drip_inst, Trigger.ON_TURN_END)
-    assert gs.players[1].signal == 18
+    assert gs.players[1].signal == 28
 
 
 # ---------------------------------------------------------------- fuse
@@ -174,7 +174,7 @@ def test_fuse_ticks_and_detonates():
     assert inst in gs.players[0].board and inst.fuse_ticks == 2
     engine.begin_turn(gs)
     assert inst not in gs.players[0].board
-    assert gs.players[1].signal == 16
+    assert gs.players[1].signal == 26
 
 
 # ---------------------------------------------------------------- scalings

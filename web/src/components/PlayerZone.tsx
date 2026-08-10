@@ -118,7 +118,7 @@ export function PlayerZone({
       </div>
       <div className="side-info">
         <div className="side-name">{title}</div>
-        <VuMeter value={player.signal} max={20} colorVar={mine ? "--amber" : "--magenta"} />
+        <VuMeter value={player.signal} max={player.max_signal} colorVar={mine ? "--amber" : "--magenta"} />
         <div className="side-meta">
           <span>HAND {player.hand_count}</span>
           <span className="bandwidth">

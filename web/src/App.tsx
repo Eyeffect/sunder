@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { version } from "../package.json";
 import { BackgroundShader } from "./components/BackgroundShader";
+import { ChangelogView } from "./components/ChangelogView";
 import { CodexView } from "./components/CodexView";
 import { GameView } from "./components/GameView";
 import type { BoardCard, ClientMsg, HandCard, Mode, Snapshot } from "./types";
@@ -10,8 +11,16 @@ export default function App() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [mode, setMode] = useState<Mode>({ kind: "none" });
   const [notice, setNotice] = useState("");
-  const [view, setView] = useState<"battle" | "codex">("battle");
+  const [view, setView] = useState<"battle" | "codex" | "changelog">("battle");
   const socketRef = useRef<GameSocket | null>(null);
+
+  useEffect(() => {
+    const hidden = view === "codex" || view === "changelog";
+    document.documentElement.classList.toggle("no-scrollbar", hidden);
+    return () => {
+      document.documentElement.classList.toggle("no-scrollbar", false);
+    };
+  }, [view]);
 
   const send = useCallback((msg: ClientMsg) => {
     socketRef.current?.send(msg);
@@ -128,7 +137,15 @@ export default function App() {
       <div className="layout">
       <header className="sunder-header">
         <div className="wordmark">
-          SUNDER <span className="freq">v{version}</span>
+          SUNDER{" "}
+          <button
+            className="freq"
+            onClick={() => setView("changelog")}
+            title="Changelog"
+            type="button"
+          >
+            v{version}
+          </button>
         </div>
         <nav className="tabs">
           <button
@@ -155,6 +172,8 @@ export default function App() {
           <div className="boot">Connecting to the airwaves…</div>
         ) : view === "codex" ? (
           <CodexView />
+        ) : view === "changelog" ? (
+          <ChangelogView />
         ) : (
           <GameView
             snapshot={snapshot}

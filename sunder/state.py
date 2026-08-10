@@ -8,7 +8,7 @@ computed server-side from the existing game helpers so the client stays dumb.
 
 from __future__ import annotations
 
-from .game import GameState
+from .game import MAX_SIGNAL, GameState
 from .lore import rules_text
 from .primitives import CardType, Target
 
@@ -64,6 +64,7 @@ def player_view(gs: GameState, p, viewer: int) -> dict:
         "index": p.index,
         "sleeve": p.sleeve,
         "signal": p.signal,
+        "max_signal": MAX_SIGNAL,
         "bandwidth": p.bandwidth,
         "max_bandwidth": p.current_max_bandwidth(),
         "hand_count": len(p.hand),

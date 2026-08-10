@@ -103,7 +103,7 @@ input:focus-visible {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(6, 7, 9, 0.5);
+  background: rgba(6, 7, 9, 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -363,10 +363,20 @@ input:focus-visible {
   position: absolute;
   inset: 0;
   display: flex;
-  justify-content: space-between;
-  padding: 0 1px;
 }
-.vu-ticks span { width: 1px; background: rgba(0, 0, 0, 0.4); }
+.vu-ticks span {
+  flex: 1;
+  position: relative;
+}
+.vu-ticks span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.4);
+}
 .vu-readout {
   font-family: var(--font-display);
   font-size: 16px;
