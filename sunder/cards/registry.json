@@ -1,0 +1,129 @@
+{
+  "keywords": [
+    {
+      "definition": "Can attack the turn it's aired.",
+      "id": "LOUD",
+      "reminder": "Can attack the turn it's aired.",
+      "status": "approved"
+    },
+    {
+      "definition": "Can attack Broadcasts immediately, but not the rival station.",
+      "id": "RUSH",
+      "reminder": "Can attack Broadcasts immediately, but not the rival station.",
+      "status": "approved"
+    },
+    {
+      "definition": "When this goes silent, do the listed effect.",
+      "id": "ECHO",
+      "reminder": "When this goes silent, do the listed effect.",
+      "status": "approved"
+    },
+    {
+      "definition": "+1/+1 each time a Broadcast is aired.",
+      "id": "AMP",
+      "reminder": "+1/+1 each time a Broadcast is aired.",
+      "status": "approved"
+    },
+    {
+      "definition": "Always-on ability.",
+      "id": "CARRIER",
+      "reminder": "Always-on ability.",
+      "status": "approved"
+    },
+    {
+      "definition": "Enemy Broadcasts must target this one.",
+      "id": "BEACON",
+      "reminder": "Enemy Broadcasts must target this one.",
+      "status": "approved"
+    },
+    {
+      "definition": "Noise this deals to Broadcasts is lethal.",
+      "id": "DISTORT",
+      "reminder": "Noise this deals to Broadcasts is lethal.",
+      "status": "approved"
+    },
+    {
+      "definition": "Negates the first Noise dealt to this.",
+      "id": "FILTER",
+      "reminder": "Negates the first Noise dealt to this.",
+      "status": "approved"
+    },
+    {
+      "definition": "Noise this deals also boosts your Signal.",
+      "id": "DRAIN",
+      "reminder": "Noise this deals also boosts your Signal.",
+      "status": "approved"
+    },
+    {
+      "definition": "Attacks twice.",
+      "id": "FEEDBACK",
+      "reminder": "Attacks twice.",
+      "status": "approved"
+    },
+    {
+      "definition": "Can't be targeted until it attacks.",
+      "id": "MASKED",
+      "reminder": "Can't be targeted until it attacks.",
+      "status": "approved"
+    },
+    {
+      "definition": "Detonates when the fuse expires.",
+      "id": "FUSE",
+      "reminder": "Detonates when the fuse expires.",
+      "status": "approved"
+    },
+    {
+      "definition": "Hidden until its listed condition triggers.",
+      "id": "B_SIDE",
+      "reminder": "Hidden until its listed condition triggers.",
+      "status": "approved"
+    }
+  ],
+  "schema_version": 1,
+  "tag": [
+    {
+      "definition": "glowing",
+      "id": "neon",
+      "reminder": "Bright.",
+      "status": "approved"
+    }
+  ],
+  "tags": [
+    {
+      "definition": "records, grooves, needle, analog",
+      "id": "vinyl",
+      "reminder": "Old-school media \u2014 records, tapes, film.",
+      "status": "approved"
+    },
+    {
+      "definition": "metal, neon, machines, polished surfaces",
+      "id": "chrome",
+      "reminder": "Machines and polished metal.",
+      "status": "approved"
+    },
+    {
+      "definition": "unseen, memory, residual, spectral",
+      "id": "ghost",
+      "reminder": "Something that was there \u2014 or was never there.",
+      "status": "approved"
+    },
+    {
+      "definition": "interference, noise, broken signal, hiss",
+      "id": "static",
+      "reminder": "Interference in the signal.",
+      "status": "approved"
+    },
+    {
+      "definition": "heat, fire, slow burning, warmth",
+      "id": "ember",
+      "reminder": "Slow heat that keeps going.",
+      "status": "approved"
+    },
+    {
+      "definition": "water, waves, cycles, ebb and flow",
+      "id": "tide",
+      "reminder": "Things that come and go in cycles.",
+      "status": "approved"
+    }
+  ]
+}

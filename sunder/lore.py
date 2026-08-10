@@ -1,6 +1,6 @@
 """SUNDER — lore layer. Player-facing words only; the engine never sees these."""
 
-from .primitives import Effect, Target, Trigger
+from .primitives import Effect, Scaling, Target, Trigger
 
 WORDS = {
     "life": "Signal",
@@ -99,5 +99,16 @@ def rules_text(card, live_values: dict | None = None) -> str:
         kw = live.get("keyword", ab.keyword or "")
         t = _TARGET_WORDS.get(ab.target, ab.target.value)
         e = _EFFECT_WORDS.get(ab.effect, ab.effect.value).format(n=n, nd=nd, kw=kw, t=t)
-        parts.append(f"{_TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)}: {e}.")
+        clause = _TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)
+        if ab.condition and ab.condition.get("has_tag"):
+            tag = ab.condition["has_tag"]
+            if ab.trigger is Trigger.ON_ANY_BROADCAST_PLAYED:
+                clause = f"Whenever a Broadcast with the {tag} tag is aired"
+            else:
+                clause = f"{clause}, if the triggering card has the {tag} tag"
+        if ab.scaling is Scaling.X_COUNT_OF_TAG_ON_BOARD:
+            note = f" (X = number of {ab.tag} cards on the airwaves)"
+        else:
+            note = ""
+        parts.append(f"{clause}: {e}.{note}")
     return " ".join(parts) if parts else "(no text)"

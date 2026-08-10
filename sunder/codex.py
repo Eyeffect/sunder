@@ -25,6 +25,8 @@ CARDS_DIR = Path(__file__).parent / "cards"
 def all_cards() -> list[Card]:
     cards = []
     for f in sorted(CARDS_DIR.glob("*.json")):
+        if f.name == "registry.json":
+            continue
         cards.extend(load_card_file(f))
     return cards
 
@@ -59,6 +61,8 @@ def format_card(c: Card, live: dict | None = None) -> str:
         lines.append(f"Stats: {c.atk}/{c.def_}")
     if c.keywords:
         lines.append("Keywords: " + ", ".join(f"{display(k)} — {remind(k)}" for k in c.keywords))
+    if c.tags:
+        lines.append("Tags: " + ", ".join(f"#{t}" for t in c.tags))
     if c.fuse:
         lines.append(f"FUSE: detonates {c.fuse} of your turns after airing.")
     text = rules_text(c, live)

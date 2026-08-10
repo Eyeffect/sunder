@@ -55,6 +55,18 @@ export interface VersionEntry {
 
 export const VERSIONS: VersionEntry[] = [
   {
+    version: "0.3.5",
+    codename: "Test Pattern",
+    date: "2026-08-10",
+    changes: [
+      { type: "added", text: "Tags — cards can carry up to four approved tags; X_COUNT_OF_TAG_ON_BOARD scales on the count across both stations" },
+      { type: "added", text: "Registry — tag/keyword governance (propose, approve, reject) with a review panel in the codex; starter tags seeded: vinyl, chrome, ghost, static, ember, tide" },
+      { type: "added", text: "GENERATE tab — LLM-assisted single-pack card generation with seeded reproducibility and a deterministic no-LLM mode" },
+      { type: "added", text: "CLI card generation — python -m sunder gen" },
+      { type: "added", text: "Cards render their tags in the inspector, hand, codex, and generated packs" },
+    ],
+  },
+  {
     version: "0.3.4",
     codename: "Station Bulletin",
     date: "2026-08-10",
@@ -138,7 +150,7 @@ export interface RoadmapItem {
 export const ROADMAP: RoadmapItem[] = [
   { status: "in_progress", text: "Responsive UI" },
   { status: "in_progress", text: "Card sleeves" },
-  { status: "planned", text: "LLM card generation" },
+  { status: "in_progress", text: "LLM card generation" },
   { status: "planned", text: "Economy, saved decks" },
   { status: "planned", text: "Profiles" },
   { status: "planned", text: "Multiplayer" },

@@ -12,6 +12,7 @@ export interface BoardCard {
   type: CardType | null;
   name: string;
   keywords: string[];
+  tags?: string[];
   is_token: boolean;
   cost?: number;
   plane?: string;
@@ -34,6 +35,7 @@ export interface HandCard {
   plane?: string;
   type: CardType;
   keywords: string[];
+  tags?: string[];
   atk: number;
   def: number;
   rules: string;
@@ -63,6 +65,7 @@ export interface HistoryCard {
   plane: string;
   cost?: number | null;
   keywords: string[];
+  tags?: string[];
   is_token: boolean;
   station: number;
 }
@@ -117,6 +120,7 @@ export interface CodexCard {
   atk: number;
   def: number;
   keywords: string[];
+  tags?: string[];
   rules: string;
   flavor: string;
 }
@@ -126,6 +130,28 @@ export interface Keyword {
   display: string;
   meaning: string;
   kind: string;
+}
+
+export interface Tag {
+  id: string;
+  definition: string;
+  reminder: string;
+}
+
+export interface RegistryEntry extends Tag {
+  status: "proposed" | "approved" | "rejected";
+}
+
+export interface RegistryData {
+  tags: RegistryEntry[];
+  keywords: RegistryEntry[];
+}
+
+export interface GeneratedPack {
+  cards: CodexCard[];
+  theme: string;
+  seed: number | null;
+  mode: "llm" | "deterministic";
 }
 
 export interface ServerMsg {

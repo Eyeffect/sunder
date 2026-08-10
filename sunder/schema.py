@@ -20,6 +20,12 @@ _KNOWN_KEYWORDS = {
 }
 
 
+def _approved_tags() -> set[str]:
+    """Approved tag ids (governance gate for tag-bearing cards)."""
+    from .registry import approved_tags
+    return set(approved_tags())
+
+
 @dataclass
 class Ability:
     trigger: Trigger
@@ -31,6 +37,7 @@ class Ability:
     condition: dict | None = None
     count_type: CardType | None = None
     keyword: str | None = None      # GRANT_KEYWORD payload
+    tag: str | None = None          # X_COUNT_OF_TAG_ON_BOARD payload
     ref: int | None = None          # stable ability index for THIS_TRIGGERED counts
 
 
@@ -45,6 +52,7 @@ class Card:
     type: CardType
     abilities: list[Ability] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     atk: int = 0
     def_: int = 0
     fuse: int | None = None
@@ -106,6 +114,7 @@ def parse_ability(raw: dict, index: int) -> Ability:
         condition=raw.get("condition"),
         count_type=count_type,
         keyword=raw.get("keyword"),
+        tag=raw.get("tag"),
         ref=index,
     )
 
@@ -128,6 +137,19 @@ def parse_card(raw: dict) -> Card:
         if k not in _KNOWN_KEYWORDS:
             raise SchemaError(f"card {raw.get('id')}: unknown keyword {k!r}")
 
+    tags = raw.get("tags") or []
+    if not isinstance(tags, list):
+        raise SchemaError(f"card {raw.get('id')}: tags must be a list")
+    if len(tags) > 4:
+        raise SchemaError(f"card {raw.get('id')}: {len(tags)} tags (need 0–4)")
+    if len(set(tags)) != len(tags):
+        raise SchemaError(f"card {raw.get('id')}: duplicate tags")
+    for t in tags:
+        if not isinstance(t, str) or not t:
+            raise SchemaError(f"card {raw.get('id')}: malformed tag {t!r}")
+        if t not in _approved_tags():
+            raise SchemaError(f"card {raw.get('id')}: unknown tag {t!r}")
+
     if ctype is CardType.BROADCAST:
         atk = int(stats.get("atk", 0))
         def_ = int(stats.get("def", 0))
@@ -144,6 +166,7 @@ def parse_card(raw: dict) -> Card:
         type=ctype,
         abilities=abilities,
         keywords=keywords,
+        tags=tags,
         atk=atk,
         def_=def_,
         fuse=int(raw["fuse"]) if raw.get("fuse") is not None else None,
@@ -164,6 +187,14 @@ def describe_ability(card: Card, ab: Ability) -> str:
     trig = _TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)
     target = _TARGET_WORDS.get(ab.target, ab.target.value)
     effect = _EFFECT_WORDS.get(ab.effect, ab.effect.value)
+    if ab.condition and ab.condition.get("has_tag"):
+        tag = ab.condition["has_tag"]
+        if ab.trigger is Trigger.ON_ANY_BROADCAST_PLAYED:
+            trig = f"Whenever a Broadcast with the {tag} tag is aired"
+        else:
+            trig = f"{trig}, if the triggering card has the {tag} tag"
+    if ab.scaling is Scaling.X_COUNT_OF_TAG_ON_BOARD:
+        return f"{trig}: {effect} {num} to {target} (X = {ab.tag} cards on the airwaves)."
     return f"{trig}: {effect} {num} to {target}."
 
 

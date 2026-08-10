@@ -8,6 +8,8 @@ export interface CardLike {
   type?: string | null;
   name: string;
   keywords?: string[];
+  tags?: string[];
+  tagMeanings?: Record<string, string>;
   is_token?: boolean;
   cost?: number;
   atk?: number;
@@ -143,6 +145,19 @@ export function Card({
           </div>
           <div className="card-name">{card.name}</div>
           {typeLine && <div className="card-type">{typeLine}</div>}
+          {card.tags && card.tags.length > 0 && (
+            <div className="card-tags">
+              {card.tags.map((t) => (
+                <span
+                  key={t}
+                  className="tag-chip"
+                  title={card.tagMeanings?.[t] ?? `#${t}`}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
           {card.fuse != null && (
             <div className="card-fuse">
               FUSE {card.fuse_ticks ?? 0}/{card.fuse}

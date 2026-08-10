@@ -138,6 +138,7 @@ class GameState:
             "plane": inst.card.plane,
             "cost": inst.card.cost,
             "keywords": list(inst.card.keywords),
+            "tags": list(inst.card.tags),
             "is_token": inst.is_token,
             "station": inst.controller if station is None else station,
         }
