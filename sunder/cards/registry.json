@@ -80,14 +80,6 @@
     }
   ],
   "schema_version": 1,
-  "tag": [
-    {
-      "definition": "glowing",
-      "id": "neon",
-      "reminder": "Bright.",
-      "status": "approved"
-    }
-  ],
   "tags": [
     {
       "definition": "records, grooves, needle, analog",
@@ -123,6 +115,270 @@
       "definition": "water, waves, cycles, ebb and flow",
       "id": "tide",
       "reminder": "Things that come and go in cycles.",
+      "status": "approved"
+    },
+    {
+      "definition": "Bitter cold that bites deeper each turn.",
+      "id": "frostbite",
+      "mechanic": {
+        "effect": "DEAL_DAMAGE",
+        "scaling": "FLAT",
+        "target": "ENEMY_FACE",
+        "trigger": "ON_TURN_END",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the end of your turn: deal 1 Noise to the rival station.",
+      "status": "approved"
+    },
+    {
+      "definition": "Ethereal lights that fortify the frozen sky.",
+      "id": "aurora",
+      "mechanic": {
+        "effect": "BUFF_STAT",
+        "scaling": "FLAT",
+        "target": "ALL_YOUR_BROADCASTS",
+        "trigger": "STATIC",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "Always on: +1/+0 to your Broadcasts.",
+      "status": "approved"
+    },
+    {
+      "definition": "A solid duplicate that fights beside you.",
+      "id": "shadow_clone",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "SUMMON_TOKEN",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "SELF",
+        "trigger": "ON_PLAY",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When this enters play: summon 1 1/1 Echo.",
+      "status": "approved"
+    },
+    {
+      "definition": "The copy wheel eye that mirrors any jutsu.",
+      "id": "sharingan",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "COPY_LAST_TRACK",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "SELF",
+        "trigger": "ON_PLAY",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When this enters play: replay the last Track 1 time(s).",
+      "status": "approved"
+    },
+    {
+      "definition": "the resonant hum beneath the chorus",
+      "id": "deep_signal",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "GAIN_BANDWIDTH",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "SELF",
+        "trigger": "ON_TURN_START",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the start of your turn: generate 1 Bandwidth this turn.",
+      "status": "approved"
+    },
+    {
+      "definition": "a slow gravity well that bends time",
+      "id": "orbital_drift",
+      "mechanic": {
+        "effect": "BUFF_STAT",
+        "scaling": "X_TURN_NUMBER",
+        "target": "ALL_YOUR_BROADCASTS",
+        "trigger": "ON_TURN_START",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the start of your turn: +1/+0 to your Broadcasts.",
+      "status": "approved"
+    },
+    {
+      "definition": "a broadcast bent by gravity, arriving before it left",
+      "id": "warp_signal",
+      "mechanic": {
+        "effect": "DEAL_DAMAGE",
+        "scaling": "X_TURN_NUMBER",
+        "target": "RANDOM",
+        "trigger": "ON_CAST_TRACK",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When a Track is played: deal 1 Noise to a random Broadcast.",
+      "status": "approved"
+    },
+    {
+      "definition": "an inescapable point where all sound collapses inward",
+      "id": "singularity",
+      "mechanic": {
+        "effect": "BUFF_STAT",
+        "scaling": "FLAT",
+        "target": "ALL_YOUR_BROADCASTS",
+        "trigger": "ON_TURN_END",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the end of your turn: +1/+0 to your Broadcasts.",
+      "status": "approved"
+    },
+    {
+      "definition": "a bustling hive heart that swarms anew",
+      "id": "hive",
+      "mechanic": {
+        "effect": "SUMMON_TOKEN",
+        "scaling": "FLAT",
+        "target": "SELF",
+        "trigger": "ON_TURN_START",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the start of your turn: summon 1 1/1 Echo.",
+      "status": "approved"
+    },
+    {
+      "definition": "sparkling pollen that carries knowledge",
+      "id": "pollen",
+      "mechanic": {
+        "effect": "DRAW_CARD",
+        "scaling": "FLAT",
+        "target": "SELF",
+        "trigger": "ON_PLAY",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When this enters play: cue 1.",
+      "status": "approved"
+    },
+    {
+      "definition": "a spontaneous solo that lifts the whole band",
+      "id": "improvisation",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "BUFF_STAT",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "ALL_YOUR_BROADCASTS",
+        "trigger": "ON_TURN_START",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the start of your turn: +1/+0 to your Broadcasts.",
+      "status": "approved"
+    },
+    {
+      "definition": "a devastating closing run that lands after the set ends",
+      "id": "final_chorus",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "DEAL_DAMAGE",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "RANDOM",
+        "trigger": "ON_DEATH",
+        "value": 2,
+        "value_def": 0
+      },
+      "reminder": "When this goes silent: deal 2 Noise to a random Broadcast.",
+      "status": "approved"
+    },
+    {
+      "definition": "an unbearably concentrated beat that strikes the core",
+      "id": "clit_pulse",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "DEAL_DAMAGE",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "ENEMY_FACE",
+        "trigger": "ON_PLAY",
+        "value": 2,
+        "value_def": 0
+      },
+      "reminder": "When this enters play: deal 2 Noise to the rival station.",
+      "status": "approved"
+    },
+    {
+      "definition": "a soft returning signal that laps back from the void",
+      "id": "peach_thump",
+      "mechanic": {
+        "condition": null,
+        "count_type": null,
+        "effect": "RETURN_FROM_DISCARD",
+        "keyword": null,
+        "scaling": "FLAT",
+        "tag": null,
+        "target": "SELF",
+        "trigger": "ON_TURN_START",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "At the start of your turn: return 1 from Static.",
+      "status": "approved"
+    },
+    {
+      "definition": "a guarded clutch of eggs defended with desperate maternal fury",
+      "id": "nest",
+      "mechanic": {
+        "effect": "SUMMON_TOKEN",
+        "scaling": "FLAT",
+        "target": "SELF",
+        "trigger": "ON_DEATH",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When this goes silent: summon 1 1/1 Echo.",
+      "status": "approved"
+    },
+    {
+      "definition": "the dominant carnivore's bellow, a claim carved into the air",
+      "id": "alpha_roar",
+      "mechanic": {
+        "effect": "DEAL_DAMAGE",
+        "scaling": "FLAT",
+        "target": "ALL_ENEMY_BROADCASTS",
+        "trigger": "ON_PLAY",
+        "value": 1,
+        "value_def": 0
+      },
+      "reminder": "When this enters play: deal 1 Noise to all enemy Broadcasts.",
+      "status": "approved"
+    },
+    {
+      "definition": "the daily ritual of marking the start of a shift",
+      "id": "punch_clock",
+      "reminder": "This card belongs to the working life of Meridian, where every day begins with a stamp.",
+      "status": "approved"
+    },
+    {
+      "definition": "the night crew that keeps essential jobs running after dark",
+      "id": "graveyard_shift",
+      "reminder": "This card catches the hollow hours when the office lights never turn off.",
       "status": "approved"
     }
   ]

@@ -34,7 +34,7 @@ def default_decks() -> tuple[list, list]:
 
 def _registry_json(e) -> dict:
     return {"id": e.id, "definition": e.definition, "reminder": e.reminder,
-            "status": e.status}
+            "status": e.status, "mechanic": e.mechanic}
 
 
 def _card_json(c) -> dict:
@@ -99,6 +99,8 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                 str(payload.get("id", "")),
                 str(payload.get("definition", "")),
                 str(payload.get("reminder", "")),
+                mechanic=payload.get("mechanic") if isinstance(
+                    payload.get("mechanic"), dict) else None,
             )
         except ValueError as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
@@ -117,6 +119,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
         import asyncio
 
         from ..gen import generate_pack
+        from ..schema import parse_card
         theme = str(payload.get("theme", "")).strip()
         if not theme:
             return JSONResponse({"error": "theme is required"}, status_code=400)
@@ -130,7 +133,9 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                 seed = int(seed)
             except (TypeError, ValueError):
                 return JSONResponse({"error": "seed must be a number"}, status_code=400)
-        return await asyncio.to_thread(generate_pack, theme, count, seed)
+        result = await asyncio.to_thread(generate_pack, theme, count, seed)
+        result["cards"] = [_card_json(parse_card(c)) for c in result["cards"]]
+        return result
 
     @app.get("/api/health")
     def api_health():

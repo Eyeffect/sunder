@@ -4,6 +4,7 @@ import random
 
 import pytest
 
+from sunder.gen import humanizer as humanizer_mod
 from sunder.gen.fake import FakeLLM
 from sunder.gen.humanizer import MAX_ATTEMPTS, deterministic_fill, humanize_pack
 from sunder.gen.ledger import Ledger
@@ -82,6 +83,25 @@ def test_deterministic_fill_uses_pool_and_menu():
         assert "humanizer" in entry["flavor"]
     names = [e["name"] for e in out]
     assert all(n in profile.name_pool for n in names)
+
+
+def test_prompt_surfaces_subject_first():
+    sks = skeletons()
+    messages = humanizer_mod._build_prompt("humanizer",
+                                           default_profile("humanizer"), sks)
+    first = messages[-1]["content"].split("CARD 1")[1]
+    assert first.startswith(" — ")
+    assert "Subject tag: #" in first
+    assert first.index("Subject tag") < first.index("Ability")
+    assert "additional" in first
+
+
+def test_zero_flavor_picks_validate():
+    sks = [s for s in skeletons(60) if s.n_flavor == 0]
+    assert sks, "expected some zero-pick skeletons"
+    out = humanize_pack("humanizer", default_profile("humanizer"), sks,
+                        FakeLLM(responses=[valid_pack(sks)]))
+    assert all(e["flavor_tags"] == [] for e in out)
 
 
 def _sequence(responses):

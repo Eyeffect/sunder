@@ -133,3 +133,68 @@ def test_ability_tag_payload_parsed():
                          "tag": "ember", "value": 0}])
     assert c.abilities[0].tag == "ember"
     assert c.abilities[0].scaling is Scaling.X_COUNT_OF_TAG_ON_BOARD
+
+
+# ------------------------------------------------------- target rendering
+
+def _ab(abilities, **kw):
+    base = {"type": "BROADCAST", "stats": {"atk": 1, "def": 1},
+            "abilities": abilities}
+    base.update(kw)
+    return card(**base)
+
+
+def test_deal_damage_renders_face_target():
+    text = rules_text(_ab([{
+        "trigger": "ON_TURN_END", "effect": "DEAL_DAMAGE",
+        "target": "ENEMY_FACE", "value": 1}]))
+    assert text == "At the end of your turn: deal 1 Noise to the rival station."
+
+
+def test_deal_damage_renders_all_enemy_broadcasts_target():
+    text = rules_text(_ab([{
+        "trigger": "ON_PLAY", "effect": "DEAL_DAMAGE",
+        "target": "ALL_ENEMY_BROADCASTS", "value": 1}]))
+    assert text == "When this enters play: deal 1 Noise to all enemy Broadcasts."
+
+
+def test_deal_damage_renders_random_target():
+    text = rules_text(_ab([{
+        "trigger": "ON_PLAY", "effect": "DEAL_DAMAGE",
+        "target": "RANDOM", "value": 1}]))
+    assert text == "When this enters play: deal 1 Noise to a random Broadcast."
+
+
+def test_buff_stat_renders_your_broadcasts_target():
+    text = rules_text(_ab([{
+        "trigger": "STATIC", "effect": "BUFF_STAT",
+        "target": "ALL_YOUR_BROADCASTS", "value": 1, "value_def": 1}]))
+    assert text == "Always on: +1/+1 to your Broadcasts."
+
+
+def test_self_effects_stay_bare():
+    text = rules_text(_ab([{
+        "trigger": "ON_PLAY", "effect": "DRAW_CARD", "target": "SELF",
+        "value": 1}]))
+    assert text == "When this enters play: cue 1."
+    assert "self" not in text
+
+
+def test_template_targets_unchanged():
+    jam = rules_text(_ab([{
+        "trigger": "ON_PLAY", "effect": "DESTROY",
+        "target": "ENEMY_BROADCAST"}]))
+    assert jam == "When this enters play: jam an enemy Broadcast."
+    grant = rules_text(_ab([{
+        "trigger": "ON_PLAY", "effect": "GRANT_KEYWORD",
+        "target": "CHOSEN", "keyword": "LOUD"}]))
+    assert grant == "When this enters play: grant LOUD to a chosen Broadcast."
+
+
+def test_schema_and_lore_renderers_agree():
+    from sunder.schema import Card
+    c = _ab([{"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE",
+              "target": "ENEMY_FACE", "value": 1}])
+    assert isinstance(c, Card)
+    assert c.rules_text() == rules_text(c)
+

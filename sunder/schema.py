@@ -59,15 +59,8 @@ class Card:
     flavor: str = ""
 
     def rules_text(self) -> str:
-        from .lore import remind
-
-        parts = []
-        if self.keywords:
-            parts.append(" ".join(remind(k) for k in self.keywords))
-        for ab in self.abilities:
-            parts.append(describe_ability(self, ab))
-        text = " ".join(p for p in parts if p)
-        return text or "(no text)"
+        from .lore import rules_text as _rules_text
+        return _rules_text(self)
 
 
 # ---------------------------------------------------------------- validation
@@ -178,77 +171,3 @@ def load_card_file(path: str | Path) -> list[Card]:
     cards = json.loads(Path(path).read_text())
     return [parse_card(raw) for raw in cards]
 
-
-# ---------------------------------------------------------------- display
-
-def describe_ability(card: Card, ab: Ability) -> str:
-    """Deterministic rules text from the ability tuple (lore-flavoured)."""
-    num = _num(card, ab)
-    trig = _TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)
-    target = _TARGET_WORDS.get(ab.target, ab.target.value)
-    effect = _EFFECT_WORDS.get(ab.effect, ab.effect.value)
-    if ab.condition and ab.condition.get("has_tag"):
-        tag = ab.condition["has_tag"]
-        if ab.trigger is Trigger.ON_ANY_BROADCAST_PLAYED:
-            trig = f"Whenever a Broadcast with the {tag} tag is aired"
-        else:
-            trig = f"{trig}, if the triggering card has the {tag} tag"
-    if ab.scaling is Scaling.X_COUNT_OF_TAG_ON_BOARD:
-        return f"{trig}: {effect} {num} to {target} (X = {ab.tag} cards on the airwaves)."
-    return f"{trig}: {effect} {num} to {target}."
-
-
-def _num(card: Card, ab: Ability) -> int:
-    return _scaled_value(card, ab, ab.value)
-
-
-def _scaled_value(card: Card, ab: Ability, base: int) -> int:
-    s = ab.scaling
-    if s is Scaling.X_TURN_NUMBER:
-        return base  # placeholder — live value applied by the engine
-    if s is not Scaling.FLAT:
-        return base
-    return base
-
-
-_TRIGGER_WORDS = {
-    Trigger.ON_PLAY: "When this enters play",
-    Trigger.ON_ATTACK: "When this attacks",
-    Trigger.ON_DEATH: "When this goes silent",
-    Trigger.ON_TURN_START: "At the start of your turn",
-    Trigger.ON_TURN_END: "At the end of your turn",
-    Trigger.ON_CAST_TRACK: "When a Track is played",
-    Trigger.ON_ANY_BROADCAST_PLAYED: "Whenever a Broadcast is aired",
-    Trigger.ON_FUSE_EXPIRED: "When the fuse expires",
-    Trigger.STATIC: "Always on",
-}
-
-_TARGET_WORDS = {
-    Target.SELF: "self",
-    Target.ENEMY_FACE: "the rival station",
-    Target.ENEMY_BROADCAST: "an enemy Broadcast",
-    Target.ALL_ENEMY_BROADCASTS: "all enemy Broadcasts",
-    Target.ALL_YOUR_BROADCASTS: "your Broadcasts",
-    Target.ALL_BROADCASTS: "all Broadcasts",
-    Target.RANDOM: "a random Broadcast",
-    Target.CHOSEN: "a chosen Broadcast",
-}
-
-_EFFECT_WORDS = {
-    Effect.DEAL_DAMAGE: "deal {n} Noise",
-    Effect.GAIN_LIFE: "boost your Signal by {n}",
-    Effect.DRAW_CARD: "cue {n}",
-    Effect.BUFF_STAT: "+{n}/+{nd}",
-    Effect.SUMMON_TOKEN: "summon {n} 1/1 Echo",
-    Effect.RETURN_FROM_DISCARD: "return {n} card from Static",
-    Effect.COPY_LAST_TRACK: "replay the last Track {n} time(s)",
-    Effect.COUNTER_TRACK: "cut the Track",
-    Effect.DESTROY: "jam {t}",
-    Effect.GRANT_KEYWORD: "grant {kw} to {t}",
-    Effect.DOUBLE_NEXT_TRIGGER: "double {t}'s next trigger",
-}
-
-
-def keyword_display(key: str) -> str:
-    from .keywords import KEYWORD_REGISTRY
-    return KEYWORD_REGISTRY.get(key, (key, "")).display

@@ -1198,6 +1198,12 @@ html.no-scrollbar::-webkit-scrollbar {
   letter-spacing: 2px;
   color: var(--text);
 }
+.registry-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
 .registry-propose {
   display: flex;
   flex-wrap: wrap;
@@ -1262,6 +1268,17 @@ html.no-scrollbar::-webkit-scrollbar {
   color: var(--text-dim);
   flex: 1;
   min-width: 160px;
+}
+.registry-mechanic {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  border: 1px solid rgba(255, 183, 64, 0.35);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 .registry-reminder {
   font-family: var(--font-mono);

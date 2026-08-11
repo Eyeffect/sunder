@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 
-from ..registry import tag_definition
+from ..registry import tag_definition, tag_mechanic, tag_reminder
 from ..schema import SchemaError
 from .client import LLMError
 from .profile import ThemeProfile
@@ -23,11 +23,11 @@ log = logging.getLogger("sunder.gen")
 MAX_ATTEMPTS = 3
 
 _FLAVOR_TEMPLATES = [
-    "It rides the {theme} signal.",
-    "The {theme} frequency remembers.",
-    "No one in {theme} hears it the same way twice.",
-    "A little {theme} in everything.",
-    "Tuned to {theme}, never quite in tune.",
+    "A shard of {theme}, bleeding in from across the multiverse.",
+    "Every {theme} card carries its whole world with it.",
+    "The broadcast catches {theme} at its strangest.",
+    "No two universes see {theme} the same way.",
+    "Somewhere in the multiverse, {theme} is all there is.",
 ]
 
 
@@ -41,7 +41,7 @@ def humanize_pack(theme: str, profile: ThemeProfile, skeletons: list[CardSkeleto
     messages = _build_prompt(theme, profile, skeletons)
     raw = None
     for attempt in range(MAX_ATTEMPTS):
-        raw = client.chat_json(messages, temperature=0.9, max_tokens=8000)
+        raw = client.chat_json(messages, temperature=0.9, max_tokens=24000)
         human = _validate_all(raw, skeletons)
         if human is not None:
             return human
@@ -74,41 +74,61 @@ def deterministic_fill(skeletons: list[CardSkeleton], profile: ThemeProfile) -> 
 
 # ---------------------------------------------------------------- prompt
 
+def _tag_note(tag_id: str) -> str:
+    """Menu/subject annotation: the engine-true reminder for mechanical
+    tags, the subject-matter definition otherwise."""
+    if tag_mechanic(tag_id):
+        return tag_reminder(tag_id)
+    return tag_definition(tag_id)
+
+
 def _build_prompt(theme: str, profile: ThemeProfile,
                   skeletons: list[CardSkeleton]) -> list[dict]:
     blocks = []
     for i, sk in enumerate(skeletons):
         card = skeleton_to_card(sk)
-        menu = "".join(f"\n    {t} — {tag_definition(t)}"
+        menu = "".join(f"\n    {t} — {_tag_note(t)}"
                        for t in sk.flavor_tag_menu)
+        subject = (f"  Subject tag: #{sk.subject_tag} — "
+                   f"{_tag_note(sk.subject_tag)}\n"
+                   if sk.subject_tag else "")
         stats = (f"Stats: {sk.stats['atk']}/{sk.stats['def']}"
                  if sk.type == "BROADCAST" else "Stats: —")
         kw = ", ".join(sk.keywords) if sk.keywords else "none"
         blocks.append(
             f"CARD {i + 1} — {sk.type} ({sk.rarity}, cost {sk.cost})\n"
+            f"{subject}"
             f"  {stats}   Keywords: {kw}\n"
             f"  Ability: {card.rules_text()}\n"
-            f"  Offered flavor tags (pick exactly {sk.n_flavor}):{menu}"
+            f"  Offered flavor tags (pick exactly {sk.n_flavor} "
+            f"additional):{menu}"
         )
     return [
         {"role": "system",
          "content": (
-             "You write cards for SUNDER, a procedural music-duel game. "
-             "Reply with ONLY a JSON array — one object per card, in the "
-             "exact same order as the input. Each object is:\n"
-             '{"name": "punchy card name", "flavor": "one evocative sentence '
-             'of flavour text", "flavor_tags": ["tag ids from the offered '
-             'menu, verbatim"]}\n'
+             "You write cards for SUNDER, a multiverse card game: you play "
+             "a broadcast station battling another across a shared "
+             "spectrum, and every card is a transmission from some world — "
+             "any world. Keep each card true to its theme; the radio frame "
+             "is just the shell. Reply with ONLY a JSON array — one object "
+             "per card, in the exact same order as the input. Each object is:\n"
+             '{"flavor_tags": ["tag ids from the offered menu, verbatim"], '
+             '"name": "punchy card name", "flavor": "one evocative sentence '
+             'of flavour text"}\n'
              "Rules:\n"
-             "- flavor_tags must use EXACTLY the required count, chosen ONLY "
-             "from the offered menu (ids verbatim, no invented tags).\n"
+             "- Every card has a subject tag. The name and flavor text must "
+             "name or clearly evoke the subject tag.\n"
+             "- flavor_tags holds only the additional picks — exactly the "
+             "required count, chosen ONLY from the offered menu (ids "
+             "verbatim, no invented tags). Never put the subject tag in "
+             "flavor_tags.\n"
              "- Names must be fresh and must not repeat within the pack.\n"
              "- Do not add quotes around the flavor text."
          )},
         {"role": "user",
          "content": (
              f"THEME: {theme}\n"
-             f"FREQUENCY BRIEF: {profile.flavor_brief}\n"
+             f"THEME BRIEF: {profile.flavor_brief}\n"
              f"NAME POOL (inspiration only — invent better): "
              f"{', '.join(profile.name_pool)}\n\n"
              + "\n\n".join(blocks)

@@ -20,6 +20,11 @@ import httpx
 DEFAULT_BASE_URL = os.environ.get("SUNDER_LLM_BASE_URL", "http://127.0.0.1:20128/v1")
 DEFAULT_MODEL = os.environ.get("SUNDER_LLM_MODEL", "oc/big-pickle")
 
+try:
+    DEFAULT_TIMEOUT = float(os.environ.get("SUNDER_LLM_TIMEOUT", "120"))
+except ValueError:
+    DEFAULT_TIMEOUT = 120.0
+
 
 class LLMError(RuntimeError):
     """Raised when the LLM is unreachable or returns unusable content."""
@@ -27,17 +32,22 @@ class LLMError(RuntimeError):
 
 class LLMClient:
     def __init__(self, base_url: str | None = None, model: str | None = None,
-                 api_key: str | None = None, timeout: float = 120.0,
+                 api_key: str | None = None, timeout: float | None = None,
                  transport: httpx.BaseTransport | None = None):
         self.base_url = (base_url or DEFAULT_BASE_URL).rstrip("/")
         self.model = model or DEFAULT_MODEL
         self.api_key = api_key or os.environ.get("SUNDER_LLM_API_KEY") or None
-        self.timeout = timeout
+        self.timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
         self._transport = transport
 
     def chat_json(self, messages: list[dict], *, temperature: float = 0.9,
-                  max_tokens: int = 8000, attempts: int = 2):
-        """POST a chat completion and return the parsed JSON from content."""
+                  max_tokens: int = 24000, attempts: int = 2,
+                  timeout: float | None = None):
+        """POST a chat completion and return the parsed JSON from content.
+
+        `timeout` overrides the client-wide timeout for this one call (used
+        for short-lived fallback re-probes).
+        """
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
@@ -51,8 +61,8 @@ class LLMClient:
         last: Exception | None = None
         for _ in range(max(1, attempts)):
             try:
-                with httpx.Client(timeout=self.timeout,
-                                  transport=self._transport) as http:
+                with httpx.Client(timeout=self.timeout if timeout is None
+                                  else timeout, transport=self._transport) as http:
                     resp = http.post(f"{self.base_url}/chat/completions",
                                      headers=headers, json=body)
                     resp.raise_for_status()

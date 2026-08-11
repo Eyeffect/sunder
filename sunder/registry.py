@@ -63,6 +63,7 @@ class RegistryEntry:
     definition: str
     reminder: str
     status: str
+    mechanic: dict | None = None
 
 
 # ---------------------------------------------------------------- storage
@@ -155,17 +156,34 @@ def tag_definition(tag_id: str) -> str:
     return ""
 
 
+def tag_reminder(tag_id: str) -> str:
+    for e in _entries("tags"):
+        if e["id"] == tag_id:
+            return e.get("reminder", "")
+    return ""
+
+
 def all_entries(kind: str) -> list[RegistryEntry]:
     return [
         RegistryEntry(kind=kind, id=e["id"], definition=e.get("definition", ""),
-                      reminder=e.get("reminder", ""), status=e.get("status", PROPOSED))
+                      reminder=e.get("reminder", ""), status=e.get("status", PROPOSED),
+                      mechanic=e.get("mechanic"))
         for e in _entries(kind)
     ]
 
 
+def tag_mechanic(tag_id: str) -> dict | None:
+    """Return the structured mechanic attached to a tag, or None."""
+    for e in _entries("tags"):
+        if e["id"] == tag_id and isinstance(e.get("mechanic"), dict):
+            return e["mechanic"]
+    return None
+
+
 # ---------------------------------------------------------------- mutations
 
-def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "") -> RegistryEntry:
+def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "",
+            mechanic: dict | None = None) -> RegistryEntry:
     """Add an entry to the review queue, or re-open a rejected one."""
     if kind not in _KNOWN_KINDS:
         raise ValueError(f"unknown registry kind {kind!r}")
@@ -176,15 +194,22 @@ def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "") 
         if e["id"] == entry_id:
             e["definition"] = definition or e.get("definition", "")
             e["reminder"] = reminder or e.get("reminder", "")
+            if mechanic is not None:
+                e["mechanic"] = mechanic
+            elif "mechanic" in e:
+                del e["mechanic"]
             if e.get("status") == REJECTED:
                 e["status"] = PROPOSED
             save_registry(data)
-            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"], e["status"])
-    entry = {"id": entry_id, "definition": definition, "reminder": reminder,
-             "status": PROPOSED}
+            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
+                                 e["status"], e.get("mechanic"))
+    entry: dict = {"id": entry_id, "definition": definition, "reminder": reminder,
+                   "status": PROPOSED}
+    if mechanic is not None:
+        entry["mechanic"] = mechanic
     data.setdefault(_SECTION[kind], []).append(entry)
     save_registry(data)
-    return RegistryEntry(kind, entry_id, definition, reminder, PROPOSED)
+    return RegistryEntry(kind, entry_id, definition, reminder, PROPOSED, mechanic)
 
 
 def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
@@ -197,7 +222,8 @@ def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
         if e["id"] == entry_id:
             e["status"] = status
             save_registry(data)
-            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"], status)
+            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
+                                 status, e.get("mechanic"))
     return None
 
 

@@ -98,7 +98,10 @@ def rules_text(card, live_values: dict | None = None) -> str:
         nd = live.get("value_def", ab.value_def)
         kw = live.get("keyword", ab.keyword or "")
         t = _TARGET_WORDS.get(ab.target, ab.target.value)
-        e = _EFFECT_WORDS.get(ab.effect, ab.effect.value).format(n=n, nd=nd, kw=kw, t=t)
+        template = _EFFECT_WORDS.get(ab.effect, ab.effect.value)
+        if ab.target is not Target.SELF and "{t}" not in template:
+            template += " to {t}"
+        e = template.format(n=n, nd=nd, kw=kw, t=t)
         clause = _TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)
         if ab.condition and ab.condition.get("has_tag"):
             tag = ab.condition["has_tag"]
@@ -108,6 +111,9 @@ def rules_text(card, live_values: dict | None = None) -> str:
                 clause = f"{clause}, if the triggering card has the {tag} tag"
         if ab.scaling is Scaling.X_COUNT_OF_TAG_ON_BOARD:
             note = f" (X = number of {ab.tag} cards on the airwaves)"
+        elif ab.scaling is Scaling.X_COUNT_OF_TYPE_ON_BOARD:
+            ct = ab.count_type or card.type
+            note = f" (X = number of {ct.value} cards on the airwaves)"
         else:
             note = ""
         parts.append(f"{clause}: {e}.{note}")

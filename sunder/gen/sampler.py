@@ -14,14 +14,19 @@ not a discount).
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
-from ..budget import budget_score, suggested_cost
+from ..budget import _KEYWORD_COST, budget_score, suggested_cost
 from ..primitives import Rarity
-from ..registry import approved_ids
+from ..registry import approved_ids, tag_mechanic
 from ..schema import parse_card
 from .ledger import Ledger, signature_from_skeleton
+from .legality import (_EFFECT_TARGETS, _EFFECTS_BY_TYPE, _KEYWORDS_BY_TYPE,
+                       _TRIGGERS_BY_TYPE, _VALUE_RANGE, mechanic_legal)
 from .profile import ThemeProfile
+
+log = logging.getLogger("sunder.gen")
 
 MAX_NOVELTY_ATTEMPTS = 5
 BUDGET_ATTEMPTS = 6
@@ -29,60 +34,6 @@ BUDGET_ATTEMPTS = 6
 # Ceiling budget per rarity keeps generated costs inside the playable band
 # (roughly cost 2–6) so a pack feels draftable, not theoretical.
 _SCORE_CAP = {"COMMON": 6, "UNCOMMON": 8, "RARE": 11, "SUNDERED": 14}
-
-# --- legality tables (string-valued to keep the sampler enum-free) --------
-
-_ALL_TRIGGERS = ["ON_PLAY", "ON_ATTACK", "ON_DEATH", "ON_TURN_START",
-                 "ON_TURN_END", "ON_CAST_TRACK", "ON_ANY_BROADCAST_PLAYED",
-                 "STATIC"]
-
-_TRIGGERS_BY_TYPE = {
-    "BROADCAST": _ALL_TRIGGERS,
-    "TRACK": ["ON_PLAY"],
-    "LOOP": ["STATIC", "ON_TURN_START", "ON_TURN_END",
-             "ON_ANY_BROADCAST_PLAYED", "ON_CAST_TRACK"],
-}
-
-_EFFECTS_BY_TYPE = {
-    "BROADCAST": ["DEAL_DAMAGE", "GAIN_LIFE", "DRAW_CARD", "BUFF_STAT",
-                  "SUMMON_TOKEN", "DESTROY", "GRANT_KEYWORD",
-                  "DOUBLE_NEXT_TRIGGER", "GAIN_BANDWIDTH"],
-    "TRACK": ["DEAL_DAMAGE", "DRAW_CARD", "GAIN_LIFE", "SUMMON_TOKEN",
-              "DESTROY", "COPY_LAST_TRACK"],
-    "LOOP": ["BUFF_STAT", "GAIN_BANDWIDTH", "GRANT_KEYWORD",
-             "RETURN_FROM_DISCARD", "UNCAP_BANDWIDTH"],
-}
-
-_EFFECT_TARGETS = {
-    "DEAL_DAMAGE": ["ENEMY_FACE", "ENEMY_BROADCAST", "ALL_ENEMY_BROADCASTS",
-                    "RANDOM", "CHOSEN"],
-    "GAIN_LIFE": ["SELF"],
-    "DRAW_CARD": ["SELF"],
-    "BUFF_STAT": ["SELF", "ALL_YOUR_BROADCASTS", "CHOSEN"],
-    "SUMMON_TOKEN": ["SELF"],
-    "RETURN_FROM_DISCARD": ["SELF"],
-    "COPY_LAST_TRACK": ["SELF"],
-    "COUNTER_TRACK": ["SELF"],
-    "DESTROY": ["ENEMY_BROADCAST", "ALL_ENEMY_BROADCASTS", "RANDOM", "CHOSEN"],
-    "GRANT_KEYWORD": ["SELF", "ALL_YOUR_BROADCASTS", "CHOSEN"],
-    "DOUBLE_NEXT_TRIGGER": ["SELF"],
-    "GAIN_BANDWIDTH": ["SELF"],
-    "UNCAP_BANDWIDTH": ["SELF"],
-}
-
-_KEYWORDS_BY_TYPE = {
-    "BROADCAST": ["LOUD", "RUSH", "ECHO", "AMP", "CARRIER", "BEACON",
-                  "DISTORT", "FILTER", "DRAIN", "FEEDBACK", "MASKED", "B_SIDE"],
-    "TRACK": [],
-    "LOOP": ["CARRIER", "B_SIDE"],
-}
-
-_VALUE_RANGE = {
-    "DEAL_DAMAGE": (1, 4), "GAIN_LIFE": (2, 5), "DRAW_CARD": (1, 2),
-    "BUFF_STAT": (1, 2), "SUMMON_TOKEN": (1, 2),
-    "RETURN_FROM_DISCARD": (1, 2), "COPY_LAST_TRACK": (1, 2),
-    "GAIN_BANDWIDTH": (1, 3),
-}
 
 _RARITY_ORDER = [r.value for r in Rarity]
 
@@ -99,6 +50,7 @@ class CardSkeleton:
     stats: dict
     abilities: list[dict]
     load_bearing_tag: str | None = None
+    subject_tag: str | None = None
     flavor_tag_menu: list[str] = field(default_factory=list)
     n_flavor: int = 0
 
@@ -124,7 +76,8 @@ def sample_pack(theme: str, profile: ThemeProfile, rng, ledger: Ledger,
         assert cand is not None
         if ledger.collides(signature_from_skeleton(cand)) \
                 and ledger.relaxed_collides(signature_from_skeleton(cand)):
-            pass  # narrow theme — accept the near-duplicate rather than hang
+            log.warning("novelty relax: accepted near-duplicate %s "
+                        "(narrow theme)", cand.id)
         ledger.add(signature_from_skeleton(cand))
         used[cand.rarity] = used.get(cand.rarity, 0) + 1
         out.append(cand)
@@ -133,7 +86,11 @@ def sample_pack(theme: str, profile: ThemeProfile, rng, ledger: Ledger,
 
 def build_card_raw(sk: CardSkeleton, name: str, flavor: str,
                    flavor_tags: list[str]) -> dict:
-    tags = ([sk.load_bearing_tag] if sk.load_bearing_tag else []) + list(flavor_tags)
+    tags = []
+    for t in (sk.load_bearing_tag, sk.subject_tag):
+        if t and t not in tags:
+            tags.append(t)
+    tags.extend(flavor_tags)
     return {
         "id": sk.id, "name": name, "set": sk.set, "plane": sk.plane,
         "rarity": sk.rarity, "cost": sk.cost, "type": sk.type,
@@ -192,8 +149,88 @@ def _sample_card(slug, theme, index, profile, rng, approved_kw, approved_tags,
         if budget_score(skeleton_to_card(sk)) <= cap:
             break
     assert sk is not None
+    if budget_score(skeleton_to_card(sk)) > cap:
+        _downgrade_to_budget(sk, cap, rng, approved_tags, profile)
     sk.cost = suggested_cost(skeleton_to_card(sk))
     return sk
+
+
+def _downgrade_to_budget(sk, cap, rng, approved_tags, profile) -> None:
+    """Cut content until the skeleton fits `cap`, never re-rolling stats.
+
+    Ladder: drop the second ability first (the RARE/SUNDERED overflow case),
+    then keywords, then stats, then shave the remaining ability's values.
+    If even that can't land under the cap the card is accepted over-budget
+    with a detailed log line (the true floor — reachable only if the budget
+    cost table changes under us).
+    """
+    original = budget_score(skeleton_to_card(sk))
+    cuts: list[str] = []
+    while budget_score(skeleton_to_card(sk)) > cap:
+        if len(sk.abilities) > 1:
+            # the subject is the card's identity — when it carries a mechanic
+            # (abilities[0]) keep it fixed through the ladder
+            force = sk.subject_tag if tag_mechanic(sk.subject_tag) else None
+            sk.abilities = sk.abilities[:1]
+            _assign_tags(sk, _load_bearing(sk.abilities, approved_tags), rng,
+                         approved_tags, profile, ctype=sk.type,
+                         force_subject=force)
+            cuts.append("2nd-ability")
+        elif sk.keywords:
+            _drop_costliest_keyword(sk)
+            cuts.append("keyword")
+        elif sk.type == "BROADCAST" and (sk.stats["def"] > 0 or sk.stats["atk"] > 0):
+            if sk.stats["def"] > 0:
+                sk.stats["def"] -= 1
+                cuts.append("def")
+            else:
+                sk.stats["atk"] -= 1
+                cuts.append("atk")
+        elif _shave_ability_value(sk):
+            cuts.append("value")
+        else:
+            break
+    final = budget_score(skeleton_to_card(sk))
+    if final > cap:
+        ab = sk.abilities[0] if sk.abilities else {}
+        log.warning(
+            "budget accept-over rarity=%s type=%s effect=%s trigger=%s "
+            "target=%s scaling=%s value=%s value_def=%s keywords=%s "
+            "stats=%s score=%d cap=%d",
+            sk.rarity, sk.type, ab.get("effect"), ab.get("trigger"),
+            ab.get("target"), ab.get("scaling"), ab.get("value"),
+            ab.get("value_def"), sk.keywords, sk.stats, final, cap,
+        )
+    else:
+        log.warning("budget clamp rarity=%s score=%d cap=%d cuts=%s "
+                    "-> final_score=%d", sk.rarity, original, cap,
+                    ",".join(cuts), final)
+
+
+def _drop_costliest_keyword(sk) -> None:
+    costly = sorted(sk.keywords, key=lambda k: -_KEYWORD_COST.get(k, 0))
+    if _KEYWORD_COST.get(costly[0], 0) <= 0:
+        sk.keywords = []  # only free keywords remain — drop them all
+    else:
+        sk.keywords.remove(costly[0])
+
+
+def _shave_ability_value(sk) -> bool:
+    """Reduce the surviving ability's value/value_def by one step.
+
+    Returns False when there is nothing left to shave (fixed-value effects,
+    X-scaling abilities, or already at the floor).
+    """
+    if not sk.abilities:
+        return False
+    ab = sk.abilities[0]
+    if ab.get("value", 0) > 1:
+        ab["value"] = ab["value"] - 1
+        return True
+    if ab.get("value_def", 0) > 0:
+        ab["value_def"] = ab["value_def"] - 1
+        return True
+    return False
 
 
 def _build_skeleton(slug, theme, index, profile, rng, approved_kw,
@@ -202,16 +239,75 @@ def _build_skeleton(slug, theme, index, profile, rng, approved_kw,
     keywords = _sample_keywords(rng, ctype, approved_kw, profile.keyword_affinity)
     abilities = _sample_abilities(rng, ctype, rarity, approved_kw, approved_tags,
                                   profile)
-    load_tag = _load_bearing(abilities, approved_tags)
-    n_flavor = rng.choice([1, 2, 2, 2, 3])
-    menu = _flavor_menu(rng, approved_tags, profile.tag_affinity, load_tag)
     stats = _sample_stats(rng, ctype, rarity)
-    return CardSkeleton(
+    sk = CardSkeleton(
         id=f"{slug}_{index + 1:03d}", set=slug, plane=theme,
         type=ctype, rarity=rarity, cost=0, keywords=keywords, stats=stats,
-        abilities=abilities, load_bearing_tag=load_tag,
-        flavor_tag_menu=menu, n_flavor=n_flavor,
+        abilities=abilities, n_flavor=rng.choice([0, 0, 1, 1]),
     )
+    _assign_tags(sk, _load_bearing(abilities, approved_tags), rng,
+                 approved_tags, profile, ctype=ctype)
+    _inject_subject_mechanic(sk)
+    return sk
+
+
+def _inject_subject_mechanic(sk) -> None:
+    """A mechanical subject tag becomes the card's primary (identity) ability.
+
+    The mechanic is only attached when the card's type can legally host its
+    trigger + effect; the reminder is derived from the same mechanic, so a
+    card that carries the tag actually does what the tag promises.
+    """
+    if not sk.subject_tag:
+        return
+    mech = tag_mechanic(sk.subject_tag)
+    if not mech:
+        return
+    if mechanic_legal(mech, sk.type):
+        sk.abilities.insert(0, dict(mech))
+    else:
+        log.warning("tag mechanic skipped for %s (#%s illegal on %s)",
+                    sk.id, sk.subject_tag, sk.type)
+
+
+def _assign_tags(sk, load_tag, rng, approved_tags, profile, ctype=None,
+                 force_subject=None) -> CardSkeleton:
+    """Set load-bearing + subject tags and the offered flavor menu.
+
+    A load-bearing card's subject *is* its load-bearing tag; otherwise the
+    subject is a seeded draw from the card's own affinity-weighted menu (so a
+    pack clusters on the theme's top few tags without collapsing the pool).
+    Mechanical tags that can't legally attach to this card type are skipped
+    for subject selection, so a subject never promises a mechanic the card
+    can't have. The offered menu excludes the subject, so the humanizer never
+    re-picks it.
+    """
+    menu = _flavor_menu(rng, approved_tags, profile.tag_affinity, load_tag)
+    sk.load_bearing_tag = load_tag
+    subject = force_subject
+    if subject is None:
+        if load_tag:
+            subject = load_tag
+        elif menu:
+            subject = _pick_subject(rng, menu, ctype, profile.tag_affinity)
+    sk.subject_tag = subject
+    sk.flavor_tag_menu = [t for t in menu if t != subject] if subject else menu
+    return sk
+
+
+def _pick_subject(rng, menu: list[str], ctype: str | None,
+                  affinity: dict) -> str:
+    """Affinity-weighted subject draw, skipping mechanical tags illegal on
+    this type. Weighted (not uniform) so a theme's own tags dominate the
+    card's identity without ever being guaranteed."""
+    legal = [t for t in menu if not _mechanic_illegal(t, ctype)] \
+        if ctype else list(menu)
+    return _pick(rng, legal, affinity) if legal else rng.choice(menu)
+
+
+def _mechanic_illegal(tag_id: str, ctype: str) -> bool:
+    mech = tag_mechanic(tag_id)
+    return bool(mech) and not mechanic_legal(mech, ctype)
 
 
 def _sample_keywords(rng, ctype, approved_kw, affinity) -> list[str]:

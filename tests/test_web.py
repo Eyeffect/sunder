@@ -65,6 +65,27 @@ def test_registry_propose_and_approve(tmp_path, monkeypatch):
         registry._CACHE = None
 
 
+def test_registry_propose_with_mechanic(tmp_path, monkeypatch):
+    import sunder.registry as registry
+    monkeypatch.setattr(registry, "REGISTRY_PATH", tmp_path / "registry.json")
+    monkeypatch.setattr(registry, "REGISTRY_DIR", tmp_path)
+    registry._CACHE = None
+    tc = TestClient(create_app(ai_think=0, ai_delay=0))
+    try:
+        mech = {"trigger": "ON_PLAY", "effect": "DRAW_CARD", "target": "SELF",
+                "scaling": "FLAT", "value": 1}
+        r = tc.post("/api/registry", json={
+            "kind": "tag", "id": "probe", "definition": "a scan",
+            "reminder": "derived", "mechanic": mech})
+        assert r.status_code == 201
+        assert r.json()["entry"]["mechanic"] == mech
+        got = tc.get("/api/registry").json()
+        entry = next(t for t in got["tags"] if t["id"] == "probe")
+        assert entry["mechanic"] == mech
+    finally:
+        registry._CACHE = None
+
+
 def test_generate_endpoint(monkeypatch):
     import sunder.gen as gen_mod
 
@@ -80,6 +101,31 @@ def test_generate_endpoint(monkeypatch):
     assert tc.post("/api/generate", json={"theme": "", "count": 5}).status_code == 400
     assert tc.post("/api/generate", json={"theme": "x", "count": "bogus"}).status_code == 400
     assert tc.post("/api/generate", json={"theme": "x", "seed": "nope"}).status_code == 400
+
+
+def test_generate_endpoint_serializes_codex_shape(monkeypatch, tmp_path):
+    """Generated packs must come back in CodexCard shape (flat stats + rules)."""
+    import sunder.gen as gen_mod
+    from sunder.gen import profile as prof
+
+    monkeypatch.setattr(prof, "CACHE_DIR", tmp_path / "cache")
+    orig = gen_mod.generate_pack
+    monkeypatch.setattr(
+        gen_mod, "generate_pack",
+        lambda theme, count, seed: orig(theme, count=count, seed=seed,
+                                        use_llm=False))
+    tc = TestClient(create_app(ai_think=0, ai_delay=0))
+    r = tc.post("/api/generate", json={"theme": "serialize", "count": 3, "seed": 7})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["mode"] == "deterministic"
+    assert len(d["cards"]) == 3
+    for c in d["cards"]:
+        assert "stats" not in c
+        assert "atk" in c and "def" in c
+        assert "rules" in c and c["rules"]
+        assert "keywords" in c and "flavor" in c
+        assert len(c["tags"]) <= 2
 
 
 def test_start_returns_snapshot():

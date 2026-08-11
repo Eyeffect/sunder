@@ -85,4 +85,46 @@ describe("CodexView", () => {
     expect(screen.getByText("Cinder Hound")).toBeInTheDocument();
     expect(screen.queryByText("Vinyl Golem")).not.toBeInTheDocument();
   });
+
+  it("refreshes the registry after a successful generation", async () => {
+    let registryCalls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        const u = String(url);
+        if (u.includes("/api/registry")) {
+          registryCalls += 1;
+          const tags =
+            registryCalls >= 2
+              ? [{ id: "probe", definition: "a scan", reminder: "", status: "proposed" }]
+              : [];
+          return Promise.resolve({
+            json: () => Promise.resolve({ tags, keywords: [] }),
+          });
+        }
+        if (u.includes("/api/generate")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                cards: [],
+                theme: "jazz club",
+                seed: 1,
+                mode: "llm",
+              }),
+          });
+        }
+        const data = u.includes("/api/keywords") ? { keywords } : { cards };
+        return Promise.resolve({ json: () => Promise.resolve(data) });
+      }),
+    );
+    render(<CodexView />);
+    fireEvent.click(screen.getByRole("button", { name: "GENERATE" }));
+    fireEvent.change(screen.getByLabelText("Theme"), {
+      target: { value: "jazz club" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "TRANSMIT PACK" }));
+    expect(await screen.findByText("probe")).toBeInTheDocument();
+    expect(registryCalls).toBeGreaterThanOrEqual(2);
+  });
 });

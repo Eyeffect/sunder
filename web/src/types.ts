@@ -138,8 +138,22 @@ export interface Tag {
   reminder: string;
 }
 
+export interface Mechanic {
+  trigger: string;
+  effect: string;
+  target: string;
+  scaling: string;
+  value: number;
+  value_def?: number;
+  tag?: string;
+  keyword?: string;
+  count_type?: string;
+  condition?: { has_tag: string };
+}
+
 export interface RegistryEntry extends Tag {
   status: "proposed" | "approved" | "rejected";
+  mechanic?: Mechanic | null;
 }
 
 export interface RegistryData {

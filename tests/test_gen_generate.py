@@ -34,7 +34,7 @@ def gen_env(tmp_path, monkeypatch):
 def _llm_fake():
     def on_call(messages):
         txt = messages[-1]["content"]
-        if "Write the profile" in txt:
+        if "MECHANIC RULES" in txt:
             return PROFILE_RESP
         blocks = re.split(r"CARD \d+", txt)[1:]
         out = []
@@ -107,3 +107,24 @@ def test_count_capped_at_max(gen_env):
 def test_empty_theme_rejected(gen_env):
     with pytest.raises(ValueError):
         generate_pack("   ", use_llm=False)
+
+
+def test_mechanical_tag_lands_on_cards(gen_env):
+    """A proposed tag with a validated mechanic becomes a real ability once
+    approved: its subject card actually does what the tag promises."""
+    from sunder.registry import approve, propose
+    mech = {"trigger": "ON_PLAY", "effect": "DRAW_CARD", "target": "SELF",
+            "scaling": "FLAT", "value": 1}
+    propose("tag", "probe", "a scan", "When this enters play: cue 1.",
+            mechanic=mech)
+    approve("tag", "probe")
+    probe_cards = []
+    for seed in range(20):
+        res = generate_pack("probe theme", count=10, seed=seed, use_llm=False)
+        probe_cards = [parse_card(c) for c in res["cards"]
+                       if "probe" in c["tags"]]
+        if probe_cards:
+            break
+    assert probe_cards  # the tag actually showed up in the pack
+    assert any(c.abilities and c.abilities[0].effect.value == "DRAW_CARD"
+               for c in probe_cards)

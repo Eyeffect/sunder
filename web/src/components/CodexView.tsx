@@ -106,7 +106,12 @@ function RegistryList({
                 {e.id}
                 <span className="registry-status">{e.status}</span>
               </div>
-              <div className="registry-def">{e.definition}</div>
+              <div className="registry-def">
+                {e.definition}
+                {e.mechanic && (
+                  <span className="registry-mechanic">MECHANIC</span>
+                )}
+              </div>
               <div className="registry-reminder">{e.reminder}</div>
               <button
                 className="filter-pill registry-approve"
@@ -127,7 +132,12 @@ function RegistryList({
                 {e.id}
                 <span className="registry-status approved">approved</span>
               </div>
-              <div className="registry-def">{e.definition}</div>
+              <div className="registry-def">
+                {e.definition}
+                {e.mechanic && (
+                  <span className="registry-mechanic">MECHANIC</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -263,6 +273,7 @@ export function CodexView() {
         setGenError(d.error ?? "generation failed");
       } else {
         setPack(d as GeneratedPack);
+        refreshRegistry();
       }
     } catch {
       setGenError("generation failed");
@@ -525,6 +536,10 @@ export function CodexView() {
 
           <div className="registry-panel">
             <div className="registry-title">TAG & KEYWORD REGISTRY</div>
+            <p className="registry-note">
+              Tags appear on generated cards. Custom keywords are recorded for
+              later but won't appear on generated cards until mechanics land.
+            </p>
             <div className="registry-propose">
               <select
                 value={proposeKind}

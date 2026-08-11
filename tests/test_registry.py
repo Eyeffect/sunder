@@ -42,6 +42,42 @@ def test_propose_persists_to_disk(reg):
     assert any(t["id"] == "neon" and t["status"] == PROPOSED for t in data["tags"])
 
 
+def test_propose_with_mechanic_roundtrips(reg):
+    from sunder.registry import all_entries, tag_mechanic
+    mech = {"trigger": "ON_PLAY", "effect": "DRAW_CARD", "target": "SELF",
+            "scaling": "FLAT", "value": 1}
+    e = propose("tag", "probe", "a scan", "derived reminder", mechanic=mech)
+    assert e.mechanic == mech
+    # persisted on disk
+    data = json.loads(reg.read_text())
+    saved = next(t for t in data["tags"] if t["id"] == "probe")
+    assert saved["mechanic"] == mech
+    # readable back through the public query
+    assert tag_mechanic("probe") == mech
+    entry = next(x for x in all_entries("tags") if x.id == "probe")
+    assert entry.mechanic == mech
+    assert all(x.mechanic is None for x in all_entries("tags") if x.id != "probe")
+
+
+def test_mechanic_survives_approval(reg):
+    from sunder.registry import approve, tag_mechanic
+    mech = {"trigger": "ON_PLAY", "effect": "DEAL_DAMAGE", "target": "ENEMY_FACE",
+            "scaling": "FLAT", "value": 2}
+    propose("tag", "probe", "a scan", "derived reminder", mechanic=mech)
+    e = approve("tag", "probe")
+    assert e.mechanic == mech
+    assert tag_mechanic("probe") == mech
+
+
+def test_repropose_without_mechanic_clears_it(reg):
+    from sunder.registry import tag_mechanic
+    propose("tag", "probe", "a scan", "derived reminder",
+            mechanic={"trigger": "ON_PLAY", "effect": "DRAW_CARD",
+                      "target": "SELF", "scaling": "FLAT", "value": 1})
+    propose("tag", "probe", "a scan", "just flavor now")
+    assert tag_mechanic("probe") is None
+
+
 def test_repropose_reopens_rejected(reg):
     reject("tag", "vinyl")
     e = propose("tag", "vinyl")
