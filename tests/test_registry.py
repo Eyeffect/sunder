@@ -63,6 +63,15 @@ def test_schema_gate_follows_approval(reg):
     from sunder.schema import SchemaError, parse_card
 
     def with_tag(t):
+        """
+        Create a sample card containing the specified tag.
+        
+        Parameters:
+        	t (str): Tag to include on the card.
+        
+        Returns:
+        	dict: Card data with the tag included in its tags list.
+        """
         return {"id": "t", "name": "T", "set": "test", "plane": "test",
                 "rarity": "COMMON", "cost": 0, "type": "BROADCAST",
                 "stats": {"atk": 1, "def": 1}, "tags": [t],

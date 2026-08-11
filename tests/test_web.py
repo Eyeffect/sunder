@@ -69,6 +69,16 @@ def test_generate_endpoint(monkeypatch):
     import sunder.gen as gen_mod
 
     def fake_pack(theme, count, seed):
+        """Create an empty deterministic card pack for the specified theme and seed.
+        
+        Parameters:
+        	theme: The theme assigned to the pack.
+        	count: The requested card count.
+        	seed: The seed associated with the pack.
+        
+        Returns:
+        	dict: A pack containing no cards and the specified theme, seed, and deterministic mode.
+        """
         return {"cards": [], "theme": theme, "seed": seed, "mode": "deterministic"}
 
     monkeypatch.setattr(gen_mod, "generate_pack", fake_pack)

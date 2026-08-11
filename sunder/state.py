@@ -14,6 +14,17 @@ from .primitives import CardType, Target
 
 
 def _revealed_view(gs: GameState, inst, viewer: int) -> dict:
+    """
+    Serialize a visible card instance for a viewer.
+    
+    Parameters:
+        gs (GameState): Current game state.
+        inst: Card instance to serialize.
+        viewer (int): Player viewing the card.
+    
+    Returns:
+        dict: Card details, including identity, rules, metadata, fuse state, damage, and token status. Broadcasts include effective attack and remaining defense; the controlling player also receives attack availability and legal attack targets.
+    """
     card = inst.card
     view = {
         "serial": inst.serial,
@@ -76,6 +87,16 @@ def player_view(gs: GameState, p, viewer: int) -> dict:
 
 
 def hand_view(gs: GameState, p) -> list[dict]:
+    """
+    Serialize a player's hand into card data for display and interaction.
+    
+    Parameters:
+        gs (GameState): The current game state.
+        p: The player whose hand is serialized.
+    
+    Returns:
+        list[dict]: Card details including playability, targeting requirements, and legal target serials.
+    """
     hand = []
     for inst in p.hand:
         card = inst.card

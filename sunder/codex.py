@@ -23,6 +23,11 @@ CARDS_DIR = Path(__file__).parent / "cards"
 
 
 def all_cards() -> list[Card]:
+    """Load and return all cards from the card data files.
+    
+    Returns:
+    	list[Card]: Cards loaded from sorted JSON files, excluding ``registry.json``.
+    """
     cards = []
     for f in sorted(CARDS_DIR.glob("*.json")):
         if f.name == "registry.json":
@@ -55,6 +60,16 @@ def list_all() -> str:
 
 
 def format_card(c: Card, live: dict | None = None) -> str:
+    """
+    Format a card's identity, mechanics, flavor text, and budget assessment for display.
+    
+    Parameters:
+    	c (Card): The card to format.
+    	live (dict | None): Optional live values used when rendering rules text.
+    
+    Returns:
+    	str: A multiline human-readable card description.
+    """
     lines = [f"{c.name} — {c.rarity.value} {c.type.value.lower()}",
              f"Set {c.set} · {c.id} · Cost {c.cost} BW"]
     if c.type is CardType.BROADCAST:

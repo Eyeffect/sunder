@@ -120,6 +120,16 @@ class GameState:
         return self.players[1 - self.current]
 
     def _mini_card(self, inst, station: int | None = None) -> dict:
+        """
+        Create a compact dictionary representation of a card instance for game history.
+        
+        Parameters:
+        	inst (CardInstance): The card instance to represent.
+        	station (int | None): Optional station identifier to use instead of the instance controller.
+        
+        Returns:
+        	dict: Card metadata, with hidden cards exposing concealed placeholder information.
+        """
         if inst.hidden:
             return {
                 "serial": inst.serial,

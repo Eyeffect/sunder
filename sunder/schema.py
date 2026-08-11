@@ -21,7 +21,12 @@ _KNOWN_KEYWORDS = {
 
 
 def _approved_tags() -> set[str]:
-    """Approved tag ids (governance gate for tag-bearing cards)."""
+    """
+    Retrieve the set of tag identifiers approved by the registry.
+    
+    Returns:
+        set[str]: The approved tag identifiers.
+    """
     from .registry import approved_tags
     return set(approved_tags())
 
@@ -92,6 +97,19 @@ def _as_enum_list(name: str, cls, values):
 
 
 def parse_ability(raw: dict, index: int) -> Ability:
+    """
+    Parse a raw ability definition into an ``Ability`` object.
+    
+    Parameters:
+        raw (dict): Ability data containing trigger, effect, and target values.
+        index (int): Input position assigned as the ability reference.
+    
+    Returns:
+        Ability: The parsed ability.
+    
+    Raises:
+        SchemaError: If a required field or enum value is invalid.
+    """
     try:
         trigger = _enum("trigger", Trigger, raw["trigger"])
         effect = _enum("effect", Effect, raw["effect"])
@@ -120,6 +138,15 @@ def parse_ability(raw: dict, index: int) -> Ability:
 
 
 def parse_card(raw: dict) -> Card:
+    """
+    Parse and validate a raw card mapping into a `Card`.
+    
+    Parameters:
+    	raw (dict): Card data containing its identity, metadata, type, rarity, cost, abilities, keywords, tags, and optional stats.
+    
+    Returns:
+    	Card: The validated card with parsed abilities, keywords, tags, and applicable combat stats.
+    """
     try:
         ctype = _enum("type", CardType, raw["type"])
         rarity = _enum("rarity", Rarity, raw["rarity"])
@@ -182,7 +209,16 @@ def load_card_file(path: str | Path) -> list[Card]:
 # ---------------------------------------------------------------- display
 
 def describe_ability(card: Card, ab: Ability) -> str:
-    """Deterministic rules text from the ability tuple (lore-flavoured)."""
+    """
+    Generate deterministic rules text for an ability on a card, including tag conditions and tag-count scaling.
+    
+    Parameters:
+        card (Card): Card context used to determine the displayed numeric value.
+        ab (Ability): Ability whose trigger, target, effect, and scaling are rendered.
+    
+    Returns:
+        str: Lore-themed rules text describing the ability.
+    """
     num = _num(card, ab)
     trig = _TRIGGER_WORDS.get(ab.trigger, ab.trigger.value)
     target = _TARGET_WORDS.get(ab.target, ab.target.value)

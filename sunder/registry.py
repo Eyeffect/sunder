@@ -68,6 +68,12 @@ class RegistryEntry:
 # ---------------------------------------------------------------- storage
 
 def _default_data() -> dict[str, Any]:
+    """
+    Create the initial registry data with approved starter tags and engine-defined keywords.
+    
+    Returns:
+    	dict[str, Any]: Registry data containing the schema version, tags, and keywords.
+    """
     from .keywords import KEYWORD_REGISTRY
     keywords = [
         {"id": k, "definition": v.reminder, "reminder": v.reminder, "status": APPROVED}
@@ -81,11 +87,28 @@ def _default_data() -> dict[str, Any]:
 
 
 def _with_status(entry: dict[str, str], status: str) -> dict[str, str]:
+    """Return a registry entry with its status set to the specified value.
+    
+    Parameters:
+    	entry (dict[str, str]): Registry entry data.
+    	status (str): Status to assign to the entry.
+    
+    Returns:
+    	dict[str, str]: A copy of the entry containing the specified status.
+    """
     return {**entry, "status": status}
 
 
 def load_registry(force_reload: bool = False) -> dict[str, Any]:
-    """Return the registry data, re-syncing keywords from the engine."""
+    """
+    Load the registry data and synchronize it with the engine's keywords.
+    
+    Parameters:
+    	force_reload (bool): Whether to reload the registry from disk instead of using cached data.
+    
+    Returns:
+    	dict[str, Any]: The registry data.
+    """
     global _CACHE
     if _CACHE is not None and not force_reload:
         return _CACHE
@@ -118,7 +141,11 @@ def save_registry(data: dict[str, Any] | None = None) -> None:
 
 
 def _sync_keywords(data: dict[str, Any]) -> None:
-    """Mirror the engine's KEYWORD_REGISTRY so governance never drifts."""
+    """Synchronize registry keywords with the engine's keyword definitions.
+    
+    Parameters:
+    	data (dict[str, Any]): Registry data to update with missing engine keywords.
+    """
     from .keywords import KEYWORD_REGISTRY
     known = {e["id"]: e for e in data.get("keywords", [])}
     for k, v in KEYWORD_REGISTRY.items():
@@ -132,23 +159,60 @@ def _sync_keywords(data: dict[str, Any]) -> None:
 # ---------------------------------------------------------------- queries
 
 def _entries(kind: str, data: dict[str, Any] | None = None) -> list[dict[str, str]]:
+    """
+    Retrieve registry entries for the specified kind.
+    
+    Parameters:
+        kind (str): Registry kind used to select the corresponding data section.
+        data (dict[str, Any] | None): Registry data to query, or the loaded registry when omitted.
+    
+    Returns:
+        list[dict[str, str]]: Entries stored under the selected registry section.
+    """
     data = data if data is not None else load_registry()
     return list(data.get(_SECTION.get(kind, kind), []))
 
 
 def approved_ids(kind: str) -> frozenset[str]:
+    """
+    Get the identifiers of approved entries for a registry kind.
+    
+    Parameters:
+    	kind (str): The registry kind to query.
+    
+    Returns:
+    	The approved entry identifiers.
+    """
     return frozenset(e["id"] for e in _entries(kind) if e.get("status") == APPROVED)
 
 
 def approved_tags() -> frozenset[str]:
+    """Return the identifiers of all approved tags.
+    
+    Returns:
+    	frozenset[str]: Approved tag identifiers.
+    """
     return approved_ids("tags")
 
 
 def approved_keywords() -> frozenset[str]:
+    """Return the identifiers of all approved keywords.
+    
+    Returns:
+    	frozenset[str]: Approved keyword identifiers.
+    """
     return approved_ids("keywords")
 
 
 def tag_definition(tag_id: str) -> str:
+    """Return the definition or reminder associated with a tag.
+    
+    Parameters:
+    	tag_id (str): Identifier of the tag to look up.
+    
+    Returns:
+    	str: The tag's definition, its reminder when no definition is available, or an empty string when the tag is absent.
+    """
     for e in _entries("tags"):
         if e["id"] == tag_id:
             return e.get("definition", "") or e.get("reminder", "")
@@ -156,6 +220,15 @@ def tag_definition(tag_id: str) -> str:
 
 
 def all_entries(kind: str) -> list[RegistryEntry]:
+    """
+    Return all registry entries for a given kind.
+    
+    Parameters:
+    	kind (str): Registry kind whose entries should be returned.
+    
+    Returns:
+    	list[RegistryEntry]: Entries for the specified registry kind.
+    """
     return [
         RegistryEntry(kind=kind, id=e["id"], definition=e.get("definition", ""),
                       reminder=e.get("reminder", ""), status=e.get("status", PROPOSED))
@@ -166,7 +239,21 @@ def all_entries(kind: str) -> list[RegistryEntry]:
 # ---------------------------------------------------------------- mutations
 
 def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "") -> RegistryEntry:
-    """Add an entry to the review queue, or re-open a rejected one."""
+    """
+    Add an entry for review or reopen a rejected entry.
+    
+    Parameters:
+        kind (str): Registry category for the entry.
+        entry_id (str): Lowercase snake_case identifier.
+        definition (str): Optional definition for the entry.
+        reminder (str): Optional reminder associated with the entry.
+    
+    Returns:
+        RegistryEntry: The proposed or reopened registry entry.
+    
+    Raises:
+        ValueError: If the registry category or identifier is invalid.
+    """
     if kind not in _KNOWN_KINDS:
         raise ValueError(f"unknown registry kind {kind!r}")
     if not entry_id or not entry_id.islower() or not entry_id.replace("_", "").isalnum():
@@ -188,6 +275,20 @@ def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "") 
 
 
 def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
+    """
+    Update the lifecycle status of a registry entry.
+    
+    Parameters:
+        kind (str): Registry entry kind.
+        entry_id (str): Identifier of the entry to update.
+        status (str): New lifecycle status.
+    
+    Returns:
+        RegistryEntry | None: The updated entry, or `None` if no matching entry exists.
+    
+    Raises:
+        ValueError: If the registry kind or status is unknown.
+    """
     if kind not in _KNOWN_KINDS:
         raise ValueError(f"unknown registry kind {kind!r}")
     if status not in _VALID_STATUSES:
@@ -202,8 +303,27 @@ def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
 
 
 def approve(kind: str, entry_id: str) -> RegistryEntry | None:
+    """
+    Approve a registry entry.
+    
+    Parameters:
+        kind (str): Registry entry category.
+        entry_id (str): Identifier of the entry to approve.
+    
+    Returns:
+        RegistryEntry | None: The updated entry, or `None` if no matching entry exists.
+    """
     return set_status(kind, entry_id, APPROVED)
 
 
 def reject(kind: str, entry_id: str) -> RegistryEntry | None:
+    """Mark a registry entry as rejected.
+    
+    Parameters:
+    	kind (str): The registry kind containing the entry.
+    	entry_id (str): The identifier of the entry to reject.
+    
+    Returns:
+    	RegistryEntry | None: The updated entry, or `None` if no matching entry exists.
+    """
     return set_status(kind, entry_id, REJECTED)

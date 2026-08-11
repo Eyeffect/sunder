@@ -9,6 +9,9 @@ from sunder.gen.client import LLMClient, LLMError, _decode_body, _parse_json_con
 
 
 def _sse_client():
+    """
+    Create a mock LLM client that emits a streamed JSON response.
+    """
     def chunk(piece):
         data = json.dumps({"choices": [{"delta": {"content": piece}}]})
         return f"data: {data}\n"
@@ -43,11 +46,20 @@ def test_decode_body_sse_without_done():
 
 
 def _client(handler):
+    """Create an LLM client using the supplied mock HTTP request handler.
+    
+    Parameters:
+        handler: The mock request handler used by the client's transport.
+    
+    Returns:
+        LLMClient: A client configured for the fake API endpoint and test model.
+    """
     return LLMClient(base_url="http://fake/v1", model="m", timeout=1,
                      transport=httpx.MockTransport(handler))
 
 
 def _resp(content):
+    """Create a mock chat-completion handler that returns the specified message content."""
     def handler(request):
         assert request.url.path.endswith("/chat/completions")
         body = json.loads(request.content)

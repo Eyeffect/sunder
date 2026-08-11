@@ -23,6 +23,13 @@ PROFILE_RESP = {
 
 @pytest.fixture
 def gen_env(tmp_path, monkeypatch):
+    """
+    Isolate cache and registry state for each test.
+    
+    Parameters:
+        tmp_path: Temporary directory used for test-specific cache and registry paths.
+        monkeypatch: Pytest fixture used to replace module paths temporarily.
+    """
     monkeypatch.setattr(prof, "CACHE_DIR", tmp_path / "cache")
     monkeypatch.setattr(registry, "REGISTRY_PATH", tmp_path / "registry.json")
     monkeypatch.setattr(registry, "REGISTRY_DIR", tmp_path)
@@ -32,6 +39,7 @@ def gen_env(tmp_path, monkeypatch):
 
 
 def _llm_fake():
+    """Create a fake LLM client that returns profile data and generated card responses for tests."""
     def on_call(messages):
         txt = messages[-1]["content"]
         if "Write the profile" in txt:
@@ -71,6 +79,17 @@ def test_transport_failure_falls_back_to_deterministic(gen_env):
     box = {"n": 0}
 
     def on_call(messages):
+        """Simulate a successful profile request followed by an LLM transport failure.
+        
+        Parameters:
+        	messages: Request messages, used only to match the callback interface.
+        
+        Returns:
+        	The profile response on the first call.
+        
+        Raises:
+        	LLMError: On every call after the first.
+        """
         box["n"] += 1
         if box["n"] == 1:
             return PROFILE_RESP  # profile succeeds

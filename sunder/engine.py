@@ -35,6 +35,18 @@ def _is_dead(gs, inst) -> bool:
 
 
 def _condition_ok(gs, inst, ab: Ability, event) -> bool:
+    """
+    Determine whether an ability's conditions are satisfied for an event.
+    
+    Parameters:
+        gs: The current game state.
+        inst: The instance containing the ability.
+        ab (Ability): The ability whose conditions are evaluated.
+        event: The event object being checked.
+    
+    Returns:
+        bool: `True` if all specified conditions are satisfied, `False` otherwise.
+    """
     c = ab.condition
     if not c:
         return True
@@ -50,7 +62,17 @@ def _condition_ok(gs, inst, ab: Ability, event) -> bool:
 
 
 def _scaled(gs, source, ab: Ability) -> tuple[int, int]:
-    """Returns (value, value_def) after applying the scaling metric."""
+    """
+    Calculate an ability's value and defense value according to its scaling rule.
+    
+    Parameters:
+        gs: Game state used to determine turn, card, and board counts.
+        source: Broadcast whose controller and trigger history provide scaling context.
+        ab (Ability): Ability containing the scaling rule and base values.
+    
+    Returns:
+        tuple[int, int]: The scaled value and defense value.
+    """
     s = ab.scaling
     if s is Scaling.FLAT:
         return ab.value, ab.value_def

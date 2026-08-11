@@ -28,16 +28,38 @@ DIST_DIR = SERVER_DIR.parent.parent / "web" / "dist"
 
 
 def default_decks() -> tuple[list, list]:
+    """Load the default Neon Frequency and Cinderworks card decks.
+    
+    Returns:
+    	tuple[list, list]: The Neon Frequency and Cinderworks decks, respectively.
+    """
     return (load_card_file(CARDS_DIR / "neon_frequency.json"),
             load_card_file(CARDS_DIR / "cinderworks.json"))
 
 
 def _registry_json(e) -> dict:
+    """Serialize a registry entry for API responses.
+    
+    Parameters:
+    	e: The registry entry to serialize.
+    
+    Returns:
+    	dict: The entry's identifier, definition, reminder text, and status.
+    """
     return {"id": e.id, "definition": e.definition, "reminder": e.reminder,
             "status": e.status}
 
 
 def _card_json(c) -> dict:
+    """
+    Serialize a card into the JSON-compatible representation used by the API.
+    
+    Parameters:
+    	c: Card whose metadata, combat values, keywords, tags, rules, and flavor are serialized.
+    
+    Returns:
+    	dict: A JSON-compatible mapping of the card's public data.
+    """
     return {
         "id": c.id, "name": c.name, "set": c.set, "plane": c.plane,
         "rarity": c.rarity.value, "cost": c.cost, "type": c.type.value,
@@ -47,9 +69,15 @@ def _card_json(c) -> dict:
 
 
 def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> FastAPI:
-    """Build the app. `ai_think`/`ai_delay` are the base seconds for the
-    rival's thinking pause and per-action delay (randomized around them);
-    pass 0 to make AI turns instant (tests)."""
+    """Create and configure the SUNDER FastAPI application.
+    
+    Parameters:
+    	decks: Card decks to use; defaults to the built-in decks when omitted.
+    	ai_think (float): Base duration of the AI's thinking pause in seconds.
+    	ai_delay (float): Base duration of the AI's per-action delay in seconds.
+    
+    Returns:
+    	FastAPI: The configured application."""
     decks = tuple(decks) if decks else default_decks()
     app = FastAPI(title="SUNDER", docs_url="/api/docs")
 
@@ -59,6 +87,12 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.get("/api/keywords")
     def api_keywords():
+        """
+        List registered keywords with their resolved keys, display names, meanings, and kinds.
+        
+        Returns:
+        	dict: A mapping containing the registered keyword metadata.
+        """
         from ..keywords import KEYWORD_REGISTRY, resolve_key
         return {"keywords": [
             {
@@ -72,6 +106,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.get("/api/tags")
     def api_tags():
+        """Return all approved tag registry entries."""
         from ..registry import all_entries
         return {"tags": [
             {
@@ -84,6 +119,11 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.get("/api/registry")
     def api_registry():
+        """Return all registered tags and keywords with their serialized metadata.
+        
+        Returns:
+        	dict: A mapping containing serialized registry entries under ``"tags"`` and ``"keywords"``.
+        """
         from ..registry import all_entries
         return {
             "tags": [_registry_json(e) for e in all_entries("tags")],
@@ -92,6 +132,15 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.post("/api/registry")
     def api_registry_propose(payload: dict):
+        """
+        Propose a tag or keyword registry entry from the supplied payload.
+        
+        Parameters:
+        	payload (dict): Registry entry data containing kind, ID, definition, and reminder fields.
+        
+        Returns:
+        	JSONResponse: A 201 response containing the proposed entry, or a 400 response containing a validation error.
+        """
         from ..registry import propose
         try:
             entry = propose(
@@ -106,6 +155,15 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.post("/api/registry/{kind}/{entry_id}/approve")
     def api_registry_approve(kind: str, entry_id: str):
+        """Approve a tag or keyword registry entry.
+        
+        Parameters:
+            kind (str): Registry entry type to approve.
+            entry_id (str): Identifier of the registry entry.
+        
+        Returns:
+            JSONResponse or dict: A 404 error response when the entry does not exist; otherwise, an object containing the approved entry.
+        """
         from ..registry import approve
         entry = approve(kind, entry_id)
         if entry is None:
@@ -114,6 +172,15 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.post("/api/generate")
     async def api_generate(payload: dict):
+        """
+        Generate a card pack for the requested theme.
+        
+        Parameters:
+            payload (dict): Request data containing a non-empty ``theme``, an optional numeric ``count``, and an optional numeric ``seed``.
+        
+        Returns:
+            JSONResponse: The generated card pack, or an error response with status 400 when the theme, count, or seed is invalid.
+        """
         import asyncio
 
         from ..gen import generate_pack
@@ -134,6 +201,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.get("/api/health")
     def api_health():
+        """Return the server health status."""
         return {"ok": True}
 
     @app.websocket("/ws")

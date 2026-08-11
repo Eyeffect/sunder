@@ -15,6 +15,15 @@ type Tab = "cards" | "keywords" | "generate";
 
 const TYPE_OPTS = ["BROADCAST", "TRACK", "LOOP"];
 
+/**
+ * Renders a card with its metadata, keywords, tags, rules, and flavor text.
+ *
+ * @param c - The card data to display
+ * @param keywordByKey - Keyword definitions used for chip labels and tooltips
+ * @param tagByKey - Tag definitions used for tag tooltips
+ * @param kwActive - The currently selected keyword
+ * @param onKw - Handles selection of a keyword chip
+ */
 function CardTile({
   c,
   keywordByKey,
@@ -84,6 +93,13 @@ function CardTile({
   );
 }
 
+/**
+ * Renders registry entries grouped by approval status.
+ *
+ * @param title - The heading displayed for the registry group
+ * @param entries - The registry entries to display
+ * @param onApprove - Called with a pending entry's identifier when approval is requested
+ */
 function RegistryList({
   title,
   entries,
@@ -136,6 +152,9 @@ function RegistryList({
   );
 }
 
+/**
+ * Renders the Codex interface for browsing cards and keywords, generating card packs, and managing registry proposals.
+ */
 export function CodexView() {
   const [tab, setTab] = useState<Tab>("cards");
   const [cards, setCards] = useState<CodexCard[]>([]);

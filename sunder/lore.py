@@ -74,10 +74,15 @@ _EFFECT_WORDS = {
 
 
 def rules_text(card, live_values: dict | None = None) -> str:
-    """Deterministic rules text from the card's ability tuples.
-
-    `live_values` optionally overrides numbers (engine resolves live ones;
-    display falls back to the raw value).
+    """
+    Render deterministic, player-facing rules text for a card.
+    
+    Parameters:
+        card: Card whose keywords and abilities are rendered.
+        live_values (dict | None): Optional live values keyed by ability reference.
+    
+    Returns:
+        str: The rendered rules text, or "(no text)" when the card has no rules text.
     """
     from .keywords import display as kw_display
 

@@ -13,6 +13,18 @@ APPROVED_TAGS = approved_ids("tags")
 
 
 def pack(theme="theme", count=5, seed=1, ledger=None):
+    """
+    Sample a pack of cards using a seeded random generator and theme profile.
+    
+    Parameters:
+        theme (str): Theme used to configure the card profile.
+        count (int): Number of cards to sample.
+        seed (int): Seed for deterministic sampling.
+        ledger (Ledger | None): Optional ledger of previously known card signatures.
+    
+    Returns:
+        list: The sampled cards.
+    """
     rng = random.Random(seed)
     return sample_pack(theme, default_profile(theme), rng,
                        ledger or Ledger.seeded(), count)

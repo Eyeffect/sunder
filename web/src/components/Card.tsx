@@ -88,6 +88,14 @@ interface CardProps {
   fxSummoned?: boolean;
 }
 
+/**
+ * Renders a card with its content, visual state, and optional interactions.
+ *
+ * @param card - The card data to display.
+ * @param size - The card size variant.
+ * @param sleeve - The sleeve used for hidden cards.
+ * @returns The rendered card element.
+ */
 export function Card({
   card,
   onClick,

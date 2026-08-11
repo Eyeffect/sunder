@@ -12,12 +12,29 @@ from sunder.gen.sampler import sample_pack
 
 
 def skeletons(n=3):
+    """
+    Create a deterministic collection of humanizer card skeletons.
+    
+    Parameters:
+    	n (int): Number of card skeletons to create.
+    
+    Returns:
+    	list: The generated card skeletons.
+    """
     rng = random.Random(1)
     return sample_pack("humanizer", default_profile("humanizer"), rng,
                        Ledger.seeded(), n)
 
 
 def valid_pack(sks):
+    """Build valid humanized card data for the provided card skeletons.
+    
+    Parameters:
+    	sks (iterable): Card skeletons whose allowed flavor tags and tag counts determine each card's flavor tags.
+    
+    Returns:
+    	list: Card data with sequential names, fixed flavor text, and tags selected from each skeleton's allowed menu.
+    """
     return [{"name": f"Card {i + 1}", "flavor": "Swing is a frequency.",
              "flavor_tags": list(sk.flavor_tag_menu[: sk.n_flavor])}
             for i, sk in enumerate(sks)]
@@ -85,10 +102,27 @@ def test_deterministic_fill_uses_pool_and_menu():
 
 
 def _sequence(responses):
-    """on_call that pops scripted responses in order."""
+    """
+    Create a callback that returns scripted responses in sequence and repeats the final response after the sequence is exhausted.
+    
+    Parameters:
+        responses (list): Responses to return in order.
+    
+    Returns:
+        on_call (callable): A callback that accepts messages and returns the next scripted response.
+    """
     box = {"i": 0}
 
     def on_call(messages):
+        """
+        Return scripted responses in sequence, reusing the final response after the sequence is exhausted.
+        
+        Parameters:
+            messages: Messages provided to the language model callback.
+        
+        Returns:
+            The next scripted response.
+        """
         i = box["i"]
         box["i"] += 1
         return responses[i] if i < len(responses) else responses[-1]
