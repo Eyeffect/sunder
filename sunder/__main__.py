@@ -2,6 +2,7 @@
 
   python -m sunder            launch the web server (browse to localhost:8000)
   python -m sunder codex …    browse the codex from the terminal
+  python -m sunder gen …      generate an LLM card pack
   python -m sunder cli        play the headless print battle
 """
 
@@ -15,6 +16,9 @@ def main() -> None:
     if args and args[0] == "codex":
         from .codex import main as codex_main
         sys.exit(codex_main(args[1:]))
+    if args and args[0] == "gen":
+        from .gen.generate import cli_main
+        sys.exit(cli_main(args[1:]))
     if args and args[0] == "cli":
         from .cli import main as cli_main
         cli_main()

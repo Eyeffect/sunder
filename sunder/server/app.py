@@ -13,6 +13,7 @@ import random
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .. import ai as ai_mod
@@ -31,12 +32,17 @@ def default_decks() -> tuple[list, list]:
             load_card_file(CARDS_DIR / "cinderworks.json"))
 
 
+def _registry_json(e) -> dict:
+    return {"id": e.id, "definition": e.definition, "reminder": e.reminder,
+            "status": e.status, "mechanic": e.mechanic}
+
+
 def _card_json(c) -> dict:
     return {
         "id": c.id, "name": c.name, "set": c.set, "plane": c.plane,
         "rarity": c.rarity.value, "cost": c.cost, "type": c.type.value,
         "atk": c.atk, "def": c.def_, "keywords": list(c.keywords),
-        "rules": rules_text(c), "flavor": c.flavor,
+        "tags": list(c.tags), "rules": rules_text(c), "flavor": c.flavor,
     }
 
 
@@ -63,6 +69,73 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
             }
             for key, kw in sorted(KEYWORD_REGISTRY.items())
         ]}
+
+    @app.get("/api/tags")
+    def api_tags():
+        from ..registry import all_entries
+        return {"tags": [
+            {
+                "id": e.id,
+                "definition": e.definition,
+                "reminder": e.reminder,
+            }
+            for e in all_entries("tags") if e.status == "approved"
+        ]}
+
+    @app.get("/api/registry")
+    def api_registry():
+        from ..registry import all_entries
+        return {
+            "tags": [_registry_json(e) for e in all_entries("tags")],
+            "keywords": [_registry_json(e) for e in all_entries("keywords")],
+        }
+
+    @app.post("/api/registry")
+    def api_registry_propose(payload: dict):
+        from ..registry import propose
+        try:
+            entry = propose(
+                str(payload.get("kind", "tag")),
+                str(payload.get("id", "")),
+                str(payload.get("definition", "")),
+                str(payload.get("reminder", "")),
+                mechanic=payload.get("mechanic") if isinstance(
+                    payload.get("mechanic"), dict) else None,
+            )
+        except ValueError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+        return JSONResponse({"entry": _registry_json(entry)}, status_code=201)
+
+    @app.post("/api/registry/{kind}/{entry_id}/approve")
+    def api_registry_approve(kind: str, entry_id: str):
+        from ..registry import approve
+        entry = approve(kind, entry_id)
+        if entry is None:
+            return JSONResponse({"error": f"no such {kind} entry"}, status_code=404)
+        return {"entry": _registry_json(entry)}
+
+    @app.post("/api/generate")
+    async def api_generate(payload: dict):
+        import asyncio
+
+        from ..gen import generate_pack
+        from ..schema import parse_card
+        theme = str(payload.get("theme", "")).strip()
+        if not theme:
+            return JSONResponse({"error": "theme is required"}, status_code=400)
+        try:
+            count = int(payload.get("count", 5))
+        except (TypeError, ValueError):
+            return JSONResponse({"error": "count must be a number"}, status_code=400)
+        seed = payload.get("seed")
+        if seed is not None:
+            try:
+                seed = int(seed)
+            except (TypeError, ValueError):
+                return JSONResponse({"error": "seed must be a number"}, status_code=400)
+        result = await asyncio.to_thread(generate_pack, theme, count, seed)
+        result["cards"] = [_card_json(parse_card(c)) for c in result["cards"]]
+        return result
 
     @app.get("/api/health")
     def api_health():

@@ -42,6 +42,10 @@ def _condition_ok(gs, inst, ab: Ability, event) -> bool:
         return False
     if "not_self" in c and event is inst:
         return False
+    if "has_tag" in c:
+        tag = c["has_tag"]
+        if not getattr(event, "card", None) or tag not in getattr(event.card, "tags", ()):
+            return False
     return True
 
 
@@ -57,6 +61,9 @@ def _scaled(gs, source, ab: Ability) -> tuple[int, int]:
     elif s is Scaling.X_COUNT_OF_TYPE_ON_BOARD:
         ct = ab.count_type or source.card.type
         n = sum(1 for p in gs.players for i in p.board if i.card.type is ct)
+    elif s is Scaling.X_COUNT_OF_TAG_ON_BOARD:
+        tag = ab.tag or ""
+        n = sum(1 for p in gs.players for i in p.board if tag in i.card.tags)
     elif s is Scaling.X_TIMES_THIS_TRIGGERED_THIS_GAME:
         source.trigger_counts[ab.ref] = source.trigger_counts.get(ab.ref, 0) + 1
         n = source.trigger_counts[ab.ref]

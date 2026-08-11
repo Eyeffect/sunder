@@ -36,7 +36,7 @@ export const MILESTONES: Milestone[] = [
   { label: "CONCEPT", status: "done" },
   { label: "ENGINE", status: "done" },
   { label: "WEB UI", status: "done" },
-  { label: "GENERATION", status: "planned" },
+  { label: "GENERATION", status: "active" },
   { label: "COLLECTION & STREAM", status: "planned" },
 ];
 
@@ -54,6 +54,24 @@ export interface VersionEntry {
 }
 
 export const VERSIONS: VersionEntry[] = [
+  {
+    version: "0.3.5",
+    codename: "Worldcast",
+    date: "2026-08-10",
+    changes: [
+      { type: "added", text: "Tags — cards can carry up to four theme tags, and some abilities grow stronger the more matching tags are on the airwaves" },
+      { type: "added", text: "The tag library — browse, propose, approve, or reject tag and keyword ideas in the codex; the starter set ships with vinyl, chrome, ghost, static, ember, and tide" },
+      { type: "added", text: "Tags show on cards everywhere — in your hand, the inspector, the codex, and freshly generated packs" },
+      { type: "added", text: "The GENERATE tab — type any theme and get a fresh pack of cards, reliably repeatable with a seed (or fully offline with no model)" },
+      { type: "added", text: "Card generation from the command line — python -m sunder gen" },
+      { type: "added", text: "The multiverse opens up — card themes can be anything at all now. You're still a broadcast station; the worlds your cards come from no longer have to be radio-themed" },
+      { type: "added", text: "Tags come alive — a new tag proposed for your theme carries a real ability that works in-game, and its card text is written for you" },
+      { type: "added", text: "A theme's own new tags show up right away in its packs, and far more often than tags from other worlds" },
+      { type: "fixed", text: "Generating could stall and hand back the same stock cards instead of your theme — the game now waits properly for the model" },
+      { type: "fixed", text: "New tags appear in the library the moment a pack finishes generating, no restart needed" },
+      { type: "fixed", text: "Ability text on generated cards now always says what it affects, like #frostbite dealing Noise to the rival station" },
+    ],
+  },
   {
     version: "0.3.4",
     codename: "Station Bulletin",
@@ -138,7 +156,7 @@ export interface RoadmapItem {
 export const ROADMAP: RoadmapItem[] = [
   { status: "in_progress", text: "Responsive UI" },
   { status: "in_progress", text: "Card sleeves" },
-  { status: "planned", text: "LLM card generation" },
+  { status: "in_progress", text: "LLM card generation" },
   { status: "planned", text: "Economy, saved decks" },
   { status: "planned", text: "Profiles" },
   { status: "planned", text: "Multiplayer" },
