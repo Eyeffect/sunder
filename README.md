@@ -142,6 +142,6 @@ pytest tests -x
 
 ## Status / notes
 
-- v0.3.5 — changelog inside the game UI (Changelog tab) with a short roadmap.
+- v0.3.6 — changelog inside the game UI (Changelog tab) with a short roadmap.
 - Second station starts with a Signal Spike — the coin analog for the first-turn tempo advantage.
 - AMP is a "trigger macro" keyword: implemented engine-side, it buffs the aired card +1/+1 for every Broadcast aired (counting itself, either station, and DOUBLE_NEXT_TRIGGER doubles). ECHO is declarative — the card's ON_DEATH ability carries the behavior, and schema validation guarantees every ECHO card actually has one.

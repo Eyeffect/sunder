@@ -233,7 +233,7 @@ describe("App", () => {
   it("opens the changelog when clicking the version and returns via DUEL", () => {
     render(<App />);
     pump(snapshot());
-    fireEvent.click(screen.getByRole("button", { name: /v0\.3\.5/ }));
+    fireEvent.click(screen.getByRole("button", { name: /v0\.3\.6/ }));
     expect(screen.getByText("VERSION LOG")).toBeInTheDocument();
     expect(screen.getByText("ON THE DIAL — ROADMAP")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "DUEL" }));

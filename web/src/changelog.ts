@@ -55,6 +55,19 @@ export interface VersionEntry {
 
 export const VERSIONS: VersionEntry[] = [
   {
+    version: "0.3.6",
+    codename: "Feedback",
+    date: "2026-10-20",
+    current: true,
+    changes: [
+      { type: "added", text: "Signal Spike — going second now opens with a free Track that grants +1 Bandwidth for the turn, closing the first-move tempo gap" },
+      { type: "changed", text: "AMP finally broadcasts for real — a card with AMP grows +1/+1 every time any Broadcast is aired, on either station, itself included" },
+      { type: "changed", text: "Fresh tags wait for your approval in the tag library instead of joining packs instantly — a review queue now, and a tag you rejected stays rejected until you bring it back" },
+      { type: "balanced", text: "Going second is no longer strictly behind — the spike evens out the opening tempo" },
+      { type: "fixed", text: "ECHO always has something to say — any card carrying ECHO must also carry a death effect, and freshly generated packs are checked for it too" },
+    ],
+  },
+  {
     version: "0.3.5",
     codename: "Worldcast",
     date: "2026-08-10",
