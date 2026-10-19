@@ -44,3 +44,31 @@ def test_bandwidth_bonus_raises_cap():
     gs.players[0].bandwidth_bonus = 2
     gs.players[0].turns_taken = 3
     assert gs.players[0].current_max_bandwidth() == 5
+
+
+def test_second_station_gets_coin():
+    gs = make_gs()
+    gs.start_game()
+    hand = gs.players[1].hand
+    assert len(hand) == 1
+    assert hand[0].card.name == "Signal Spike"
+    assert gs.players[0].hand == []
+
+
+def test_coin_grants_one_bandwidth_this_turn_only():
+    gs = make_gs()
+    gs.start_game()
+    gs.end_turn()  # Station 2's turn
+    p = gs.cur
+    assert gs.current == 1
+    before = p.bandwidth
+    idx = next(i for i, c in enumerate(p.hand) if c.card.id == "SIGNAL_SPIKE")
+    gs.play_card(idx)
+    assert p.bandwidth == before + 1
+    assert "generates 1 Bandwidth" in gs.log[-1]
+    gs.end_turn()
+    # the spike never raised the cap and is gone by the next refill
+    assert p.max_bandwidth == min(10, p.turns_taken)
+    gs.end_turn()
+    gs.end_turn()  # Station 2's next turn: refilled exactly to max, no spike
+    assert p.bandwidth == p.max_bandwidth

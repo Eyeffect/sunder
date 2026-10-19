@@ -26,6 +26,15 @@ def _approved_tags() -> set[str]:
     return set(approved_tags())
 
 
+def _echo_needs_on_death(cid: str, keywords, abilities) -> None:
+    """ECHO promises 'when this goes silent, do the listed effect' — that
+    only works if the card actually carries an ON_DEATH ability."""
+    has_echo = "ECHO" in keywords
+    has_death = any(ab.trigger is Trigger.ON_DEATH for ab in abilities)
+    if has_echo and not has_death:
+        raise SchemaError(f"card {cid}: ECHO keyword needs an ON_DEATH ability")
+
+
 @dataclass
 class Ability:
     trigger: Trigger
@@ -129,6 +138,7 @@ def parse_card(raw: dict) -> Card:
     for k in keywords:
         if k not in _KNOWN_KEYWORDS:
             raise SchemaError(f"card {raw.get('id')}: unknown keyword {k!r}")
+    _echo_needs_on_death(raw.get("id"), keywords, abilities)
 
     tags = raw.get("tags") or []
     if not isinstance(tags, list):

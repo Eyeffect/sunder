@@ -22,6 +22,21 @@ def _token_card() -> Card:
     return _TOKEN_CACHE["TOKEN"]
 
 
+def coin_card() -> Card:
+    """Second-station compensation: a free Track that grants +1 Bandwidth
+    this turn (the Bandwidth it generates is refilled by max at turn end)."""
+    if "COIN" not in _TOKEN_CACHE:
+        from .primitives import Rarity
+        _TOKEN_CACHE["COIN"] = Card(
+            id="SIGNAL_SPIKE", name="Signal Spike", set="", plane="",
+            rarity=Rarity.COMMON, cost=0, type=CardType.TRACK,
+            abilities=[Ability(trigger=Trigger.ON_PLAY, effect=Effect.GAIN_BANDWIDTH,
+                               target=Target.SELF, scaling=Scaling.FLAT, value=1)],
+            flavor="Borrowed bandwidth. Spent the instant it exists.",
+        )
+    return _TOKEN_CACHE["COIN"]
+
+
 # ------------------------------------------------------------------ helpers
 
 def _is_dead(gs, inst) -> bool:
@@ -130,13 +145,24 @@ def apply_damage(gs, inst, amount: int, source) -> int:
 
 # ------------------------------------------------------------------ triggers
 
+_AMP_ABILITY = Ability(Trigger.ON_ANY_BROADCAST_PLAYED, Effect.BUFF_STAT,
+                       Target.SELF, value=1, value_def=1)
+
+
 def fire(gs, inst, trigger: Trigger, event=None, chosen=None) -> None:
-    """Resolve every ability of `inst` matching `trigger` (with doubles)."""
+    """Resolve every ability of `inst` matching `trigger` (with doubles).
+
+    Trigger macros (keywords that expand into built-in abilities) are
+    appended here: AMP counts every aired Broadcast on either station.
+    """
+    macro = (trigger is Trigger.ON_ANY_BROADCAST_PLAYED
+             and inst.card.type is CardType.BROADCAST
+             and inst.has("AMP"))
     if inst.zone == "AIRWAVES" and _is_dead(gs, inst):
         return
     if inst.hidden:
-        wants = any(ab.trigger is trigger and _condition_ok(gs, inst, ab, event)
-                    for ab in inst.card.abilities)
+        wants = macro or any(ab.trigger is trigger and _condition_ok(gs, inst, ab, event)
+                             for ab in inst.card.abilities)
         if wants:
             inst.hidden = False
             gs.log_line(
@@ -153,6 +179,10 @@ def fire(gs, inst, trigger: Trigger, event=None, chosen=None) -> None:
         mult = 1 + inst.pending_doubles
         inst.pending_doubles = 0
         resolve_ability(gs, inst, ab, event, chosen, mult)
+    if macro:
+        mult = 1 + inst.pending_doubles
+        inst.pending_doubles = 0
+        resolve_ability(gs, inst, _AMP_ABILITY, event, mult=mult)
     process_deaths(gs)
 
 
@@ -414,11 +444,4 @@ def process_deaths(gs) -> None:
 
 
 def _wincheck(gs) -> None:
-    if gs.winner is not None:
-        return
-    if gs.players[1].signal <= 0:
-        gs.winner = 0
-    elif gs.players[0].signal <= 0:
-        gs.winner = 1
-    if gs.winner is not None:
-        gs.log_line(f"Station {gs.winner + 1} cuts the rival off the air.")
+    gs.check_win()

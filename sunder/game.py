@@ -159,6 +159,16 @@ class GameState:
             self.rng.shuffle(p.playlist)
         for p in self.players:
             self.draw(p, opening, silent=True)
+        # second-station compensation: going second, they draw an extra
+        # card also in other games — here, a free +1-Bandwidth Track.
+        inst = self.make_instance(engine.coin_card(), 1)
+        inst.zone = "HAND"
+        self.players[1].hand.append(inst)
+        self.log_line(
+            "Station 2 starts with a Signal Spike (+1 Bandwidth this turn).",
+            kind="system",
+            station=1,
+        )
         self.current = 0
         self.begin_turn()
 

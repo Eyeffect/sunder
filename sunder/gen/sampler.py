@@ -73,7 +73,8 @@ def sample_pack(theme: str, profile: ThemeProfile, rng, ledger: Ledger,
                                 approved_tags, allowed)
             if not ledger.collides(signature_from_skeleton(cand)):
                 break
-        assert cand is not None
+        if not isinstance(cand, CardSkeleton):
+            raise RuntimeError("sampler: novelty loop produced no skeleton")
         if ledger.collides(signature_from_skeleton(cand)) \
                 and ledger.relaxed_collides(signature_from_skeleton(cand)):
             log.warning("novelty relax: accepted near-duplicate %s "
@@ -148,7 +149,8 @@ def _sample_card(slug, theme, index, profile, rng, approved_kw, approved_tags,
                              approved_tags, rarity)
         if budget_score(skeleton_to_card(sk)) <= cap:
             break
-    assert sk is not None
+    if not isinstance(sk, CardSkeleton):
+        raise RuntimeError("sampler: budget loop produced no skeleton")
     if budget_score(skeleton_to_card(sk)) > cap:
         _downgrade_to_budget(sk, cap, rng, approved_tags, profile)
     sk.cost = suggested_cost(skeleton_to_card(sk))
@@ -190,6 +192,10 @@ def _downgrade_to_budget(sk, cap, rng, approved_tags, profile) -> None:
             cuts.append("value")
         else:
             break
+    if "ECHO" in sk.keywords and sk.abilities and not any(
+            ab.get("trigger") == "ON_DEATH" for ab in sk.abilities):
+        # the ladder may have cut the death trigger — keep ECHO's promise
+        sk.abilities[0]["trigger"] = "ON_DEATH"
     final = budget_score(skeleton_to_card(sk))
     if final > cap:
         ab = sk.abilities[0] if sk.abilities else {}
@@ -239,6 +245,10 @@ def _build_skeleton(slug, theme, index, profile, rng, approved_kw,
     keywords = _sample_keywords(rng, ctype, approved_kw, profile.keyword_affinity)
     abilities = _sample_abilities(rng, ctype, rarity, approved_kw, approved_tags,
                                   profile)
+    if "ECHO" in keywords and not any(
+            ab.get("trigger") == "ON_DEATH" for ab in abilities) and abilities:
+        # keep the keyword's promise: its listed effect happens on death
+        abilities[0]["trigger"] = "ON_DEATH"
     stats = _sample_stats(rng, ctype, rarity)
     sk = CardSkeleton(
         id=f"{slug}_{index + 1:03d}", set=slug, plane=theme,

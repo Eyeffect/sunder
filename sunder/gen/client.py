@@ -72,7 +72,8 @@ class LLMClient:
                 last = LLMError(f"LLM request failed: {exc}")
             except json.JSONDecodeError as exc:
                 last = LLMError(f"LLM returned unusable content: {exc}")
-        assert last is not None
+        if last is None:
+            raise LLMError("LLM request loop did not run")
         raise last
 
     def available(self) -> bool:

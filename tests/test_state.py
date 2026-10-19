@@ -16,7 +16,7 @@ def test_snapshot_shape():
     assert s["turn"] == 1 and s["current"] == 0 and s["winner"] is None
     assert len(s["hand"]) == 5
     assert s["me"]["hand_count"] == 5
-    assert s["foe"]["hand_count"] == 4
+    assert s["foe"]["hand_count"] == 5  # 4 opening cards + Signal Spike
     assert s["me"]["sleeve"] == "ember"
     assert s["foe"]["sleeve"] == "static"
     assert set(s) >= {"turn", "current", "phase", "winner", "status",
