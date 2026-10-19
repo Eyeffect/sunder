@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import random
 
+from . import engine
 from .primitives import CardType, Effect, Scaling, Target, Trigger
 from .schema import Card
-from . import engine
 
 MAX_SIGNAL = 30
 MAX_BANDWIDTH = 10

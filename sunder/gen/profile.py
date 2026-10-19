@@ -18,13 +18,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..primitives import CardType, Effect, Rarity, Target, Trigger
-from ..registry import (APPROVED, REJECTED, all_entries, approved_ids,
-                        propose as registry_propose)
+from ..registry import APPROVED, REJECTED, all_entries, approved_ids
+from ..registry import propose as registry_propose
 from ..schema import parse_card
 from .client import LLMError
-from .legality import (SCALINGS, _EFFECTS_BY_TYPE, _EFFECT_TARGETS,
-                       _TRIGGERS_BY_TYPE, _VALUE_RANGE, normalize_mechanic,
-                       validate_mechanic)
+from .legality import (
+    _EFFECT_TARGETS,
+    _EFFECTS_BY_TYPE,
+    _TRIGGERS_BY_TYPE,
+    _VALUE_RANGE,
+    SCALINGS,
+    normalize_mechanic,
+    validate_mechanic,
+)
 
 log = logging.getLogger("sunder.gen")
 

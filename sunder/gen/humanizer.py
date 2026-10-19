@@ -14,7 +14,6 @@ import logging
 
 from ..registry import tag_definition, tag_mechanic, tag_reminder
 from ..schema import SchemaError
-from .client import LLMError
 from .profile import ThemeProfile
 from .sampler import CardSkeleton, skeleton_to_card
 

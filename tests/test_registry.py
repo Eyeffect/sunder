@@ -5,8 +5,17 @@ import json
 import pytest
 
 import sunder.registry as registry
-from sunder.registry import (APPROVED, PROPOSED, REJECTED, approve, approved_tags,
-                             load_registry, propose, reject, save_registry)
+from sunder.registry import (
+    APPROVED,
+    PROPOSED,
+    REJECTED,
+    approve,
+    approved_tags,
+    load_registry,
+    propose,
+    reject,
+    save_registry,
+)
 
 
 @pytest.fixture

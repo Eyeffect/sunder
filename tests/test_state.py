@@ -3,6 +3,7 @@ from .conftest import card, make_gs, put_board, put_hand
 
 def test_snapshot_shape():
     from pathlib import Path
+
     from sunder.schema import load_card_file
     from sunder.state import snapshot
     here = Path(__file__).parent.parent / "sunder" / "cards"

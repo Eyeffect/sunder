@@ -1,5 +1,6 @@
-from .conftest import card, make_gs, put_board, put_hand, put_static
 from sunder.state import snapshot
+
+from .conftest import card, make_gs, put_board, put_hand, put_static
 
 
 def test_bside_owner_hover_reveals_real_card():

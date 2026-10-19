@@ -1,8 +1,7 @@
 """Legality tables + mechanic validation: the closed grammar is enforced
 here, so an LLM-proposed mechanic can never reach a card invalidly."""
 
-from sunder.gen.legality import (normalize_mechanic, mechanic_legal,
-                                 validate_mechanic)
+from sunder.gen.legality import mechanic_legal, normalize_mechanic, validate_mechanic
 
 
 def _ok(mechanic):

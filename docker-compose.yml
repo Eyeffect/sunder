@@ -1,0 +1,8 @@
+services:
+  sunder:
+    build: .
+    image: sunder:latest
+    container_name: sunder
+    ports:
+      - "8929:8000"
+    restart: unless-stopped

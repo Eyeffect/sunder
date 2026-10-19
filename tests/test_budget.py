@@ -1,5 +1,4 @@
 from sunder.budget import budget_score, suggested_cost
-from sunder.primitives import Rarity
 
 from .conftest import card
 

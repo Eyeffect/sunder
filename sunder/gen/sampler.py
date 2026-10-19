@@ -22,8 +22,14 @@ from ..primitives import Rarity
 from ..registry import approved_ids, tag_mechanic
 from ..schema import parse_card
 from .ledger import Ledger, signature_from_skeleton
-from .legality import (_EFFECT_TARGETS, _EFFECTS_BY_TYPE, _KEYWORDS_BY_TYPE,
-                       _TRIGGERS_BY_TYPE, _VALUE_RANGE, mechanic_legal)
+from .legality import (
+    _EFFECT_TARGETS,
+    _EFFECTS_BY_TYPE,
+    _KEYWORDS_BY_TYPE,
+    _TRIGGERS_BY_TYPE,
+    _VALUE_RANGE,
+    mechanic_legal,
+)
 from .profile import ThemeProfile
 
 log = logging.getLogger("sunder.gen")

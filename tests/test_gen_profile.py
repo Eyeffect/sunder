@@ -253,7 +253,8 @@ def test_cached_profile_floors_unranked_tags(env):
     resp["tag_affinity"] = {"static": 0.9}
     prof._save_cached("jazz club", prof._fetch_profile("jazz club",
                                                        FakeLLM(responses=[resp])))
-    from sunder.registry import propose as reg_propose, approve as reg_approve
+    from sunder.registry import approve as reg_approve
+    from sunder.registry import propose as reg_propose
     reg_propose("tag", "foreign", "some other theme's tag")
     reg_approve("tag", "foreign")
     p = prof.profile_for("jazz club", FakeLLM(responses=[resp]))

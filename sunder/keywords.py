@@ -8,7 +8,6 @@ auto-templated rules text shown in the TUI.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass(frozen=True)

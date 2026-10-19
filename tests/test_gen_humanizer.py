@@ -2,8 +2,6 @@
 
 import random
 
-import pytest
-
 from sunder.gen import humanizer as humanizer_mod
 from sunder.gen.fake import FakeLLM
 from sunder.gen.humanizer import MAX_ATTEMPTS, deterministic_fill, humanize_pack
@@ -73,7 +71,6 @@ def test_wrong_card_count_retries():
 
 
 def test_deterministic_fill_uses_pool_and_menu():
-    from sunder.gen.humanizer import deterministic_fill
     sks = skeletons(4)
     profile = default_profile("humanizer")
     out = deterministic_fill(sks, profile)

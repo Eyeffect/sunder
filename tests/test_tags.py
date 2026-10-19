@@ -2,10 +2,9 @@
 
 import pytest
 
-from sunder import engine
 from sunder.lore import rules_text
 from sunder.primitives import Scaling
-from sunder.schema import SchemaError, parse_card
+from sunder.schema import SchemaError
 
 from .conftest import card, make_gs, put_board, put_hand
 

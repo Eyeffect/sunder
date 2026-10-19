@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from . import ai as ai_mod
 from .game import GameState
-from .primitives import CardType, Effect, Target
+from .primitives import CardType, Target
 from .schema import Card
 
 
@@ -137,6 +137,7 @@ def play_cli(deck1: list[Card], deck2: list[Card], seed: int | None = None) -> i
 
 def main() -> None:
     from pathlib import Path
+
     from .schema import load_card_file
 
     here = Path(__file__).parent
