@@ -129,6 +129,17 @@ Sets live in `sunder/cards/*.json` — lists of cards:
 
 Tag + keyword governance lives in `sunder/cards/registry.json` (`proposed → approved` lifecycle, mechanic attachments, keyword reminders). See `python -m sunder codex` for the human view.
 
+## Docs
+
+Full documentation lives in [docs/](docs/index.md):
+
+- [Rules](docs/rules.md) — turn loop, combat, all 13 keywords
+- [Architecture](docs/architecture.md) — module map, closed vocabulary, engine design
+- [Card format](docs/cards.md) — JSON schema, budget model, registry governance
+- [Card generation](docs/generation.md) — the LLM pipeline + review gate
+- [Server API](docs/api.md) — REST + WebSocket protocol, snapshot shape
+- [Developing](docs/developing.md) — setup, tests, lint, CI, Docker/homelab deploy
+
 ## Testing
 
 ```bash
