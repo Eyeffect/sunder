@@ -11,8 +11,30 @@ from __future__ import annotations
 import sys
 
 
+def _usage() -> str:
+    return f"""{__doc__}
+
+    python -m sunder --version   show the version
+"""
+
+
+def _version() -> str:
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("sunder")
+    except PackageNotFoundError:
+        return "unknown"
+
+
 def main() -> None:
     args = sys.argv[1:]
+    if args and args[0] in ("-h", "--help"):
+        print(_usage())
+        return
+    if args and args[0] in ("-V", "--version"):
+        print(_version())
+        return
     if args and args[0] == "codex":
         from .codex import main as codex_main
         sys.exit(codex_main(args[1:]))
