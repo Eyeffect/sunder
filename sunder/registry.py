@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -53,6 +54,10 @@ _STARTER_TAGS: list[dict[str, str]] = [
      "reminder": "Things that come and go in cycles."},
 ]
 
+# RLock: mutators (propose/set_status) hold it across load → mutate → save,
+# while load/save also take it (non-reentrant Lock would deadlock). Web
+# generation runs in asyncio worker threads, so cache+file access is guarded.
+_LOCK = threading.RLock()
 _CACHE: dict[str, Any] | None = None
 
 
@@ -88,34 +93,36 @@ def _with_status(entry: dict[str, str], status: str) -> dict[str, str]:
 def load_registry(force_reload: bool = False) -> dict[str, Any]:
     """Return the registry data, re-syncing keywords from the engine."""
     global _CACHE
-    if _CACHE is not None and not force_reload:
-        return _CACHE
-    if REGISTRY_PATH.exists():
-        try:
-            data = json.loads(REGISTRY_PATH.read_text())
-        except (json.JSONDecodeError, OSError):
+    with _LOCK:
+        if _CACHE is not None and not force_reload:
+            return _CACHE
+        if REGISTRY_PATH.exists():
+            try:
+                data = json.loads(REGISTRY_PATH.read_text())
+            except (json.JSONDecodeError, OSError):
+                data = _default_data()
+        else:
             data = _default_data()
-    else:
-        data = _default_data()
-    _sync_keywords(data)
-    _CACHE = data
-    return data
+        _sync_keywords(data)
+        _CACHE = data
+        return data
 
 
 def save_registry(data: dict[str, Any] | None = None) -> None:
     """Persist the registry atomically (and refresh the module cache)."""
     global _CACHE
-    data = data if data is not None else (_CACHE or load_registry())
-    fd, tmp = tempfile.mkstemp(dir=str(REGISTRY_DIR), prefix="registry.", suffix=".tmp")
-    try:
-        with os.fdopen(fd, "w") as fh:
-            json.dump(data, fh, indent=2, sort_keys=True)
-            fh.write("\n")
-        os.replace(tmp, REGISTRY_PATH)
-    finally:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
-    _CACHE = data
+    with _LOCK:
+        data = data if data is not None else (_CACHE or load_registry())
+        fd, tmp = tempfile.mkstemp(dir=str(REGISTRY_DIR), prefix="registry.", suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as fh:
+                json.dump(data, fh, indent=2, sort_keys=True)
+                fh.write("\n")
+            os.replace(tmp, REGISTRY_PATH)
+        finally:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
+        _CACHE = data
 
 
 def _sync_keywords(data: dict[str, Any]) -> None:
@@ -189,27 +196,28 @@ def propose(kind: str, entry_id: str, definition: str = "", reminder: str = "",
         raise ValueError(f"unknown registry kind {kind!r}")
     if not entry_id or not entry_id.islower() or not entry_id.replace("_", "").isalnum():
         raise ValueError("entry id must be lowercase snake_case")
-    data = load_registry()
-    for e in _entries(kind, data):
-        if e["id"] == entry_id:
-            e["definition"] = definition or e.get("definition", "")
-            e["reminder"] = reminder or e.get("reminder", "")
-            if mechanic is not None:
-                e["mechanic"] = mechanic
-            elif "mechanic" in e:
-                del e["mechanic"]
-            if e.get("status") == REJECTED:
-                e["status"] = PROPOSED
-            save_registry(data)
-            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
-                                 e["status"], e.get("mechanic"))
-    entry: dict = {"id": entry_id, "definition": definition, "reminder": reminder,
-                   "status": PROPOSED}
-    if mechanic is not None:
-        entry["mechanic"] = mechanic
-    data.setdefault(_SECTION[kind], []).append(entry)
-    save_registry(data)
-    return RegistryEntry(kind, entry_id, definition, reminder, PROPOSED, mechanic)
+    with _LOCK:
+        data = load_registry()
+        for e in _entries(kind, data):
+            if e["id"] == entry_id:
+                e["definition"] = definition or e.get("definition", "")
+                e["reminder"] = reminder or e.get("reminder", "")
+                if mechanic is not None:
+                    e["mechanic"] = mechanic
+                elif "mechanic" in e:
+                    del e["mechanic"]
+                if e.get("status") == REJECTED:
+                    e["status"] = PROPOSED
+                save_registry(data)
+                return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
+                                     e["status"], e.get("mechanic"))
+        entry: dict = {"id": entry_id, "definition": definition, "reminder": reminder,
+                       "status": PROPOSED}
+        if mechanic is not None:
+            entry["mechanic"] = mechanic
+        data.setdefault(_SECTION[kind], []).append(entry)
+        save_registry(data)
+        return RegistryEntry(kind, entry_id, definition, reminder, PROPOSED, mechanic)
 
 
 def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
@@ -217,14 +225,15 @@ def set_status(kind: str, entry_id: str, status: str) -> RegistryEntry | None:
         raise ValueError(f"unknown registry kind {kind!r}")
     if status not in _VALID_STATUSES:
         raise ValueError(f"unknown status {status!r}")
-    data = load_registry()
-    for e in _entries(kind, data):
-        if e["id"] == entry_id:
-            e["status"] = status
-            save_registry(data)
-            return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
-                                 status, e.get("mechanic"))
-    return None
+    with _LOCK:
+        data = load_registry()
+        for e in _entries(kind, data):
+            if e["id"] == entry_id:
+                e["status"] = status
+                save_registry(data)
+                return RegistryEntry(kind, entry_id, e["definition"], e["reminder"],
+                                     status, e.get("mechanic"))
+        return None
 
 
 def approve(kind: str, entry_id: str) -> RegistryEntry | None:

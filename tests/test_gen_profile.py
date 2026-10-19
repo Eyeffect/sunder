@@ -143,7 +143,8 @@ def test_valid_mechanic_proposal_stored_with_derived_reminder(env):
     prof._fetch_profile("jazz club", FakeLLM(responses=[resp]))
     from sunder.registry import all_entries
     entry = next(e for e in all_entries("tags") if e.id == "probe")
-    assert entry.status == "approved"
+    # proposals land in the review queue — approval is a human decision
+    assert entry.status == "proposed"
     assert entry.mechanic["effect"] == "DRAW_CARD"
     assert entry.reminder == "When this enters play: cue 1."
 
@@ -209,15 +210,18 @@ def test_unapproved_ref_mechanic_degraded(env, caplog):
     assert any("rejecting mechanic" in r.message for r in caplog.records)
 
 
-# ------------------------------------------------ auto-approve + tag emphasis
+# ------------------------------------------------ review gate + tag emphasis
 
-def test_proposals_auto_approved(env):
+def test_proposals_queued_not_approved(env):
     resp = dict(PROFILE_RESP)
     resp["proposed_tags"] = [{"id": "probe", "definition": "a scan"}]
     prof._fetch_profile("jazz club", FakeLLM(responses=[resp]))
     from sunder.registry import all_entries
     entry = next(e for e in all_entries("tags") if e.id == "probe")
-    assert entry.status == "approved"
+    assert entry.status == "proposed"
+    # unapproved, so it is not yet drawable by the sampler
+    from sunder.registry import approved_ids
+    assert "probe" not in approved_ids("tags")
 
 
 def test_rejected_tag_not_auto_approved(env):

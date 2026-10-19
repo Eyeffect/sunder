@@ -18,8 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..primitives import CardType, Effect, Rarity, Target, Trigger
-from ..registry import (REJECTED, all_entries, approved_ids,
-                        approve as registry_approve,
+from ..registry import (APPROVED, REJECTED, all_entries, approved_ids,
                         propose as registry_propose)
 from ..schema import parse_card
 from .client import LLMError
@@ -245,11 +244,13 @@ def _fetch_profile(theme: str, client, timeout: float | None = None) -> ThemePro
 
 
 def _register_proposals(raw) -> list[str]:
-    """Propose tags from the LLM response, auto-approving them.
+    """Propose tags from the LLM response into the review queue.
 
-    Returns the ids of every accepted proposal (used by the caller to boost
-    the theme's own tags in `tag_affinity`). A tag the user explicitly
-    rejected is re-opened to `proposed` but NOT auto-approved — a rejection
+    Returns the ids of every proposal (used by the caller to boost the
+    theme's own tags in `tag_affinity` once approved). Proposals land as
+    `proposed` — the web REGISTRY panel approves them and only then does
+    the sampler draw them and attach mechanics. A tag the user explicitly
+    rejected is re-opened to `proposed` but stays unapproved — a rejection
     is respected until the user acts again.
     """
     accepted: list[str] = []
@@ -284,8 +285,11 @@ def _register_proposals(raw) -> list[str]:
         except ValueError as exc:
             log.warning("skipping proposed tag %r: %s", entry_id, exc)
             continue
-        if existing.get(entry_id) != REJECTED:
-            registry_approve("tag", entry_id)
+        if existing.get(entry_id) == REJECTED:
+            log.info("proposed tag %r stays unapproved — earlier rejection "
+                     "is respected", entry_id)
+        elif existing.get(entry_id) != APPROVED:
+            log.info("proposed tag %r queued for review", entry_id)
         accepted.append(entry_id)
     return accepted
 
