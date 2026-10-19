@@ -55,10 +55,18 @@ export interface VersionEntry {
 
 export const VERSIONS: VersionEntry[] = [
   {
-    version: "0.3.6",
+    version: "0.3.6.1",
     codename: "Feedback",
     date: "2026-10-20",
     current: true,
+    changes: [
+      { type: "changed", text: "Under-the-hood polish build — same game, new docs, care where you can't see" },
+    ],
+  },
+  {
+    version: "0.3.6",
+    codename: "Feedback",
+    date: "2026-10-20",
     changes: [
       { type: "added", text: "Signal Spike — going second now opens with a free Track that grants +1 Bandwidth for the turn, closing the first-move tempo gap" },
       { type: "changed", text: "AMP finally broadcasts for real — a card with AMP grows +1/+1 every time any Broadcast is aired, on either station, itself included" },
