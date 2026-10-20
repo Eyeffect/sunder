@@ -20,6 +20,7 @@ from .. import ai as ai_mod
 from ..game import GameState
 from ..lore import rules_text
 from ..schema import load_card_file
+from ..sleeves import load_manifest
 from ..state import snapshot
 
 SERVER_DIR = Path(__file__).parent
@@ -46,40 +47,12 @@ def _card_json(c) -> dict:
     }
 
 
-_FALLBACK_SLEEVES = [
-    {"id": "default", "label": "Frequency", "pattern": "wavelength",
-     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
-     "emblem": "◉"},
-    {"id": "ember", "label": "Ember", "pattern": "starburst",
-     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
-     "emblem": "◉"},
-    {"id": "static", "label": "Static", "pattern": "staticNoise",
-     "palette": {"ink": "magenta", "glow": "magenta", "paper": "voidDeep"},
-     "emblem": "◉"},
-]
-
-
-def load_sleeves() -> dict[str, dict]:
-    """Sleeve manifest from `cards/sleeves.json` (falls back to a minimal
-    set if the file is missing or malformed)."""
-    path = CARDS_DIR / "sleeves.json"
-    try:
-        data = json.loads(path.read_text())
-        sleeves = [s for s in data.get("sleeves", [])
-                   if isinstance(s, dict) and isinstance(s.get("id"), str)]
-    except (OSError, AttributeError, json.JSONDecodeError):
-        sleeves = []
-    if not sleeves:
-        sleeves = _FALLBACK_SLEEVES
-    return {s["id"]: s for s in sleeves}
-
-
 def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> FastAPI:
     """Build the app. `ai_think`/`ai_delay` are the base seconds for the
     rival's thinking pause and per-action delay (randomized around them);
     pass 0 to make AI turns instant (tests)."""
     decks = tuple(decks) if decks else default_decks()
-    sleeves = load_sleeves()
+    sleeves = load_manifest()
     app = FastAPI(title="SUNDER", docs_url="/api/docs")
 
     @app.get("/api/cards")
@@ -182,6 +155,12 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
         def human_turn() -> bool:
             return gs is not None and gs.winner is None and gs.current == 0
 
+        def my_station() -> int:
+            # Single-human server: the connected client always sits at
+            # station 0. A future 2-human socket server derives this from
+            # the connection's assigned seat.
+            return 0
+
         async def send_state() -> None:
             await ws.send_text(json.dumps({"type": "state", "snapshot": snapshot(gs)}))
 
@@ -199,7 +178,8 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                 mtype = msg.get("type")
 
                 if mtype == "start" or mtype == "restart":
-                    gs = GameState(*decks, seed=msg.get("seed"))
+                    gs = GameState(*decks, seed=msg.get("seed"),
+                                   sleeves=sleeves)
                     gs.start_game()
                     await send_state()
 
@@ -258,7 +238,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                     if not isinstance(sid, str) or sid not in sleeves:
                         await send_error("unknown sleeve")
                         continue
-                    gs.players[0].sleeve = sid
+                    gs.players[my_station()].sleeve = sid
                     await send_state()
 
                 elif mtype == "ping":

@@ -13,50 +13,81 @@
       "id": "default",
       "label": "Frequency",
       "pattern": "wavelength",
-      "palette": { "ink": "amber", "glow": "amber", "paper": "voidDeep" },
-      "emblem": "◉"
+      "palette": {
+        "ink": "amber",
+        "glow": "amber",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u25c9"
     },
     {
       "id": "ember",
       "label": "Ember",
       "pattern": "starburst",
-      "palette": { "ink": "amber", "glow": "amber", "paper": "voidDeep" },
-      "emblem": "◉"
+      "palette": {
+        "ink": "amber",
+        "glow": "amber",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u25c9"
     },
     {
       "id": "static",
       "label": "Static",
       "pattern": "staticNoise",
-      "palette": { "ink": "magenta", "glow": "magenta", "paper": "voidDeep" },
-      "emblem": "◉"
+      "palette": {
+        "ink": "magenta",
+        "glow": "magenta",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u25c9"
     },
     {
       "id": "neonfreq",
       "label": "Neon Frequency",
       "pattern": "wavelength",
-      "palette": { "ink": "cyan", "glow": "cyan", "paper": "voidDeep" },
-      "emblem": "≈"
+      "palette": {
+        "ink": "cyan",
+        "glow": "cyan",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u2248",
+      "plane": "neon_frequency"
     },
     {
       "id": "cinderworks",
       "label": "Cinderworks",
       "pattern": "circuit",
-      "palette": { "ink": "cinder", "glow": "cinder", "paper": "voidDeep" },
-      "emblem": "⌁"
+      "palette": {
+        "ink": "cinder",
+        "glow": "cinder",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u2301",
+      "plane": "cinderworks"
     },
     {
       "id": "driftglass",
       "label": "Driftglass",
       "pattern": "vinyl",
-      "palette": { "ink": "cyan", "glow": "green", "paper": "voidDeep" },
-      "emblem": "◍"
+      "palette": {
+        "ink": "cyan",
+        "glow": "green",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u25cd",
+      "plane": "driftglass"
     },
     {
       "id": "spool",
       "label": "Spool",
       "pattern": "spool",
-      "palette": { "ink": "text", "glow": "cyan", "paper": "voidDeep" },
-      "emblem": "◎"
+      "palette": {
+        "ink": "text",
+        "glow": "cyan",
+        "paper": "voidDeep"
+      },
+      "emblem": "\u25ce"
     }
   ]
 }

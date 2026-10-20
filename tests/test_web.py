@@ -249,10 +249,10 @@ def test_sleeves_endpoint():
 def test_sleeves_manifest_file_matches_fallback_ids(monkeypatch):
     import json as _json
 
-    from sunder.server import app as app_mod
+    from sunder import sleeves as sleeves_mod
 
     manifest = _json.loads(
-        (app_mod.CARDS_DIR / "sleeves.json").read_text())
+        (sleeves_mod.SLEEVE_PATH).read_text())
     ids = [s["id"] for s in manifest["sleeves"]]
     assert len(ids) == len(set(ids))
     assert "default" in ids
@@ -262,7 +262,7 @@ def test_set_sleeve_updates_station():
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "start", "seed": 1})
         s1 = ws.receive_json()["snapshot"]
-        assert s1["players"]["0"]["sleeve"] == "ember"
+        assert s1["players"]["0"]["sleeve"] == "neonfreq"
         ws.send_json({"type": "set_sleeve", "sleeve": "driftglass"})
         s2 = ws.receive_json()["snapshot"]
         assert s2["players"]["0"]["sleeve"] == "driftglass"
@@ -272,7 +272,7 @@ def test_set_sleeve_rejects_unknown_id():
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "start", "seed": 1})
         s1 = ws.receive_json()["snapshot"]
-        assert s1["players"]["0"]["sleeve"] == "ember"
+        assert s1["players"]["0"]["sleeve"] == "neonfreq"
         ws.send_json({"type": "set_sleeve", "sleeve": "nope"})
         err = ws.receive_json()
         assert err["type"] == "error"
@@ -288,9 +288,9 @@ def test_sleeves_manifest_schema():
     library must match this catalog exactly)."""
     import json as _json
 
-    from sunder.server import app as app_mod
+    from sunder import sleeves as sleeves_mod
 
-    manifest = _json.loads((app_mod.CARDS_DIR / "sleeves.json").read_text())
+    manifest = _json.loads((sleeves_mod.SLEEVE_PATH).read_text())
     assert isinstance(manifest.get("schema_version"), int)
     patterns = manifest.get("patterns")
     assert isinstance(patterns, list) and len(patterns) > 0

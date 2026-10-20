@@ -18,8 +18,9 @@ def test_snapshot_shape():
     assert len(s["hand"]) == 5
     assert s["me"]["hand_count"] == 5
     assert s["foe"]["hand_count"] == 5  # 4 opening cards + Signal Spike
-    assert s["me"]["sleeve"] == "ember"
-    assert s["foe"]["sleeve"] == "static"
+    # sleeves are always populated (deck-bound defaults via manifest)
+    assert isinstance(s["me"]["sleeve"], str) and s["me"]["sleeve"]
+    assert isinstance(s["foe"]["sleeve"], str) and s["foe"]["sleeve"]
     assert set(s) >= {"turn", "current", "phase", "winner", "status",
                       "viewer", "can_act", "players", "me", "foe", "hand", "log"}
 

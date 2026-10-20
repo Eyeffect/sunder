@@ -10,6 +10,7 @@ import random
 from . import engine
 from .primitives import CardType, Effect, Scaling, Target, Trigger
 from .schema import Card
+from .sleeves import load_manifest, seat_sleeve
 
 MAX_SIGNAL = 30
 MAX_BANDWIDTH = 10
@@ -61,7 +62,7 @@ class Player:
     def __init__(self, index: int, deck_cards: list[Card], gs: "GameState"):
         self.index = index
         self.gs = gs
-        self.sleeve = "ember" if index == 0 else "static"
+        self.sleeve = seat_sleeve(gs.sleeves, deck_cards, index)
         self.signal = MAX_SIGNAL
         self.bandwidth = 0
         self.max_bandwidth = 1
@@ -91,7 +92,9 @@ class Player:
 
 
 class GameState:
-    def __init__(self, deck1: list[Card], deck2: list[Card], seed: int | None = None):
+    def __init__(self, deck1: list[Card], deck2: list[Card],
+                 seed: int | None = None,
+                 sleeves: dict[str, dict] | None = None):
         self.rng = random.Random(seed)
         self.turn = 1
         self.current = 0
@@ -103,6 +106,7 @@ class GameState:
         self.resolving: set[int] = set()
         self.last_track_stack: list[CardInstance] = []
         self.winner: int | None = None
+        self.sleeves = sleeves if sleeves is not None else load_manifest()
         self.players = [Player(0, deck1, self), Player(1, deck2, self)]
 
     # ------------------------------------------------------------------ setup
