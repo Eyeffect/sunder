@@ -497,17 +497,9 @@ html.no-scrollbar::-webkit-scrollbar {
 .deck-card.back-1 {
   border-color: var(--accent, var(--amber));
   box-shadow: 0 0 6px color-mix(in srgb, var(--accent, var(--amber)) 45%, transparent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-.deck-icon {
-  color: var(--accent, var(--amber));
-  opacity: 0.5;
-  font-size: 13px;
-  line-height: 1;
-}
-.deck-stack.board .deck-icon { font-size: 26px; }
+.deck-card .card-back { --pile-w: 34px; }
+.deck-stack.board .deck-card .card-back { --pile-w: var(--card-w); }
 .deck-count {
   position: absolute;
   bottom: -6px;
@@ -535,7 +527,7 @@ html.no-scrollbar::-webkit-scrollbar {
 .card-back {
   position: absolute;
   inset: 0;
-  border-radius: calc(var(--pile-w, 52px) * 0.115);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
   background: var(--sleeve-paper, var(--void-deep));
   border: 2px solid var(--sleeve-primary);
   box-shadow:

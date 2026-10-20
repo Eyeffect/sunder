@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { BoardCard, PlayerState } from "../types";
 import { sleeveOf } from "../sleeves";
 import { Card, VuMeter } from "./Card";
+import { CardBack } from "./CardBack";
 
 export function DeckStack({
   sleeve,
@@ -18,7 +19,7 @@ export function DeckStack({
       <div className="deck-card back-3" />
       <div className="deck-card back-2" />
       <div className="deck-card back-1" style={style}>
-        <span className="deck-icon">◉</span>
+        <CardBack sleeve={sleeve} />
       </div>
       <span className="deck-count">{count}</span>
     </div>
