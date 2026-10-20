@@ -281,6 +281,39 @@ def test_set_sleeve_rejects_unknown_id():
         assert ws.receive_json()["type"] == "pong"
 
 
+def test_avatars_endpoint():
+    r = client.get("/api/avatars")
+    avatars = r.json()["avatars"]
+    ids = {a["id"] for a in avatars}
+    assert {"frequency", "neon", "cinder", "callsign"} <= ids
+    assert all(a.get("label") and a.get("glyph") for a in avatars)
+
+
+def test_set_avatar_updates_station():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        s1 = ws.receive_json()["snapshot"]
+        assert s1["players"]["0"]["avatar"] == "frequency"
+        assert s1["players"]["0"]["avatar_glyph"] == "◉"
+        ws.send_json({"type": "set_avatar", "avatar": "cinder"})
+        s2 = ws.receive_json()["snapshot"]
+        assert s2["players"]["0"]["avatar"] == "cinder"
+        assert s2["players"]["0"]["avatar_glyph"] == "⌁"
+        ws.send_json({"type": "set_sleeve", "sleeve": "driftglass"})
+        s3 = ws.receive_json()["snapshot"]
+        assert s3["players"]["0"]["sleeve_ink"] == "cyan"
+
+
+def test_set_avatar_rejects_unknown_id():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        ws.receive_json()
+        ws.send_json({"type": "set_avatar", "avatar": "nope"})
+        err = ws.receive_json()
+        assert err["type"] == "error"
+        assert "avatar" in err["message"]
+
+
 def test_sleeves_manifest_schema():
     """Structure guard for sleeves.json: palette *channels* resolve
     client-side against web/src/sleeves.ts CHANNELS (tested there), and

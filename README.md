@@ -153,7 +153,7 @@ pytest tests -x
 
 ## Status / notes
 
-- v0.3.7.5 — card faces redrawn at the standard 5:7 ratio, with an edition/rarity badge, a station watermark, clamped rules, and a playability signal on the hand cost bars; flavor moves to the inspector.
+- v0.3.7.5 — card faces redrawn at the standard 5:7 ratio, with an edition/rarity badge, a station watermark, clamped rules, and a playability signal on the hand cost bars; flavor moves to the inspector. Profile icons are a separate pick from sleeves: the station avatar opens an emblem grid, and the glyph takes your sleeve's ink.
 - v0.3.6.1 — changelog inside the game UI (Changelog tab) with a short roadmap.
 - Card backs are hand-editable SVG art (`web/src/art/sleeves/*.svg`), one file per sleeve, themed via palette channels from `sunder/cards/sleeves.json`. Browse + pick in the codex (SLEEVES tab), carried server-side per station so opponents see your back too. Adding a sleeve = one JSON entry + one SVG.
 - Second station starts with a Signal Spike — the coin analog for the first-turn tempo advantage.

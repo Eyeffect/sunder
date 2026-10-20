@@ -21,6 +21,11 @@ def test_snapshot_shape():
     # sleeves are always populated (deck-bound defaults via manifest)
     assert isinstance(s["me"]["sleeve"], str) and s["me"]["sleeve"]
     assert isinstance(s["foe"]["sleeve"], str) and s["foe"]["sleeve"]
+    # profile icons are independent of sleeves but tinted by sleeve ink
+    assert s["me"]["avatar"] == "frequency"
+    assert s["me"]["avatar_glyph"] == "◉"
+    assert s["me"]["sleeve_ink"] == "amber"
+    assert isinstance(s["foe"]["sleeve_ink"], str) and s["foe"]["sleeve_ink"]
     assert set(s) >= {"turn", "current", "phase", "winner", "status",
                       "viewer", "can_act", "players", "me", "foe", "hand", "log"}
 

@@ -63,6 +63,7 @@ export const VERSIONS: VersionEntry[] = [
       { type: "changed", text: "Card faces redrawn at true 2.5×3.5 playing-card proportions — tighter type, a 5-line rules window, and one layout across hand, board, and codex" },
       { type: "added", text: "Every face prints its edition and rarity in the top-right badge, with the station code watermarked in the corner" },
       { type: "added", text: "Hand cost bars read playability: they light in the edition's colour when the card is affordable, and stay grey when it isn't" },
+      { type: "added", text: "Station profile icons: pick one of the old sleeve emblems from your avatar; the glyph takes your sleeve's ink and persists between sessions" },
       { type: "changed", text: "Unplayable hand cards keep full opacity; flavor text moves to the inspector (the codex keeps its quotes)" },
       { type: "changed", text: "Board cards step down to the compact face so six slots fit; the codex field fades blue while browsing" },
       { type: "changed", text: "Sleeve art redrawn as hand-editable SVGs — emblems are part of the art now, and the roster is trimmed to nine" },

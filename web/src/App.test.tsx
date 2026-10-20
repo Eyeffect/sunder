@@ -27,6 +27,22 @@ const ws = vi.hoisted(() => {
 
 vi.mock("./ws", () => ({ GameSocket: ws.GameSocket }));
 
+const storage = vi.hoisted(() => {
+  const data = new Map<string, string>();
+  return {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value);
+    },
+    removeItem: (key: string) => {
+      data.delete(key);
+    },
+    clear: () => data.clear(),
+  };
+});
+
+vi.stubGlobal("localStorage", storage);
+
 vi.stubGlobal(
   "fetch",
   vi.fn((url: string) => {
@@ -115,6 +131,7 @@ function pump(snap: Snapshot): void {
 
 beforeEach(() => {
   ws.sendMock.mockClear();
+  storage.clear();
 });
 
 describe("App", () => {
@@ -124,6 +141,33 @@ describe("App", () => {
     pump(snapshot({ hand: [handCard()] }));
     expect(screen.getByText("Neon Drifter")).toBeInTheDocument();
     expect(screen.getByText(/Your turn/)).toBeInTheDocument();
+  });
+
+  it("picks a profile icon from the station avatar", () => {
+    render(<App />);
+    pump(
+      snapshot({
+        me: player({
+          index: 0,
+          avatar: "frequency",
+          avatar_glyph: "◉",
+          sleeve_ink: "amber",
+        }),
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Choose profile icon" }));
+    expect(screen.getByRole("dialog", { name: "Choose profile icon" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Cinderworks/ }));
+    expect(ws.sendMock).toHaveBeenCalledWith({ type: "set_avatar", avatar: "cinder" });
+    expect(localStorage.getItem("sunder-avatar")).toBe("cinder");
+  });
+
+  it("restores the saved profile icon on connect", () => {
+    localStorage.setItem("sunder-avatar", "vhs");
+    render(<App />);
+    const sock = ws.GameSocket.last;
+    act(() => sock?.onOpen());
+    expect(ws.sendMock).toHaveBeenCalledWith({ type: "set_avatar", avatar: "vhs" });
   });
 
   it("signals playability on the hand cost bars", () => {

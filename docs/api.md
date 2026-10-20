@@ -19,6 +19,7 @@ by the test suite). The module also exposes a ready `app = create_app()` for
 | POST | `/api/generate` | run [generation](generation.md): `{theme, count?, seed?}` |
 | GET | `/api/health` | `{"ok": true}` |
 | GET | `/api/sleeves` | card-back manifest from `sunder/cards/sleeves.json` |
+| GET | `/api/avatars` | profile-icon manifest from `sunder/cards/avatars.json` |
 
 The built SPA is served at `/` **iff `web/dist` exists** (StaticFiles, html
 mode). Rails: dev frontend via `npm run dev` in `web/` proxies `/api` + `/ws`.
@@ -35,6 +36,7 @@ answers with a full `state` snapshot. Protocol:
 | `attack` | `{board: <index>, target: <serial> \| "face"}` | attack (indexes into your board) |
 | `end_turn` | `{turn: <n>}` | guarded — a stale turn number is ignored; then the AI's turn is **staged**: before it speaks (director pause), then one snapshot per AI action, paced by the jitter windows |
 | `set_sleeve` | `{sleeve: "<id>"}` | set your station's card back; id validated against the sleeve manifest (invalid → error, no state change); the opponent sees the new sleeve in `players.{}.sleeve` |
+| `set_avatar` | `{avatar: "<id>"}` | set your station's profile icon; id validated against `avatars.json` (invalid → error, no state change); glyph + sleeve ink ride the snapshot |
 | `ping` | — | answers `{"type": "pong"}` |
 
 Server →:
@@ -60,8 +62,11 @@ Viewer-aware (`viewer = 0` for the human station):
 }
 ```
 
-Per-player view: `signal`, `max_signal`, `bandwidth`, `max_bandwidth`,
-`hand_count` (foe = count only), `static_count`, `playlist_count`, `board`.
+Per-player view: `sleeve`, `sleeve_ink` (palette channel name), `avatar`
+(icon id), `avatar_glyph` (resolved glyph), `signal`, `max_signal`,
+`bandwidth`, `max_bandwidth`, `hand_count` (foe = count only),
+`static_count`, `playlist_count`, `board`. The client tints the glyph with
+`sleeve_ink`, so profile icons recolour with the sleeve.
 
 Board cards: effective `atk`/`def`, `damage`, fuse progress, `rules`,
 `flavor`, `rarity` — plus, **for your own cards**, `can_attack` and the

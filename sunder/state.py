@@ -62,9 +62,14 @@ def _inst_view(gs: GameState, inst, viewer: int) -> dict:
 
 
 def player_view(gs: GameState, p, viewer: int) -> dict:
+    sleeve = gs.sleeves.get(p.sleeve, {})
+    avatar = gs.avatars.get(p.avatar, {})
     return {
         "index": p.index,
         "sleeve": p.sleeve,
+        "sleeve_ink": (sleeve.get("palette") or {}).get("ink", "amber"),
+        "avatar": p.avatar,
+        "avatar_glyph": avatar.get("glyph", "◉"),
         "signal": p.signal,
         "max_signal": MAX_SIGNAL,
         "bandwidth": p.bandwidth,

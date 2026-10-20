@@ -50,6 +50,9 @@ export interface HandCard {
 export interface PlayerState {
   index: number;
   sleeve: string;
+  sleeve_ink?: string;
+  avatar?: string;
+  avatar_glyph?: string;
   signal: number;
   max_signal: number;
   bandwidth: number;
@@ -183,4 +186,5 @@ export type ClientMsg =
   | { type: "attack"; board: number; target: "face" | number }
   | { type: "end_turn"; turn: number }
   | { type: "set_sleeve"; sleeve: string }
+  | { type: "set_avatar"; avatar: string }
   | { type: "ping" };

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "avatars": [
+    { "id": "frequency", "label": "Frequency", "glyph": "◉" },
+    { "id": "neon", "label": "Neon", "glyph": "≈" },
+    { "id": "cinder", "label": "Cinderworks", "glyph": "⌁" },
+    { "id": "driftglass", "label": "Driftglass", "glyph": "◍" },
+    { "id": "spool", "label": "Spool", "glyph": "◎" },
+    { "id": "spore", "label": "Spore", "glyph": "❋" },
+    { "id": "mixtape", "label": "Mixtape", "glyph": "▤" },
+    { "id": "vhs", "label": "VHS", "glyph": "⏵" },
+    { "id": "topo", "label": "Topo", "glyph": "◬" },
+    { "id": "callsign", "label": "Call Sign", "glyph": "‖" }
+  ]
+}

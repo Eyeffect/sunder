@@ -64,6 +64,11 @@ function resolve(ch: string): string {
   return CHANNELS[ch] ?? "var(--amber)";
 }
 
+/** Resolve a manifest palette channel name (e.g. snapshot `sleeve_ink`). */
+export function channelColor(ch?: string): string {
+  return CHANNELS[ch ?? "amber"] ?? "var(--amber)";
+}
+
 function hydrate(def: SleeveDef): Sleeve {
   return {
     ...def,

@@ -6,6 +6,7 @@ import { CodexView } from "./components/CodexView";
 import { GameView } from "./components/GameView";
 import type { BoardCard, ClientMsg, HandCard, Mode, Snapshot } from "./types";
 import { SLEEVE_KEY } from "./sleeves";
+import { AVATAR_KEY } from "./avatars";
 import { GameSocket } from "./ws";
 
 export default function App() {
@@ -45,6 +46,8 @@ export default function App() {
       sock.send({ type: "start" });
       const saved = localStorage.getItem(SLEEVE_KEY);
       if (saved) sock.send({ type: "set_sleeve", sleeve: saved });
+      const savedAvatar = localStorage.getItem(AVATAR_KEY);
+      if (savedAvatar) sock.send({ type: "set_avatar", avatar: savedAvatar });
     };
     sock.connect();
     return () => sock.close();
@@ -143,6 +146,13 @@ export default function App() {
     send({ type: "set_sleeve", sleeve: id });
   }, [send]);
 
+  const setAvatar = useCallback((id: string) => {
+    try {
+      localStorage.setItem(AVATAR_KEY, id);
+    } catch { /* storage unavailable */ }
+    send({ type: "set_avatar", avatar: id });
+  }, [send]);
+
   let savedSleeve: string | null = null;
   try {
     savedSleeve = localStorage.getItem(SLEEVE_KEY);
@@ -210,6 +220,7 @@ export default function App() {
             onClickFace={onClickFace}
             onEndTurn={requestEndTurn}
             onRestart={() => send({ type: "restart" })}
+            onSetAvatar={setAvatar}
           />
         )}
       </main>

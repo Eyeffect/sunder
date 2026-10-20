@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { BoardCard, PlayerState } from "../types";
-import { sleeveOf } from "../sleeves";
+import { channelColor, sleeveOf } from "../sleeves";
 import { Card, VuMeter } from "./Card";
 import { CardBack } from "./CardBack";
 
@@ -95,6 +95,7 @@ interface PlayerZoneProps {
   onEndTurn?: () => void;
   targetableFace?: boolean;
   onClick?: () => void;
+  onAvatarClick?: () => void;
 }
 
 export function PlayerZone({
@@ -105,7 +106,10 @@ export function PlayerZone({
   onEndTurn,
   targetableFace = false,
   onClick,
+  onAvatarClick,
 }: PlayerZoneProps) {
+  const avatarGlyph = player.avatar_glyph ?? "◉";
+  const avatarStyle = { color: channelColor(player.sleeve_ink) };
   return (
     <div
       className={`side-panel ${mine ? "player" : "opponent"}${targetableFace ? " side-panel-face-targetable" : ""}`}
@@ -113,9 +117,26 @@ export function PlayerZone({
       role={onClick ? "button" : undefined}
       aria-label={onClick ? "rival transmitter" : undefined}
     >
-      <div className={`avatar-frame ${mine ? "you" : "opp"}`} aria-hidden="true">
-        ◉
-      </div>
+      {onAvatarClick ? (
+        <button
+          className={`avatar-frame avatar-frame-btn ${mine ? "you" : "opp"}`}
+          style={avatarStyle}
+          onClick={onAvatarClick}
+          type="button"
+          aria-label="Choose profile icon"
+          title="Choose profile icon"
+        >
+          {avatarGlyph}
+        </button>
+      ) : (
+        <div
+          className={`avatar-frame ${mine ? "you" : "opp"}`}
+          style={avatarStyle}
+          aria-hidden="true"
+        >
+          {avatarGlyph}
+        </div>
+      )}
       <div className="side-info">
         <div className="side-name">{title}</div>
         <VuMeter value={player.signal} max={player.max_signal} colorVar={mine ? "--amber" : "--magenta"} />

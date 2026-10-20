@@ -145,6 +145,23 @@ gallery in the codex and falls back to a hard-coded 3-sleeve list offline.
    (deck-bound defaults), and `tests/test_web.py` (endpoint + `set_sleeve`
    acceptance + manifest schema).
 
+## Profile icons (station avatars)
+
+The avatar in each station panel is a **separate pick from the card back**.
+Glyphs live in `sunder/cards/avatars.json` (`{id, label, glyph}`), loaded by
+`sunder/avatars.py`, served at `GET /api/avatars`, and validated on WS
+`set_avatar`. The server resolves the chosen id into `avatar` +
+`avatar_glyph` on every player view; the client tints the glyph with
+`sleeve_ink` (a palette channel name), so changing sleeves recolours the
+icon without changing the glyph. The picker opens from your own station
+avatar and the choice persists in `localStorage` under `sunder-avatar`.
+
+Adding an icon is one JSON entry — no artwork: `{"id": "mineral", "label":
+"Mineral", "glyph": "◆"}`. Keep `web/src/avatars.ts` (`FALLBACK_AVATARS`)
+in sync for offline boot; `web/src/avatars.test.ts` asserts parity with the
+server manifest. `tests/test_avatars.py` guards the manifest shape and
+`tests/test_web.py` covers the endpoint, `set_avatar`, and rejection.
+
 ## Card faces
 
 Every face uses the 2.5×3.5 playing-card ratio (5:7) at `--card-w` width;

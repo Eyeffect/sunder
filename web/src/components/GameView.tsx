@@ -4,6 +4,8 @@ import { Hand } from "./Hand";
 import { History } from "./History";
 import { EndGameOverlay, Inspector, type CardInfo } from "./Overlays";
 import { BoardRow, PlayerZone, type FxState } from "./PlayerZone";
+import { AvatarPicker } from "./AvatarPicker";
+import { channelColor } from "../sleeves";
 
 interface GameViewProps {
   snapshot: Snapshot;
@@ -15,6 +17,7 @@ interface GameViewProps {
   onClickFace: () => void;
   onEndTurn: () => void;
   onRestart: () => void;
+  onSetAvatar: (id: string) => void;
 }
 
 export function GameView(props: GameViewProps) {
@@ -23,6 +26,7 @@ export function GameView(props: GameViewProps) {
   const prevRef = useRef<Snapshot | null>(null);
   const [inspectedBoard, setInspectedBoard] = useState<BoardCard | null>(null);
   const [inspectedHand, setInspectedHand] = useState<HandCard | null>(null);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   useEffect(() => {
     const prev = prevRef.current;
@@ -116,6 +120,7 @@ export function GameView(props: GameViewProps) {
           mine
           canEndTurn={snapshot.can_act}
           onEndTurn={props.onEndTurn}
+          onAvatarClick={() => setAvatarOpen(true)}
         />
         <Hand
           hand={snapshot.hand}
@@ -124,6 +129,17 @@ export function GameView(props: GameViewProps) {
           onHover={(c) => setInspectedHand(c)}
         />
       </div>
+      {avatarOpen && (
+        <AvatarPicker
+          current={snapshot.me.avatar ?? "frequency"}
+          ink={channelColor(snapshot.me.sleeve_ink)}
+          onPick={(id) => {
+            props.onSetAvatar(id);
+            setAvatarOpen(false);
+          }}
+          onClose={() => setAvatarOpen(false)}
+        />
+      )}
       {snapshot.winner !== null && (
         <EndGameOverlay snapshot={snapshot} onRestart={props.onRestart} />
       )}

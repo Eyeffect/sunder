@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .. import ai as ai_mod
+from ..avatars import load_avatars
 from ..game import GameState
 from ..lore import rules_text
 from ..schema import load_card_file
@@ -53,6 +54,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
     pass 0 to make AI turns instant (tests)."""
     decks = tuple(decks) if decks else default_decks()
     sleeves = load_manifest()
+    avatars = load_avatars()
     app = FastAPI(title="SUNDER", docs_url="/api/docs")
 
     @app.get("/api/cards")
@@ -75,6 +77,10 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
     @app.get("/api/sleeves")
     def api_sleeves():
         return {"sleeves": list(sleeves.values())}
+
+    @app.get("/api/avatars")
+    def api_avatars():
+        return {"avatars": list(avatars.values())}
 
     @app.get("/api/tags")
     def api_tags():
@@ -179,7 +185,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
                 if mtype == "start" or mtype == "restart":
                     gs = GameState(*decks, seed=msg.get("seed"),
-                                   sleeves=sleeves)
+                                   sleeves=sleeves, avatars=avatars)
                     gs.start_game()
                     await send_state()
 
@@ -239,6 +245,14 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                         await send_error("unknown sleeve")
                         continue
                     gs.players[my_station()].sleeve = sid
+                    await send_state()
+
+                elif mtype == "set_avatar":
+                    aid = msg.get("avatar")
+                    if not isinstance(aid, str) or aid not in avatars:
+                        await send_error("unknown avatar")
+                        continue
+                    gs.players[my_station()].avatar = aid
                     await send_state()
 
                 elif mtype == "ping":
