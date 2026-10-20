@@ -485,7 +485,7 @@ html.no-scrollbar::-webkit-scrollbar {
   inset: 0;
   background: var(--panel);
   border: 1px solid var(--line);
-  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
 }
 .deck-stack.board .deck-card {
   clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);

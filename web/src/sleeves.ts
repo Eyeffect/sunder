@@ -32,8 +32,12 @@ export interface Sleeve {
   css: SleevePalette;
 }
 
-/** theme.css channels referenced by sleeve palettes */
-const CHANNELS: Record<string, string> = {
+/** localStorage key for your own sleeve pick (sent to the server on connect) */
+export const SLEEVE_KEY = "sunder-sleeve";
+
+/** theme.css channels referenced by sleeve palettes (exported for the
+  manifest drift tests — palettes may only name channels listed here) */
+export const CHANNELS: Record<string, string> = {
   amber: "var(--amber)",
   amberDim: "var(--amber-dim)",
   cyan: "var(--cyan)",

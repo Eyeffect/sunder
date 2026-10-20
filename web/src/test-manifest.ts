@@ -9,3 +9,9 @@ export function importServerManifest(): Sleeve[] {
   setSleeves(manifestJson.sleeves as SleeveDef[]);
   return allSleeves();
 }
+
+/** The pattern catalog shipped in the server manifest (`patterns` key). */
+export function manifestPatterns(): string[] {
+  const arr = (manifestJson as unknown as { patterns?: string[] }).patterns;
+  return Array.isArray(arr) ? arr : [];
+}

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   allSleeves,
+  CHANNELS,
   setSleeves,
   sleeveOf,
   type SleeveDef,
 } from "./sleeves";
+import { importServerManifest } from "./test-manifest";
 
 const defs: SleeveDef[] = [
   { id: "alpha", label: "Alpha", pattern: "starburst",
@@ -37,5 +39,28 @@ describe("sleeve registry", () => {
   it("syncs the server manifest", () => {
     setSleeves(defs);
     expect(sleeveOf("beta").pattern).toBe("wavelength");
+  });
+
+  it("offline fallback ids and channels agree with the server manifest", () => {
+    setSleeves(null); // fallback manifest
+    const fallback = allSleeves();
+    const server = importServerManifest();
+    const byId = new Map(server.map((s) => [s.id, s]));
+    for (const fb of fallback) {
+      const live = byId.get(fb.id);
+      expect(live, `${fb.id} missing from server manifest`).toBeTruthy();
+      expect(live!.pattern).toBe(fb.pattern);
+      expect(live!.palette).toEqual(fb.palette);
+      expect(live!.emblem).toBe(fb.emblem);
+    }
+  });
+
+  it("server manifest palettes only use known theme channels", () => {
+    const known = new Set(Object.keys(CHANNELS));
+    for (const s of importServerManifest()) {
+      for (const ch of Object.values(s.palette)) {
+        expect(known.has(ch), `${s.id}: unknown channel "${ch}"`).toBe(true);
+      }
+    }
   });
 });

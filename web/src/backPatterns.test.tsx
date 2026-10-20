@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CardBackArt, patternNames } from "./backPatterns";
-import { importServerManifest } from "./test-manifest";
+import { importServerManifest, manifestPatterns } from "./test-manifest";
 import type { Sleeve } from "./sleeves";
 
 /** render every registered pattern — missing Sleeve components crash here */
@@ -30,4 +30,8 @@ describe("backPatterns", () => {
       expect(s.css).toBeTruthy();
     });
   }
+
+  it("the manifest pattern catalog matches the shipped pattern library", () => {
+    expect(manifestPatterns().sort()).toEqual([...patternNames()].sort());
+  });
 });

@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { ReactNode } from "react";
 import type { Sleeve } from "./sleeves";
 
@@ -232,9 +233,18 @@ export function patternNames(): string[] {
   return Object.keys(PATTERNS);
 }
 
+/** Stable, id-safe hash kept for test vectors; per-instance defs ids come
+  from React's useId so identical sleeves never collide in the DOM. */
+export function hashCode(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+
 /** Shared chrome around any pattern interior. */
 export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
-  const uid = `cb${Math.abs(hashCode(sleeve.id + sleeve.label))}`;
+  const rawId = useId();
+  const uid = `cb${rawId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const inner = (PATTERNS[sleeve.pattern] ?? PATTERNS.wavelength)(sleeve, uid);
   return (
     <svg
@@ -259,11 +269,4 @@ export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
       <circle cx={CX} cy={CY} r="12.5" fill="none" stroke={sleeve.css.ink} strokeWidth="1" opacity="0.3" />
     </svg>
   );
-}
-
-/** stable, id-safe hash for defs ids */
-function hashCode(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return h;
 }

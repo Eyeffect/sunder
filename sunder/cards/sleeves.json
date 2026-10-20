@@ -1,5 +1,13 @@
 {
   "schema_version": 1,
+  "patterns": [
+    "wavelength",
+    "starburst",
+    "staticNoise",
+    "circuit",
+    "vinyl",
+    "spool"
+  ],
   "sleeves": [
     {
       "id": "default",

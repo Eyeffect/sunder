@@ -5,6 +5,7 @@ import { ChangelogView } from "./components/ChangelogView";
 import { CodexView } from "./components/CodexView";
 import { GameView } from "./components/GameView";
 import type { BoardCard, ClientMsg, HandCard, Mode, Snapshot } from "./types";
+import { SLEEVE_KEY } from "./sleeves";
 import { GameSocket } from "./ws";
 
 export default function App() {
@@ -42,7 +43,7 @@ export default function App() {
     sock.onError = (m) => setNotice(m);
     sock.onOpen = () => {
       sock.send({ type: "start" });
-      const saved = localStorage.getItem("sunder-sleeve");
+      const saved = localStorage.getItem(SLEEVE_KEY);
       if (saved) sock.send({ type: "set_sleeve", sleeve: saved });
     };
     sock.connect();
@@ -137,14 +138,14 @@ export default function App() {
 
   const setSleeve = useCallback((id: string) => {
     try {
-      localStorage.setItem("sunder-sleeve", id);
+      localStorage.setItem(SLEEVE_KEY, id);
     } catch { /* storage unavailable */ }
     send({ type: "set_sleeve", sleeve: id });
   }, [send]);
 
   let savedSleeve: string | null = null;
   try {
-    savedSleeve = localStorage.getItem("sunder-sleeve");
+    savedSleeve = localStorage.getItem(SLEEVE_KEY);
   } catch { /* storage unavailable */ }
 
   const mySleeve = snapshot?.players?.[0]?.sleeve ?? savedSleeve ?? "ember";

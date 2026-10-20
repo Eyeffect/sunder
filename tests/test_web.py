@@ -1,3 +1,5 @@
+import re
+
 from fastapi.testclient import TestClient
 
 from sunder.server.app import create_app
@@ -277,3 +279,30 @@ def test_set_sleeve_rejects_unknown_id():
         assert "sleeve" in err["message"]
         ws.send_json({"type": "ping"})
         assert ws.receive_json()["type"] == "pong"
+
+
+def test_sleeves_manifest_schema():
+    """Structure guard for sleeves.json: palette *channels* resolve
+    client-side against web/src/sleeves.ts CHANNELS (tested there), and
+    pattern coverage is cross-checked there too (the shipped pattern
+    library must match this catalog exactly)."""
+    import json as _json
+
+    from sunder.server import app as app_mod
+
+    manifest = _json.loads((app_mod.CARDS_DIR / "sleeves.json").read_text())
+    assert isinstance(manifest.get("schema_version"), int)
+    patterns = manifest.get("patterns")
+    assert isinstance(patterns, list) and len(patterns) > 0
+    sleeves = manifest["sleeves"]
+    assert sleeves, "manifest must define at least one sleeve"
+    for s in sleeves:
+        assert _json.dumps(s)  # dict-shaped entry
+        assert re.fullmatch(r"[a-z][a-z0-9_]*", s["id"]), s["id"]
+        assert s.get("label"), f"{s['id']}: missing label"
+        assert s.get("pattern") in patterns, f"{s['id']}: pattern not in catalog"
+        palette = s.get("palette") or {}
+        assert {"ink", "glow", "paper"} <= set(palette), s["id"]
+        assert all(isinstance(v, str) and v for v in palette.values()), s["id"]
+    ids = [s["id"] for s in sleeves]
+    assert len(ids) == len(set(ids)), "duplicate sleeve ids"
