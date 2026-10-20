@@ -114,26 +114,39 @@ where each table lives.
 ## Adding a card-back sleeve
 
 Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`. The
-server serves the manifest at `GET /api/sleeves`, validates WS `set_sleeve`
-ids against it, and stores the chosen sleeve per station (`players[*].sleeve`
-in snapshots). The client fetches the same manifest for the SLEEVES gallery
-in the codex and falls back to a hard-coded 3-sleeve list offline.
+server loads it via `sunder/sleeves.py` (serves `GET /api/sleeves`,
+validates WS `set_sleeve` ids against it) and stores the chosen sleeve per
+station (`players[*].sleeve` in snapshots). The client fetches the same
+manifest for the SLEEVES gallery in the codex and falls back to a
+hard-coded 3-sleeve list offline.
 
 1. Add an entry: `{"id": "mineral", "label": "Mineral", "pattern":
    "staticNoise", "palette": {"ink": "cyan", "glow": "green", "paper":
    "voidDeep"}, "emblem": "◆"}`.
-2. `pattern` keys into the SVG pattern library in `web/
-   /src/backPatterns.tsx` (`wavelength`, `starburst`, `staticNoise`,
-   `circuit`, `vinyl`, `spool`) — add a new component there only if you
-   want a genuinely new *art style*.
+2. `pattern` keys into the SVG pattern library in `web/src/
+   backPatterns.tsx` (`wavelength`, `starburst`, `staticNoise`, `circuit`,
+   `vinyl`, `spool`, `mixtape`, `vhs`, `topo`, `barcode`) — add a new
+   component there only if you want a genuinely new *art style*. The
+   manifest's top-level `patterns` catalog must list every shipped
+   pattern; the TS test suite asserts it matches the library exactly, and
+   the Python test suite validates manifest structure against it.
 3. `palette` channels reference theme.css colors by name (`amber`, `cyan`,
    `magenta`, `green`, `cinder`, `danger`, `text`, `voidDeep`, `panel`)
    resolved client-side in `web/src/sleeves.ts` (`CHANNELS`) — palettes
-   never hardcode hex, so sleeves stay themable.
-4. Done. Tests guard the wiring both sides: `web/src/backPatterns.test.tsx`
+   never hardcode hex, so sleeves stay themable. The TS drift test
+   validates every manifest channel against `CHANNELS`.
+4. Optional `"plane": "<plane-id>"` — that deck (any playlist whose cards
+   carry the plane) then wears this sleeve as its **default** back
+   (`sunder/sleeves.py:seat_sleeve` resolves deck-plane → sleeve, falling
+   back to the legacy ember/static seat colors for unknown planes). Your
+   own `set_sleeve` pick still overrides your station; the opponent's deck
+   keeps its plane's back.
+5. Done. Tests guard the wiring both sides: `web/src/backPatterns.test.tsx`
    (every manifest pattern must have a rendered component; renders them
-   all), `web/src/sleeves.test.ts` (channel resolution + fallback),
-   `tests/test_web.py` (endpoint + `set_sleeve` acceptance).
+   all), `web/src/sleeves.test.ts` (channel resolution, fallback↔manifest
+   parity), `tests/test_sleeves.py` (deck-bound defaults), and
+   `tests/test_web.py` (endpoint + `set_sleeve` acceptance + manifest
+   schema).
 
 ## Registry safety
 
