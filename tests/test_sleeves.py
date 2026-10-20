@@ -79,7 +79,10 @@ def test_manifest_round_trip_with_plane(tmp_path):
          "plane": "sporewake"},
     ]}))
     manifest = load_manifest(p)
-    weird = load_card_file(CARDS_DIR / "sporewake.json") if (
-        CARDS_DIR / "sporewake.json").exists() else None
-    if weird is not None:
-        assert seat_sleeve(manifest, weird, 1) == "spore"
+    # no sporewake.json deck ships yet — synthesize one from its plane id
+    deck = [parse_card({"id": "sp_1", "name": "Spore", "set": "t",
+                        "plane": "sporewake", "rarity": "COMMON", "cost": 1,
+                        "type": "TRACK", "abilities": []})]
+    assert seat_sleeve(manifest, deck, 1) == "spore"
+    # planes outside this manifest still fall back to the seat color
+    assert seat_sleeve(manifest, [card(id="a", name="A")], 1) == "static"

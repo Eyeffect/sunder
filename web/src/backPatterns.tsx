@@ -360,14 +360,6 @@ export function patternNames(): string[] {
   return Object.keys(PATTERNS);
 }
 
-/** Stable, id-safe hash kept for test vectors; per-instance defs ids come
-  from React's useId so identical sleeves never collide in the DOM. */
-export function hashCode(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return h;
-}
-
 /** Shared chrome around any pattern interior. */
 export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
   const rawId = useId();

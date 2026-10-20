@@ -55,10 +55,22 @@ export interface VersionEntry {
 
 export const VERSIONS: VersionEntry[] = [
   {
+    version: "0.3.7",
+    codename: "Album Cover",
+    date: "2026-10-20",
+    current: true,
+    changes: [
+      { type: "added", text: "Card sleeves: every deck comes wrapped in its own die-cut back — 10 hand-drawn SVG patterns, 12 sleeves" },
+      { type: "added", text: "Browse and pick your sleeve in the codex SLEEVES tab; your station wears it, your opponent sees it" },
+      { type: "added", text: "Deck-bound sleeves: playlists carry their plane's livery (Neon Frequency, Cinderworks, Driftglass, Sporewake)" },
+      { type: "changed", text: "Deck stacks render the real sleeve art instead of a plain outline" },
+      { type: "fixed", text: "Card-back chrome squared to the shared 8px cut geometry, inner frame retired" },
+    ],
+  },
+  {
     version: "0.3.6.1",
     codename: "Feedback",
     date: "2026-10-20",
-    current: true,
     changes: [
       { type: "changed", text: "Under-the-hood polish build — same game, new docs, care where you can't see" },
     ],
@@ -176,7 +188,6 @@ export interface RoadmapItem {
 
 export const ROADMAP: RoadmapItem[] = [
   { status: "in_progress", text: "Responsive UI" },
-  { status: "in_progress", text: "Card sleeves" },
   { status: "in_progress", text: "LLM card generation" },
   { status: "planned", text: "Economy, saved decks" },
   { status: "planned", text: "Profiles" },

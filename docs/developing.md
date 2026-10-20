@@ -113,11 +113,12 @@ where each table lives.
 
 ## Adding a card-back sleeve
 
-Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`. The
-server loads it via `sunder/sleeves.py` (serves `GET /api/sleeves`,
-validates WS `set_sleeve` ids against it) and stores the chosen sleeve per
-station (`players[*].sleeve` in snapshots). The client fetches the same
-manifest for the SLEEVES gallery in the codex and falls back to a
+Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`.
+`sunder/sleeves.py` loads the manifest at server start and serves it at
+`GET /api/sleeves`, validates WS `set_sleeve` ids against it, and stores
+the chosen sleeve per station (`players[*].sleeve` in snapshots) — restart
+the Python server to pick up edits to the file. The client fetches the
+same manifest for the SLEEVES gallery in the codex and falls back to a
 hard-coded 3-sleeve list offline.
 
 1. Add an entry: `{"id": "mineral", "label": "Mineral", "pattern":
