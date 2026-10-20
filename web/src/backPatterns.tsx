@@ -252,9 +252,9 @@ export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
         </radialGradient>
       </defs>
       <rect width={W} height={H} fill={`url(#vig-${uid})`} />
-      <rect x="3.5" y="3.5" width={W - 7} height={H - 7} rx="7" fill="none" stroke={sleeve.css.ink} strokeWidth="2" />
-      <rect x="7" y="7" width={W - 14} height={H - 14} rx="4" fill="none" stroke={sleeve.css.ink} strokeWidth="0.7" opacity="0.35" />
-      {[[7.5, 7.5], [W - 7.5, 7.5], [7.5, H - 7.5], [W - 7.5, H - 7.5]].map(([x, y], i) => (
+      <rect x="3.5" y="3.5" width={W - 7} height={H - 7} fill="none" stroke={sleeve.css.ink} strokeWidth="2" />
+      <rect x="8" y="8" width={W - 16} height={H - 16} fill="none" stroke={sleeve.css.ink} strokeWidth="0.7" opacity="0.35" />
+      {[[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]].map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r="1.5" fill={sleeve.css.ink} opacity="0.7" />
       ))}
       <circle cx={CX} cy={CY} r="12.5" fill="none" stroke={sleeve.css.ink} strokeWidth="1" opacity="0.3" />
