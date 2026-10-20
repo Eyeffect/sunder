@@ -156,11 +156,14 @@ Glyphs live in `sunder/cards/avatars.json` (`{id, label, glyph}`), loaded by
 icon without changing the glyph. The picker opens from your own station
 avatar and the choice persists in `localStorage` under `sunder-avatar`.
 
-Adding an icon is one JSON entry — no artwork: `{"id": "mineral", "label":
-"Mineral", "glyph": "◆"}`. Keep `web/src/avatars.ts` (`FALLBACK_AVATARS`)
-in sync for offline boot; `web/src/avatars.test.ts` asserts parity with the
-server manifest. `tests/test_avatars.py` guards the manifest shape and
-`tests/test_web.py` covers the endpoint, `set_avatar`, and rejection.
+Adding an icon starts with one JSON entry: `{"id": "mineral", "label":
+"Mineral", "glyph": "◆"}`. The client renders hand-tuned SVG geometry from
+`web/src/components/AvatarGlyph.tsx` so every glyph is optically centred
+and platform-independent; unknown ids fall back to the manifest `glyph`
+text. Keep `web/src/avatars.ts` (`FALLBACK_AVATARS`) in sync for offline
+boot; `web/src/avatars.test.ts` asserts parity with the server manifest.
+`tests/test_avatars.py` guards the manifest shape and `tests/test_web.py`
+covers the endpoint, `set_avatar`, and rejection.
 
 ## Card faces
 

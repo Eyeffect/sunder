@@ -26,7 +26,7 @@ describe("PlayerZone avatar", () => {
       <PlayerZone title="YOUR STATION" player={player} mine onAvatarClick={onClick} />,
     );
     const btn = getByRole("button", { name: "Choose profile icon" });
-    expect(btn).toHaveTextContent("⌁");
+    expect(btn.querySelector("svg")).toBeTruthy();
     expect(btn).toHaveStyle({ color: "var(--cyan)" });
     fireEvent.click(btn);
     expect(onClick).toHaveBeenCalledTimes(1);

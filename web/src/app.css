@@ -191,6 +191,14 @@ html.no-scrollbar::-webkit-scrollbar {
   line-height: 1;
   flex-shrink: 0;
 }
+.avatar-glyph {
+  width: 20px;
+  height: 20px;
+  display: block;
+  font-size: 18px;
+  line-height: 20px;
+  text-align: center;
+}
 .avatar-frame-btn {
   padding: 0;
   font-family: inherit;
@@ -720,6 +728,8 @@ html.no-scrollbar::-webkit-scrollbar {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  justify-content: center;
+  min-height: 62px;
   padding: 8px 4px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -729,8 +739,12 @@ html.no-scrollbar::-webkit-scrollbar {
   cursor: pointer;
 }
 .avatar-option-glyph {
+  width: 24px;
+  height: 24px;
+  display: block;
   font-size: 22px;
-  line-height: 1;
+  line-height: 24px;
+  text-align: center;
   color: var(--avatar-ink, var(--amber));
 }
 .avatar-option-label {

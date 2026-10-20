@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { FALLBACK_AVATARS, type AvatarDef } from "../avatars";
+import { AvatarGlyph } from "./AvatarGlyph";
 
 export function AvatarPicker({
   current,
@@ -75,7 +76,7 @@ export function AvatarPicker({
               title={a.label}
               autoFocus={a.id === current}
             >
-              <span className="avatar-option-glyph">{a.glyph}</span>
+              <AvatarGlyph id={a.id} glyph={a.glyph} className="avatar-option-glyph" />
               <span className="avatar-option-label">{a.label}</span>
             </button>
           ))}

@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { BoardCard, PlayerState } from "../types";
 import { channelColor, sleeveOf } from "../sleeves";
+import { AvatarGlyph } from "./AvatarGlyph";
 import { Card, VuMeter } from "./Card";
 import { CardBack } from "./CardBack";
 
@@ -126,7 +127,7 @@ export function PlayerZone({
           aria-label="Choose profile icon"
           title="Choose profile icon"
         >
-          {avatarGlyph}
+          <AvatarGlyph id={player.avatar} glyph={avatarGlyph} className="avatar-glyph" />
         </button>
       ) : (
         <div
@@ -134,7 +135,7 @@ export function PlayerZone({
           style={avatarStyle}
           aria-hidden="true"
         >
-          {avatarGlyph}
+          <AvatarGlyph id={player.avatar} glyph={avatarGlyph} className="avatar-glyph" />
         </div>
       )}
       <div className="side-info">
