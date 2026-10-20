@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SleeveGallery } from "./CodexView";
 import { CardBack } from "./CardBack";
@@ -23,15 +23,17 @@ describe("SleeveGallery", () => {
         });
       }),
     );
-    render(<SleeveGallery active="ember" />);
+    const { container } = render(<SleeveGallery active="ember" />);
+    const labelOf = (re: RegExp) =>
+      [...container.querySelectorAll<HTMLElement>(".sleeve-tile-label")]
+        .find((n) => re.test(n.textContent ?? ""));
     await waitFor(() => {
       for (const d of serverDefs) {
-        expect(screen.getByText(new RegExp(`^${d.label}$`, "i"))).toBeInTheDocument();
+        expect(labelOf(new RegExp(`^${d.label}$`, "i"))).toBeTruthy();
       }
     });
-    expect(screen.getByText(/^ember$/i))
-      .toHaveClass("sleeve-tile-label");
-    const active = screen.getByText(/^ember$/i).parentElement as HTMLElement;
+    expect(labelOf(/^ember$/i)).toBeTruthy();
+    const active = labelOf(/^ember$/i)!.parentElement as HTMLElement;
     expect(active.className).toContain("active");
   });
 
@@ -40,8 +42,13 @@ describe("SleeveGallery", () => {
       Promise.resolve({ json: () => Promise.resolve({ sleeves: serverDefs }) }),
     ));
     const onPick = vi.fn();
-    render(<SleeveGallery active="ember" onPick={onPick} />);
-    const target = await screen.findByText(/^spool$/i);
+    const { container } = render(<SleeveGallery active="ember" onPick={onPick} />);
+    const target = await waitFor(() => {
+      const el = [...container.querySelectorAll<HTMLElement>(".sleeve-tile-label")]
+        .find((n) => /^spool$/i.test(n.textContent ?? ""));
+      if (!el) throw new Error("spool label not rendered yet");
+      return el;
+    });
     fireEvent.click(target.parentElement as HTMLElement);
     expect(onPick).toHaveBeenCalledWith("spool");
   });
