@@ -13,6 +13,7 @@ export function CardBack({
   const s = typeof sleeve === "string" ? sleeveOf(sleeve) : sleeve;
   const cls = `card-back card-back--${s.id}`;
   const style = {
+    "--sleeve-ink": s.css.ink,
     "--sleeve-primary": s.css.ink,
     "--sleeve-glow": s.css.glow,
     "--sleeve-paper": s.css.paper,
