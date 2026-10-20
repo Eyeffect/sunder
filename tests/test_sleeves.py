@@ -73,8 +73,8 @@ def test_load_manifest_recovers_from_malformed(tmp_path, monkeypatch):
 
 def test_manifest_round_trip_with_plane(tmp_path):
     p = tmp_path / "m.json"
-    p.write_text(json.dumps({"schema_version": 1, "sleeves": [
-        {"id": "spore", "label": "Sporewake", "pattern": "wavelength",
+    p.write_text(json.dumps({"schema_version": 2, "sleeves": [
+        {"id": "spore", "label": "Sporewake",
          "palette": {"ink": "green", "glow": "green", "paper": "voidDeep"},
          "plane": "sporewake"},
     ]}))

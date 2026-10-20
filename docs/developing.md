@@ -113,29 +113,24 @@ where each table lives.
 
 ## Adding a card-back sleeve
 
-Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`.
-`sunder/sleeves.py` loads the manifest at server start and serves it at
-`GET /api/sleeves`, validates WS `set_sleeve` ids against it, and stores
-the chosen sleeve per station (`players[*].sleeve` in snapshots) — restart
-the Python server to pick up edits to the file. The client fetches the
-same manifest for the SLEEVES gallery in the codex and falls back to a
-hard-coded 3-sleeve list offline.
+Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`
+(`schema_version` 2, per-sleeve art). `sunder/sleeves.py` loads the
+manifest at server start and serves it at `GET /api/sleeves`, validates
+WS `set_sleeve` ids against it, and stores the chosen sleeve per station
+(`players[*].sleeve` in snapshots) — restart the Python server to pick up
+edits to the file. The client fetches the same manifest for the SLEEVES
+gallery in the codex and falls back to a hard-coded 3-sleeve list offline.
 
-1. Add an entry: `{"id": "mineral", "label": "Mineral", "pattern":
-   "staticNoise", "palette": {"ink": "cyan", "glow": "green", "paper":
-   "voidDeep"}, "emblem": "◆"}`.
-2. `pattern` keys into the SVG pattern library in `web/src/
-   backPatterns.tsx` (`wavelength`, `starburst`, `staticNoise`, `circuit`,
-   `vinyl`, `spool`, `mixtape`, `vhs`, `topo`, `barcode`) — add a new
-   component there only if you want a genuinely new *art style*. The
-   manifest's top-level `patterns` catalog must list every shipped
-   pattern; the TS test suite asserts it matches the library exactly, and
-   the Python test suite validates manifest structure against it.
+1. Add an entry: `{"id": "mineral", "label": "Mineral", "palette": {"ink":
+   "cyan", "glow": "green", "paper": "voidDeep"}, "emblem": "◆"}`.
+2. Create the art file `web/src/art/sleeves/mineral.svg` — a 90×120 SVG
+   with a single root element (see *Editing card-back art* below). Every
+   manifest sleeve needs exactly one art file; the TS test suite asserts
+   the id sets match on both sides.
 3. `palette` channels reference theme.css colors by name (`amber`, `cyan`,
    `magenta`, `green`, `cinder`, `danger`, `text`, `voidDeep`, `panel`)
    resolved client-side in `web/src/sleeves.ts` (`CHANNELS`) — palettes
-   never hardcode hex, so sleeves stay themable. The TS drift test
-   validates every manifest channel against `CHANNELS`.
+   never hardcode hex, so sleeves stay themable.
 4. Optional `"plane": "<plane-id>"` — that deck (any playlist whose cards
    carry the plane) then wears this sleeve as its **default** back
    (`sunder/sleeves.py:seat_sleeve` resolves deck-plane → sleeve, falling
@@ -143,11 +138,42 @@ hard-coded 3-sleeve list offline.
    own `set_sleeve` pick still overrides your station; the opponent's deck
    keeps its plane's back.
 5. Done. Tests guard the wiring both sides: `web/src/backPatterns.test.tsx`
-   (every manifest pattern must have a rendered component; renders them
-   all), `web/src/sleeves.test.ts` (channel resolution, fallback↔manifest
-   parity), `tests/test_sleeves.py` (deck-bound defaults), and
-   `tests/test_web.py` (endpoint + `set_sleeve` acceptance + manifest
-   schema).
+   (art registry ↔ manifest parity, sentinel-color / forbidden-markup
+   / unique-defs-id guards, renders every back), `web/src/sleeves.test.ts`
+   (channel resolution, fallback↔manifest parity), `tests/test_sleeves.py`
+   (deck-bound defaults), and `tests/test_web.py` (endpoint + `set_sleeve`
+   acceptance + manifest schema).
+
+## Editing card-back art (Inkscape)
+
+Card art is **hand-editable SVG source**, one file per sleeve:
+`web/src/art/sleeves/<sleeve-id>.svg` (90×120 viewBox). The rim, rivets,
+vignette and emblem stay in code (`web/src/backPatterns.tsx`), so files
+only carry the interior art.
+
+Open in Inkscape, edit, save as **Plain SVG** — the dev server picks the
+change up instantly (`VITE_API_TARGET=http://127.0.0.1:8100 yarn dev` in
+`web/`, then CODEX → SLEEVES); otherwise rebuild (`yarn build`).
+
+Rules (enforced by `web/src/backPatterns.test.tsx`):
+
+- Keep the `viewBox="0 0 90 120"` and a single root `<svg>`; one wrapping
+  `<g>` is conventional.
+- Paint **only** with the three palette sentinels, remapped to the
+  sleeve's theme at runtime: `#ffb545` → `var(--sleeve-ink)`,
+  `#5ff2e0` → `var(--sleeve-glow)`, `#030304` → `var(--sleeve-paper)`.
+  Use opacity (or gradients over the paper) for shades.
+- No scripts, event handlers, external hrefs, embedded images, `<style>`
+  blocks, or `class` attributes — Firefox/Chrome render what the code
+  permits.
+- Text: set any font family, the loader normalizes `font-family` to the
+  theme's mono face; sizes/spacings are preserved.
+- Gradient/filter `id`s are namespaced per card instance automatically
+  (`id="mt"` is fine; duplicate ids across backs were the old bug class).
+
+An XML declaration and comments are stripped from the bundled copy and
+Inkscape's `inkscape:`/`sodipodi:` leftovers are ignored at load time, but
+prefer saving as Plain SVG so sources stay small.
 
 ## Registry safety
 

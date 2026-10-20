@@ -154,6 +154,6 @@ pytest tests -x
 ## Status / notes
 
 - v0.3.6.1 — changelog inside the game UI (Changelog tab) with a short roadmap.
-- Card backs are a data-driven sleeve system: SVG patterns keyed from `sunder/cards/sleeves.json`, browseable + pickable in the codex (SLEEVES tab), carried server-side per station so opponents see your back too. Adding a sleeve = one JSON entry.
+- Card backs are hand-editable SVG art (`web/src/art/sleeves/*.svg`), one file per sleeve, themed via palette channels from `sunder/cards/sleeves.json`. Browse + pick in the codex (SLEEVES tab), carried server-side per station so opponents see your back too. Adding a sleeve = one JSON entry + one SVG.
 - Second station starts with a Signal Spike — the coin analog for the first-turn tempo advantage.
 - AMP is a "trigger macro" keyword: implemented engine-side, it buffs the aired card +1/+1 for every Broadcast aired (counting itself, either station, and DOUBLE_NEXT_TRIGGER doubles). ECHO is declarative — the card's ON_DEATH ability carries the behavior, and schema validation guarantees every ECHO card actually has one.

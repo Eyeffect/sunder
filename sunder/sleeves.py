@@ -13,13 +13,13 @@ CARDS_DIR = Path(__file__).parent / "cards"
 SLEEVE_PATH = CARDS_DIR / "sleeves.json"
 
 _FALLBACK_SLEEVES = [
-    {"id": "default", "label": "Frequency", "pattern": "wavelength",
+    {"id": "default", "label": "Frequency",
      "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
      "emblem": "◉"},
-    {"id": "ember", "label": "Ember", "pattern": "starburst",
+    {"id": "ember", "label": "Ember",
      "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
      "emblem": "◉"},
-    {"id": "static", "label": "Static", "pattern": "staticNoise",
+    {"id": "static", "label": "Static",
      "palette": {"ink": "magenta", "glow": "magenta", "paper": "voidDeep"},
      "emblem": "◉"},
 ]

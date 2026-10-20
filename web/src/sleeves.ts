@@ -3,8 +3,8 @@
   The manifest of sleeves lives server-side in `sunder/cards/sleeves.json`
   (validated by the server on WS `set_sleeve`, served over `/api/sleeves`).
   This module holds a synced copy of that manifest for rendering. Adding a
-  new sleeve = one entry in sleeves.json; adding a new *pattern style* =
-  one entry in `backPatterns.tsx`.
+  new sleeve = one entry in sleeves.json + one art file in
+  `web/src/art/sleeves/<id>.svg`.
 */
 
 export interface SleevePalette {
@@ -16,18 +16,18 @@ export interface SleevePalette {
 export interface SleeveDef {
   id: string;
   label: string;
-  pattern: string;
   palette: { ink: string; glow: string; paper: string };
   emblem?: string;
+  plane?: string;
 }
 
 /** A manifest sleeve with theme channels resolved to CSS variables. */
 export interface Sleeve {
   id: string;
   label: string;
-  pattern: string;
   palette: SleevePalette;
   emblem?: string;
+  plane?: string;
   /** concrete CSS color strings for styling hooks */
   css: SleevePalette;
 }
@@ -52,11 +52,11 @@ export const CHANNELS: Record<string, string> = {
 
 /** Offline/boot fallback mirroring the server manifest. */
 const FALLBACK: SleeveDef[] = [
-  { id: "default", label: "Frequency", pattern: "wavelength",
+  { id: "default", label: "Frequency",
     palette: { ink: "amber", glow: "amber", paper: "voidDeep" }, emblem: "◉" },
-  { id: "ember", label: "Ember", pattern: "starburst",
+  { id: "ember", label: "Ember",
     palette: { ink: "amber", glow: "amber", paper: "voidDeep" }, emblem: "◉" },
-  { id: "static", label: "Static", pattern: "staticNoise",
+  { id: "static", label: "Static",
     palette: { ink: "magenta", glow: "magenta", paper: "voidDeep" }, emblem: "◉" },
 ];
 

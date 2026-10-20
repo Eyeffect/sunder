@@ -11,7 +11,7 @@ export function CardBack({
   secret?: boolean;
 }) {
   const s = typeof sleeve === "string" ? sleeveOf(sleeve) : sleeve;
-  const cls = `card-back card-back--${s.pattern}`;
+  const cls = `card-back card-back--${s.id}`;
   const style = {
     "--sleeve-primary": s.css.ink,
     "--sleeve-glow": s.css.glow,

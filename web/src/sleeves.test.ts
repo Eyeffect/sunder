@@ -9,9 +9,9 @@ import {
 import { importServerManifest } from "./test-manifest";
 
 const defs: SleeveDef[] = [
-  { id: "alpha", label: "Alpha", pattern: "starburst",
+  { id: "alpha", label: "Alpha",
     palette: { ink: "amber", glow: "cinder", paper: "panel" }, emblem: "A" },
-  { id: "beta", label: "Beta", pattern: "wavelength",
+  { id: "beta", label: "Beta",
     palette: { ink: "cyan", glow: "green", paper: "voidDeep" } },
 ];
 
@@ -38,7 +38,8 @@ describe("sleeve registry", () => {
 
   it("syncs the server manifest", () => {
     setSleeves(defs);
-    expect(sleeveOf("beta").pattern).toBe("wavelength");
+    expect(sleeveOf("beta").id).toBe("beta");
+    expect(sleeveOf("beta").css.ink).toBe("var(--cyan)");
   });
 
   it("offline fallback ids and channels agree with the server manifest", () => {
@@ -49,7 +50,6 @@ describe("sleeve registry", () => {
     for (const fb of fallback) {
       const live = byId.get(fb.id);
       expect(live, `${fb.id} missing from server manifest`).toBeTruthy();
-      expect(live!.pattern).toBe(fb.pattern);
       expect(live!.palette).toEqual(fb.palette);
       expect(live!.emblem).toBe(fb.emblem);
     }

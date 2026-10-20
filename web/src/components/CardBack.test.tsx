@@ -15,6 +15,6 @@ describe("CardBack", () => {
 
   it("falls back to the default sleeve for unknown ids", () => {
     const { container } = render(<CardBack sleeve="nope" />);
-    expect(container.querySelector(".card-back--wavelength")).toBeTruthy();
+    expect(container.querySelector(".card-back--default")).toBeTruthy();
   });
 });

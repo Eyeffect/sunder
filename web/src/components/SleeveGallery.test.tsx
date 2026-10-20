@@ -4,12 +4,10 @@ import { SleeveGallery } from "./CodexView";
 import { CardBack } from "./CardBack";
 import { importServerManifest } from "../test-manifest";
 import type { SleeveDef } from "../sleeves";
-import { sleeveOf } from "../sleeves";
 
 const serverDefs: SleeveDef[] = importServerManifest().map((s) => ({
   id: s.id,
   label: s.label,
-  pattern: s.pattern,
   palette: s.palette,
   emblem: s.emblem,
 }));
@@ -54,7 +52,7 @@ describe("CardBack gallery rendering", () => {
     for (const s of importServerManifest()) {
       const { container, unmount } = render(<CardBack sleeve={s.id} />);
       expect(
-        container.querySelector(`.card-back--${sleeveOf(s.id).pattern}`),
+        container.querySelector(`.card-back--${s.id}`),
       ).toBeTruthy();
       unmount();
     }

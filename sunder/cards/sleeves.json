@@ -1,22 +1,9 @@
 {
-  "schema_version": 1,
-  "patterns": [
-    "wavelength",
-    "starburst",
-    "staticNoise",
-    "circuit",
-    "vinyl",
-    "spool",
-    "mixtape",
-    "vhs",
-    "topo",
-    "barcode"
-  ],
+  "schema_version": 2,
   "sleeves": [
     {
       "id": "default",
       "label": "Frequency",
-      "pattern": "wavelength",
       "palette": {
         "ink": "amber",
         "glow": "amber",
@@ -27,7 +14,6 @@
     {
       "id": "ember",
       "label": "Ember",
-      "pattern": "starburst",
       "palette": {
         "ink": "amber",
         "glow": "amber",
@@ -38,7 +24,6 @@
     {
       "id": "static",
       "label": "Static",
-      "pattern": "staticNoise",
       "palette": {
         "ink": "magenta",
         "glow": "magenta",
@@ -49,7 +34,6 @@
     {
       "id": "neonfreq",
       "label": "Neon Frequency",
-      "pattern": "wavelength",
       "palette": {
         "ink": "cyan",
         "glow": "cyan",
@@ -61,7 +45,6 @@
     {
       "id": "cinderworks",
       "label": "Cinderworks",
-      "pattern": "circuit",
       "palette": {
         "ink": "cinder",
         "glow": "cinder",
@@ -73,7 +56,6 @@
     {
       "id": "driftglass",
       "label": "Driftglass",
-      "pattern": "vinyl",
       "palette": {
         "ink": "cyan",
         "glow": "green",
@@ -85,7 +67,6 @@
     {
       "id": "spool",
       "label": "Spool",
-      "pattern": "spool",
       "palette": {
         "ink": "text",
         "glow": "cyan",
@@ -96,7 +77,6 @@
     {
       "id": "sporewake",
       "label": "Sporewake",
-      "pattern": "topo",
       "palette": {
         "ink": "green",
         "glow": "cyan",
@@ -108,7 +88,6 @@
     {
       "id": "mixtape",
       "label": "Mixtape",
-      "pattern": "mixtape",
       "palette": {
         "ink": "text",
         "glow": "magenta",
@@ -119,7 +98,6 @@
     {
       "id": "vhs",
       "label": "VHS",
-      "pattern": "vhs",
       "palette": {
         "ink": "green",
         "glow": "amber",
@@ -130,7 +108,6 @@
     {
       "id": "topo",
       "label": "Topograf",
-      "pattern": "topo",
       "palette": {
         "ink": "cyan",
         "glow": "green",
@@ -141,7 +118,6 @@
     {
       "id": "barcode",
       "label": "Call Sign",
-      "pattern": "barcode",
       "palette": {
         "ink": "text",
         "glow": "amber",

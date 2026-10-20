@@ -243,7 +243,7 @@ def test_sleeves_endpoint():
     sleeves = r.json()["sleeves"]
     ids = {s["id"] for s in sleeves}
     assert {"ember", "static", "default"} <= ids
-    assert all(s.get("label") and s.get("pattern") and s.get("palette") for s in sleeves)
+    assert all(s.get("label") and s.get("palette") for s in sleeves)
 
 
 def test_sleeves_manifest_file_matches_fallback_ids(monkeypatch):
@@ -284,23 +284,20 @@ def test_set_sleeve_rejects_unknown_id():
 def test_sleeves_manifest_schema():
     """Structure guard for sleeves.json: palette *channels* resolve
     client-side against web/src/sleeves.ts CHANNELS (tested there), and
-    pattern coverage is cross-checked there too (the shipped pattern
-    library must match this catalog exactly)."""
+    per-sleeve art files are cross-checked there too (sleeve id →
+    web/src/art/sleeves/<id>.svg)."""
     import json as _json
 
     from sunder import sleeves as sleeves_mod
 
     manifest = _json.loads((sleeves_mod.SLEEVE_PATH).read_text())
     assert isinstance(manifest.get("schema_version"), int)
-    patterns = manifest.get("patterns")
-    assert isinstance(patterns, list) and len(patterns) > 0
     sleeves = manifest["sleeves"]
     assert sleeves, "manifest must define at least one sleeve"
     for s in sleeves:
         assert _json.dumps(s)  # dict-shaped entry
         assert re.fullmatch(r"[a-z][a-z0-9_]*", s["id"]), s["id"]
         assert s.get("label"), f"{s['id']}: missing label"
-        assert s.get("pattern") in patterns, f"{s['id']}: pattern not in catalog"
         palette = s.get("palette") or {}
         assert {"ink", "glow", "paper"} <= set(palette), s["id"]
         assert all(isinstance(v, str) and v for v in palette.values()), s["id"]
