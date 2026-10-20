@@ -12,8 +12,7 @@ export function DeckStack({
   count: number;
   size?: "compact" | "board";
 }) {
-  const s = sleeveOf(sleeve);
-  const style = { "--accent": s.colors.primary } as CSSProperties;
+  const style = { "--accent": sleeveOf(sleeve).css.ink } as CSSProperties;
   return (
     <div className={`deck-stack ${size}`} title={`${count} cards in deck`}>
       <div className="deck-card back-3" />

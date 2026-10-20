@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "sleeves": [
+    {
+      "id": "default",
+      "label": "Frequency",
+      "pattern": "wavelength",
+      "palette": { "ink": "amber", "glow": "amber", "paper": "voidDeep" },
+      "emblem": "◉"
+    },
+    {
+      "id": "ember",
+      "label": "Ember",
+      "pattern": "starburst",
+      "palette": { "ink": "amber", "glow": "amber", "paper": "voidDeep" },
+      "emblem": "◉"
+    },
+    {
+      "id": "static",
+      "label": "Static",
+      "pattern": "staticNoise",
+      "palette": { "ink": "magenta", "glow": "magenta", "paper": "voidDeep" },
+      "emblem": "◉"
+    },
+    {
+      "id": "neonfreq",
+      "label": "Neon Frequency",
+      "pattern": "wavelength",
+      "palette": { "ink": "cyan", "glow": "cyan", "paper": "voidDeep" },
+      "emblem": "≈"
+    },
+    {
+      "id": "cinderworks",
+      "label": "Cinderworks",
+      "pattern": "circuit",
+      "palette": { "ink": "cinder", "glow": "cinder", "paper": "voidDeep" },
+      "emblem": "⌁"
+    },
+    {
+      "id": "driftglass",
+      "label": "Driftglass",
+      "pattern": "vinyl",
+      "palette": { "ink": "cyan", "glow": "green", "paper": "voidDeep" },
+      "emblem": "◍"
+    },
+    {
+      "id": "spool",
+      "label": "Spool",
+      "pattern": "spool",
+      "palette": { "ink": "text", "glow": "cyan", "paper": "voidDeep" },
+      "emblem": "◎"
+    }
+  ]
+}

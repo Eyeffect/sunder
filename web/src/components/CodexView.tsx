@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { planeMeta } from "../planes";
+import type { SleeveDef } from "../sleeves";
+import { setSleeves } from "../sleeves";
+import { sleeveFromDef } from "../sleeves";
+import { CardBack } from "./CardBack";
 import type {
   CodexCard,
   GeneratedPack,
@@ -11,7 +15,7 @@ import type {
 } from "../types";
 import { CostBars } from "./Card";
 
-type Tab = "cards" | "keywords" | "generate";
+type Tab = "cards" | "keywords" | "generate" | "sleeves";
 
 const TYPE_OPTS = ["BROADCAST", "TRACK", "LOOP"];
 
@@ -146,7 +150,13 @@ function RegistryList({
   );
 }
 
-export function CodexView() {
+export function CodexView({
+  mySleeve = "ember",
+  onSetSleeve,
+}: {
+  mySleeve?: string;
+  onSetSleeve?: (id: string) => void;
+}) {
   const [tab, setTab] = useState<Tab>("cards");
   const [cards, setCards] = useState<CodexCard[]>([]);
   const [keywords, setKeywords] = useState<Keyword[]>([]);
@@ -345,7 +355,18 @@ export function CodexView() {
         >
           GENERATE
         </button>
+        <button
+          className={`codex-tab-btn ${tab === "sleeves" ? "active" : ""}`}
+          onClick={() => setTab("sleeves")}
+          type="button"
+        >
+          SLEEVES
+        </button>
       </div>
+
+      {tab === "sleeves" && (
+        <SleeveGallery active={mySleeve} onPick={onSetSleeve} />
+      )}
 
       {tab === "cards" && (
         <section className="codex-section">
@@ -586,5 +607,55 @@ export function CodexView() {
         </section>
       )}
     </div>
+  );
+}
+
+/** Card-back gallery: previews every sleeve from /api/sleeves, click to apply. */
+export function SleeveGallery({
+  active,
+  onPick,
+}: {
+  active: string;
+  onPick?: (id: string) => void;
+}) {
+  const [sleeves, setLocal] = useState<SleeveDef[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/sleeves")
+      .then((r) => r.json())
+      .then((data) => {
+        if (alive && Array.isArray(data?.sleeves)) {
+          setSleeves(data.sleeves);
+          setLocal(data.sleeves);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return (
+    <section className="codex-section">
+      <p className="sleeve-hint">
+        Pick the back your playlists wear. Your station carries it into the
+        duel; the rival keeps theirs.
+      </p>
+      <div className="sleeve-grid">
+        {sleeves.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={`sleeve-tile ${s.id === active ? "active" : ""}`}
+            onClick={() => onPick?.(s.id)}
+            aria-pressed={s.id === active}
+          >
+            <CardBack sleeve={sleeveFromDef(s)} />
+            <span className="sleeve-tile-label">{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -40,7 +40,11 @@ export default function App() {
       setNotice("");
     };
     sock.onError = (m) => setNotice(m);
-    sock.onOpen = () => sock.send({ type: "start" });
+    sock.onOpen = () => {
+      sock.send({ type: "start" });
+      const saved = localStorage.getItem("sunder-sleeve");
+      if (saved) sock.send({ type: "set_sleeve", sleeve: saved });
+    };
     sock.connect();
     return () => sock.close();
   }, []);
@@ -131,6 +135,20 @@ export default function App() {
           ? "Your turn — air a card or attack."
           : "The rival is playing…");
 
+  const setSleeve = useCallback((id: string) => {
+    try {
+      localStorage.setItem("sunder-sleeve", id);
+    } catch { /* storage unavailable */ }
+    send({ type: "set_sleeve", sleeve: id });
+  }, [send]);
+
+  let savedSleeve: string | null = null;
+  try {
+    savedSleeve = localStorage.getItem("sunder-sleeve");
+  } catch { /* storage unavailable */ }
+
+  const mySleeve = snapshot?.players?.[0]?.sleeve ?? savedSleeve ?? "ember";
+
   return (
     <>
       <BackgroundShader turnSide={snapshot?.can_act ?? null} />
@@ -171,7 +189,10 @@ export default function App() {
         {!snapshot ? (
           <div className="boot">Connecting to the airwaves…</div>
         ) : view === "codex" ? (
-          <CodexView />
+          <CodexView
+            mySleeve={mySleeve}
+            onSetSleeve={setSleeve}
+          />
         ) : view === "changelog" ? (
           <ChangelogView />
         ) : (

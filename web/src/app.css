@@ -536,7 +536,7 @@ html.no-scrollbar::-webkit-scrollbar {
   position: absolute;
   inset: 0;
   border-radius: calc(var(--pile-w, 52px) * 0.115);
-  background: radial-gradient(110% 110% at 50% 50%, #141820, var(--void-deep) 78%);
+  background: var(--sleeve-paper, var(--void-deep));
   border: 2px solid var(--sleeve-primary);
   box-shadow:
     0 0 14px color-mix(in srgb, var(--sleeve-glow) 45%, transparent),
@@ -547,34 +547,11 @@ html.no-scrollbar::-webkit-scrollbar {
   justify-content: center;
   overflow: hidden;
 }
-.card-back--mandala {
-  background:
-    radial-gradient(85% 85% at 50% 40%, color-mix(in srgb, var(--sleeve-primary) 22%, transparent), transparent 62%),
-    repeating-conic-gradient(from 11deg at 50% 46%, color-mix(in srgb, var(--sleeve-primary) 11%, transparent) 0deg 15deg, transparent 15deg 30deg),
-    radial-gradient(110% 110% at 50% 50%, #141820, var(--void-deep) 78%);
-}
-.card-back::before {
-  content: "";
-  position: absolute;
-  inset: calc(var(--pile-w, 52px) * 0.115);
-  border: 1px solid color-mix(in srgb, var(--sleeve-primary) 38%, transparent);
-  border-radius: calc(var(--pile-w, 52px) * 0.058);
-  pointer-events: none;
-}
-.card-back::after {
-  content: "";
+.card-back-art {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  --dot: calc(var(--pile-w, 52px) * 0.096);
-  --d2: calc(var(--pile-w, 52px) * 0.03);
-  --d3: calc(var(--pile-w, 52px) * 0.04);
-  --o: calc(var(--pile-w, 52px) * 0.19);
-  background:
-    radial-gradient(var(--dot) at var(--o) var(--o), color-mix(in srgb, var(--sleeve-primary) 90%, transparent) 0 var(--d2), transparent var(--d3)),
-    radial-gradient(var(--dot) at calc(100% - var(--o)) var(--o), color-mix(in srgb, var(--sleeve-primary) 90%, transparent) 0 var(--d2), transparent var(--d3)),
-    radial-gradient(var(--dot) at var(--o) calc(100% - var(--o)), color-mix(in srgb, var(--sleeve-primary) 90%, transparent) 0 var(--d2), transparent var(--d3)),
-    radial-gradient(var(--dot) at calc(100% - var(--o)) calc(100% - var(--o)), color-mix(in srgb, var(--sleeve-primary) 90%, transparent) 0 var(--d2), transparent var(--d3));
+  width: 100%;
+  height: 100%;
 }
 .card-back-emblem {
   position: relative;
@@ -1289,4 +1266,61 @@ html.no-scrollbar::-webkit-scrollbar {
 .registry-approve {
   font-size: 10px;
   padding: 4px 10px;
+}
+
+/* sleeve gallery (codex) */
+.sleeve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+  max-width: 980px;
+}
+.sleeve-tile {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-ui);
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sleeve-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+.sleeve-tile.active {
+  border-color: var(--magenta);
+  box-shadow: 0 0 12px rgba(255, 62, 168, 0.35);
+}
+.sleeve-tile.active:focus-visible {
+  outline: 2px solid var(--magenta);
+  outline-offset: 2px;
+}
+.sleeve-tile-label {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.sleeve-tile.active .sleeve-tile-label {
+  color: var(--magenta);
+}
+.sleeve-tile .card-back {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  --pile-w: 96px;
+}
+.sleeve-hint {
+  margin: 0 0 12px;
+  max-width: 980px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: var(--text-dim);
 }

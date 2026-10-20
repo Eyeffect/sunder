@@ -180,4 +180,5 @@ export type ClientMsg =
   | { type: "play"; hand: number; target?: number | null }
   | { type: "attack"; board: number; target: "face" | number }
   | { type: "end_turn"; turn: number }
+  | { type: "set_sleeve"; sleeve: string }
   | { type: "ping" };

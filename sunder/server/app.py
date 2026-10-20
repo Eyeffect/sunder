@@ -46,11 +46,40 @@ def _card_json(c) -> dict:
     }
 
 
+_FALLBACK_SLEEVES = [
+    {"id": "default", "label": "Frequency", "pattern": "wavelength",
+     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
+     "emblem": "◉"},
+    {"id": "ember", "label": "Ember", "pattern": "starburst",
+     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
+     "emblem": "◉"},
+    {"id": "static", "label": "Static", "pattern": "staticNoise",
+     "palette": {"ink": "magenta", "glow": "magenta", "paper": "voidDeep"},
+     "emblem": "◉"},
+]
+
+
+def load_sleeves() -> dict[str, dict]:
+    """Sleeve manifest from `cards/sleeves.json` (falls back to a minimal
+    set if the file is missing or malformed)."""
+    path = CARDS_DIR / "sleeves.json"
+    try:
+        data = json.loads(path.read_text())
+        sleeves = [s for s in data.get("sleeves", [])
+                   if isinstance(s, dict) and isinstance(s.get("id"), str)]
+    except (OSError, AttributeError, json.JSONDecodeError):
+        sleeves = []
+    if not sleeves:
+        sleeves = _FALLBACK_SLEEVES
+    return {s["id"]: s for s in sleeves}
+
+
 def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> FastAPI:
     """Build the app. `ai_think`/`ai_delay` are the base seconds for the
     rival's thinking pause and per-action delay (randomized around them);
     pass 0 to make AI turns instant (tests)."""
     decks = tuple(decks) if decks else default_decks()
+    sleeves = load_sleeves()
     app = FastAPI(title="SUNDER", docs_url="/api/docs")
 
     @app.get("/api/cards")
@@ -69,6 +98,10 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
             }
             for key, kw in sorted(KEYWORD_REGISTRY.items())
         ]}
+
+    @app.get("/api/sleeves")
+    def api_sleeves():
+        return {"sleeves": list(sleeves.values())}
 
     @app.get("/api/tags")
     def api_tags():
@@ -218,6 +251,14 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                                 await send_state()
                                 await asyncio.sleep(ai_delay * random.uniform(0.6, 1.3))
                             await asyncio.sleep(ai_delay * random.uniform(0.4, 0.8))
+                    await send_state()
+
+                elif mtype == "set_sleeve":
+                    sid = msg.get("sleeve")
+                    if not isinstance(sid, str) or sid not in sleeves:
+                        await send_error("unknown sleeve")
+                        continue
+                    gs.players[0].sleeve = sid
                     await send_state()
 
                 elif mtype == "ping":

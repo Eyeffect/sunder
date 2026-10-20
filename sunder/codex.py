@@ -25,7 +25,7 @@ CARDS_DIR = Path(__file__).parent / "cards"
 def all_cards() -> list[Card]:
     cards = []
     for f in sorted(CARDS_DIR.glob("*.json")):
-        if f.name == "registry.json":
+        if f.name in ("registry.json", "sleeves.json"):
             continue
         cards.extend(load_card_file(f))
     return cards

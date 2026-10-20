@@ -18,6 +18,7 @@ by the test suite). The module also exposes a ready `app = create_app()` for
 | POST | `/api/registry/{kind}/{id}/approve` | approve a review-queue proposal (404 for unknown ids) |
 | POST | `/api/generate` | run [generation](generation.md): `{theme, count?, seed?}` |
 | GET | `/api/health` | `{"ok": true}` |
+| GET | `/api/sleeves` | card-back manifest from `sunder/cards/sleeves.json` |
 
 The built SPA is served at `/` **iff `web/dist` exists** (StaticFiles, html
 mode). Rails: dev frontend via `npm run dev` in `web/` proxies `/api` + `/ws`.
@@ -33,6 +34,7 @@ answers with a full `state` snapshot. Protocol:
 | `play` | `{hand: <index>, target?: <serial>}` | play hand card (indexes into *your* hand); `target` auto-looked up on the enemy board |
 | `attack` | `{board: <index>, target: <serial> \| "face"}` | attack (indexes into your board) |
 | `end_turn` | `{turn: <n>}` | guarded — a stale turn number is ignored; then the AI's turn is **staged**: before it speaks (director pause), then one snapshot per AI action, paced by the jitter windows |
+| `set_sleeve` | `{sleeve: "<id>"}` | set your station's card back; id validated against the sleeve manifest (invalid → error, no state change); the opponent sees the new sleeve in `players.{}.sleeve` |
 | `ping` | — | answers `{"type": "pong"}` |
 
 Server →:

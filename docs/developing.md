@@ -111,6 +111,30 @@ means regenerating the legality coverage in `gen/legality.py` and matching
 it to `_SCORE_CAP`/budget weights — [cards.md](cards.md) documents exactly
 where each table lives.
 
+## Adding a card-back sleeve
+
+Sleeves are defined in **one JSON file**: `sunder/cards/sleeves.json`. The
+server serves the manifest at `GET /api/sleeves`, validates WS `set_sleeve`
+ids against it, and stores the chosen sleeve per station (`players[*].sleeve`
+in snapshots). The client fetches the same manifest for the SLEEVES gallery
+in the codex and falls back to a hard-coded 3-sleeve list offline.
+
+1. Add an entry: `{"id": "mineral", "label": "Mineral", "pattern":
+   "staticNoise", "palette": {"ink": "cyan", "glow": "green", "paper":
+   "voidDeep"}, "emblem": "◆"}`.
+2. `pattern` keys into the SVG pattern library in `web/
+   /src/backPatterns.tsx` (`wavelength`, `starburst`, `staticNoise`,
+   `circuit`, `vinyl`, `spool`) — add a new component there only if you
+   want a genuinely new *art style*.
+3. `palette` channels reference theme.css colors by name (`amber`, `cyan`,
+   `magenta`, `green`, `cinder`, `danger`, `text`, `voidDeep`, `panel`)
+   resolved client-side in `web/src/sleeves.ts` (`CHANNELS`) — palettes
+   never hardcode hex, so sleeves stay themable.
+4. Done. Tests guard the wiring both sides: `web/src/backPatterns.test.tsx`
+   (every manifest pattern must have a rendered component; renders them
+   all), `web/src/sleeves.test.ts` (channel resolution + fallback),
+   `tests/test_web.py` (endpoint + `set_sleeve` acceptance).
+
 ## Registry safety
 
 `registry.py` holds a module-level cache guarded by an RLock: web generation
