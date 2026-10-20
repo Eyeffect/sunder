@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SUNDER card-back art — sleeve "spool".
+     Paint ONLY with these palette swatches (they are remapped at runtime):
+       ink   #ffb545  -> var(--sleeve-ink)
+       glow  #5ff2e0  -> var(--sleeve-glow)
+       paper #030304  -> var(--sleeve-paper)
+     Keep the 90x120 viewBox. Save as Plain SVG. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 120">
+<g>
+<rect x="0" y="0" width="90" height="120" fill="#030304">
+</rect>
+<g>
+<circle cx="45" cy="30" r="15" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.5">
+</circle>
+<circle cx="45" cy="30" r="5" fill="none" stroke="#ffb545" stroke-width="1.4" opacity="0.6">
+</circle>
+<line x1="51" y1="30" x2="60" y2="30" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="48" y1="35.19615242270663" x2="52.5" y2="42.99038105676658" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="42" y1="35.19615242270663" x2="37.5" y2="42.99038105676658" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="39" y1="30" x2="30" y2="30.000000000000004" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="42" y1="24.803847577293368" x2="37.49999999999999" y2="17.009618943233423" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="48" y1="24.803847577293368" x2="52.5" y2="17.00961894323342" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+</g>
+<g>
+<circle cx="45" cy="90" r="15" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.5">
+</circle>
+<circle cx="45" cy="90" r="5" fill="none" stroke="#ffb545" stroke-width="1.4" opacity="0.6">
+</circle>
+<line x1="51" y1="90" x2="60" y2="90" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="48" y1="95.19615242270663" x2="52.5" y2="102.99038105676658" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="42" y1="95.19615242270663" x2="37.5" y2="102.99038105676658" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="39" y1="90" x2="30" y2="90" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="42" y1="84.80384757729337" x2="37.49999999999999" y2="77.00961894323342" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="48" y1="84.80384757729337" x2="52.5" y2="77.00961894323342" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+</g>
+<path d="M27 30 H63 M27 90 H63" fill="none" stroke="#ffb545" stroke-width="0.8" opacity="0.18">
+</path>
+<rect x="27" y="30" width="36" height="60" fill="none" stroke="#ffb545" stroke-width="0.7" opacity="0.12">
+</rect>
+<line x1="25" y1="60" x2="65" y2="60" stroke="#ffb545" stroke-width="1.1" opacity="0.28">
+</line>
+<defs>
+<radialGradient id="sp" cx="0.5" cy="0.5" r="0.55">
+<stop offset="0" stop-color="#5ff2e0" stop-opacity="0.12">
+</stop>
+<stop offset="1" stop-color="#5ff2e0" stop-opacity="0">
+</stop>
+</radialGradient>
+</defs>
+<rect width="90" height="120" fill="url(#sp)">
+</rect>
+<circle cx="45" cy="60" r="4" fill="#5ff2e0" opacity="0.5">
+</circle>
+</g>
+</svg>

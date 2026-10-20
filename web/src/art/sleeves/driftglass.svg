@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SUNDER card-back art — sleeve "driftglass".
+     Paint ONLY with these palette swatches (they are remapped at runtime):
+       ink   #ffb545  -> var(--sleeve-ink)
+       glow  #5ff2e0  -> var(--sleeve-glow)
+       paper #030304  -> var(--sleeve-paper)
+     Keep the 90x120 viewBox. Save as Plain SVG. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 120">
+<g>
+<rect x="0" y="0" width="90" height="120" fill="#030304">
+</rect>
+<circle cx="45" cy="60" r="24" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.26">
+</circle>
+<circle cx="45" cy="60" r="27" fill="none" stroke="#ffb545" stroke-width="0.8" opacity="0.23">
+</circle>
+<circle cx="45" cy="60" r="30" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.2">
+</circle>
+<circle cx="45" cy="60" r="33" fill="none" stroke="#ffb545" stroke-width="0.8" opacity="0.17">
+</circle>
+<circle cx="45" cy="60" r="36" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.14">
+</circle>
+<circle cx="45" cy="60" r="40" fill="none" stroke="#ffb545" stroke-width="0.7" opacity="0.12">
+</circle>
+<circle cx="45" cy="60" r="42" fill="none" stroke="#ffb545" stroke-width="0.7" opacity="0.12">
+</circle>
+<circle cx="45" cy="60" r="21" fill="none" stroke="#5ff2e0" stroke-width="1.6" opacity="0.45">
+</circle>
+<circle cx="45" cy="60" r="12" fill="none" stroke="#ffb545" stroke-width="2.4" opacity="0.6">
+</circle>
+<circle cx="45" cy="60" r="4.5" fill="#ffb545" opacity="0.8">
+</circle>
+<circle cx="45" cy="60" r="1.6" fill="#030304">
+</circle>
+<defs>
+<radialGradient id="vg" cx="0.5" cy="0.5" r="0.6">
+<stop offset="0" stop-color="#ffb545" stop-opacity="0.1">
+</stop>
+<stop offset="1" stop-color="#ffb545" stop-opacity="0">
+</stop>
+</radialGradient>
+</defs>
+<rect width="90" height="120" fill="url(#vg)">
+</rect>
+<circle cx="14" cy="20" r="1.8" fill="#5ff2e0" opacity="0.6">
+</circle>
+</g>
+</svg>

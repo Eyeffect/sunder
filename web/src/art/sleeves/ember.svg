@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SUNDER card-back art — sleeve "ember".
+     Paint ONLY with these palette swatches (they are remapped at runtime):
+       ink   #ffb545  -> var(--sleeve-ink)
+       glow  #5ff2e0  -> var(--sleeve-glow)
+       paper #030304  -> var(--sleeve-paper)
+     Keep the 90x120 viewBox. Save as Plain SVG. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 120">
+<g>
+<rect x="0" y="0" width="90" height="120" fill="#030304">
+</rect>
+<defs>
+<radialGradient id="sb" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0" stop-color="#ffb545" stop-opacity="0.2">
+</stop>
+<stop offset="1" stop-color="#ffb545" stop-opacity="0">
+</stop>
+</radialGradient>
+</defs>
+<rect width="90" height="120" fill="url(#sb)">
+</rect>
+<line x1="59" y1="60" x2="105" y2="60" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="58.64899077054553" y1="63.1152930753884" x2="103.49567473090941" y2="73.35125603737886" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="57.61356415063387" y1="66.07437234764582" x2="99.05813207414515" y2="86.03302434705348" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="55.945640754552414" y1="68.72885722602227" x2="91.90988894808179" y2="97.40938811152401" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="53.72885722602227" y1="70.94564075455241" x2="82.40938811152401" y2="106.90988894808179" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="51.07437234764581" y1="72.61356415063386" x2="71.0330243470535" y2="114.05813207414515" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="48.1152930753884" y1="73.64899077054554" x2="58.35125603737887" y2="118.49567473090941" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="45" y1="74" x2="45.00000000000001" y2="120" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="41.8847069246116" y1="73.64899077054554" x2="31.64874396262114" y2="118.49567473090941" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="38.92562765235419" y1="72.61356415063386" x2="18.966975652946516" y2="114.05813207414515" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="36.27114277397773" y1="70.94564075455241" x2="7.5906118884759906" y2="106.9098889480818" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="34.054359245447586" y1="68.72885722602227" x2="-1.909888948081779" y2="97.40938811152401" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="32.38643584936614" y1="66.07437234764582" x2="-9.058132074145142" y2="86.0330243470535" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="31.35100922945447" y1="63.1152930753884" x2="-13.495674730909414" y2="73.35125603737887" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="31" y1="60" x2="-15" y2="60.00000000000001" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="31.35100922945447" y1="56.8847069246116" x2="-13.495674730909414" y2="46.64874396262114" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="32.38643584936613" y1="53.92562765235419" x2="-9.05813207414515" y2="33.966975652946516" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="34.05435924544758" y1="51.271142773977736" x2="-1.9098889480818073" y2="22.59061188847602" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="36.27114277397773" y1="49.054359245447586" x2="7.590611888475976" y2="13.090111051918221" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="38.92562765235418" y1="47.38643584936614" x2="18.966975652946502" y2="5.941867925854858" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="41.88470692461159" y1="46.35100922945447" x2="31.648743962621126" y2="1.504325269090586" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="45" y1="46" x2="44.999999999999986" y2="0" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="48.1152930753884" y1="46.35100922945447" x2="58.35125603737885" y2="1.504325269090586" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="51.07437234764581" y1="47.38643584936613" x2="71.03302434705347" y2="5.941867925854844" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="53.72885722602227" y1="49.054359245447586" x2="82.40938811152401" y2="13.090111051918207" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="55.945640754552414" y1="51.27114277397773" x2="91.90988894808177" y2="22.590611888475976" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<line x1="57.61356415063386" y1="53.92562765235418" x2="99.05813207414513" y2="33.9669756529465" stroke="#ffb545" stroke-width="0.7" opacity="0.16">
+</line>
+<line x1="58.64899077054553" y1="56.88470692461159" x2="103.49567473090941" y2="46.648743962621126" stroke="#ffb545" stroke-width="1.4" opacity="0.34">
+</line>
+<circle cx="45" cy="60" r="14" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.26">
+</circle>
+<circle cx="45" cy="60" r="22" fill="none" stroke="#ffb545" stroke-width="0.8" opacity="0.23">
+</circle>
+<circle cx="45" cy="60" r="34" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.2">
+</circle>
+<circle cx="45" cy="60" r="50" fill="none" stroke="#ffb545" stroke-width="0.8" opacity="0.17">
+</circle>
+<circle cx="45" cy="60" r="6" fill="none" stroke="#5ff2e0" stroke-width="1.4" opacity="0.55">
+</circle>
+</g>
+</svg>

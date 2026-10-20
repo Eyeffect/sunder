@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SUNDER card-back art — sleeve "mixtape".
+     Paint ONLY with these palette swatches (they are remapped at runtime):
+       ink   #ffb545  -> var(--sleeve-ink)
+       glow  #5ff2e0  -> var(--sleeve-glow)
+       paper #030304  -> var(--sleeve-paper)
+     Keep the 90x120 viewBox. Save as Plain SVG. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 120">
+<g>
+<rect x="0" y="0" width="90" height="120" fill="#030304">
+</rect>
+<defs>
+<radialGradient id="mt" cx="0.5" cy="0.55" r="0.55">
+<stop offset="0" stop-color="#ffb545" stop-opacity="0.1">
+</stop>
+<stop offset="1" stop-color="#ffb545" stop-opacity="0">
+</stop>
+</radialGradient>
+</defs>
+<rect width="90" height="120" fill="url(#mt)">
+</rect>
+<rect x="13" y="38" width="64" height="46" fill="none" stroke="#ffb545" stroke-width="1.6" opacity="0.55">
+</rect>
+<rect x="17" y="42" width="56" height="13" fill="#ffb545" opacity="0.14">
+</rect>
+<rect x="18" y="39" width="2" height="2" fill="#ffb545" opacity="0.5">
+</rect>
+<rect x="18" y="82" width="2" height="2" fill="#ffb545" opacity="0.5">
+</rect>
+<rect x="71" y="39" width="2" height="2" fill="#ffb545" opacity="0.5">
+</rect>
+<rect x="71" y="82" width="2" height="2" fill="#ffb545" opacity="0.5">
+</rect>
+<circle cx="31" cy="67" r="6.5" fill="none" stroke="#ffb545" stroke-width="1.4" opacity="0.5">
+</circle>
+<circle cx="59" cy="67" r="6.5" fill="none" stroke="#ffb545" stroke-width="1.4" opacity="0.5">
+</circle>
+<path d="M37.5 67 H52.5" stroke="#ffb545" stroke-width="0.8" opacity="0.25">
+</path>
+<rect x="24" y="59" width="42" height="16" fill="none" stroke="#ffb545" stroke-width="0.7" opacity="0.2">
+</rect>
+<text x="20" y="51.5" font-family="var(--font-mono)" font-size="6" fill="#ffb545" opacity="0.55">SIDE B</text>
+<line x1="24" y1="89" x2="66" y2="89" stroke="#5ff2e0" stroke-width="1.2" opacity="0.4">
+</line>
+</g>
+</svg>
