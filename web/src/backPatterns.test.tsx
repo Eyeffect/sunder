@@ -6,6 +6,7 @@ import {
   artIds,
   namespaceArt,
   rawArtSources,
+  stripEditorCruft,
   themedArt,
 } from "./backPatterns";
 import { importServerManifest } from "./test-manifest";
@@ -36,7 +37,7 @@ describe("backPatterns registry", () => {
 describe("art source files (web/src/art/sleeves/*.svg)", () => {
   for (const id of artIds()) {
     it(`${id}.svg is editor-guarded`, () => {
-      const src = artSource(id);
+      const src = stripEditorCruft(artSource(id));
       expect(src).toContain('viewBox="0 0 90 120"');
       expect(src).toContain("<svg"); // single root svg element
       /* palette discipline: only the three sentinels may appear */

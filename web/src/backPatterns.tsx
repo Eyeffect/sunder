@@ -54,6 +54,14 @@ const ART: Record<string, string> = {
   against these exact bytes, so hand edits are guarded at the bundler). */
 export const rawArtSources: Record<string, string> = ART;
 
+/** Drop editor metadata that GUI saves (Inkscape) attach to the file. */
+export function stripEditorCruft(src: string): string {
+  return src
+    .replace(/<metadata[\s\S]*?<\/metadata>/g, "")
+    .replace(/<(sodipodi|inkscape):namedview[\s\S]*?(\/>|<\/\1:namedview>)/g, "")
+    .replace(/\s(?:inkscape|sodipodi):[\w-]+="[^"]*"/g, "");
+}
+
 /** Strip editor cruft and map sentinel colors → theme channels. Cached:
   the output is uid-free and identical for every card using the art. */
 const themedCache = new Map<string, string>();
@@ -61,11 +69,7 @@ const themedCache = new Map<string, string>();
 export function themedArt(id: string): string {
   const cached = themedCache.get(id);
   if (cached !== undefined) return cached;
-  const src = ART[id] ?? ART.default;
-  let out = src
-    .replace(/<metadata[\s\S]*?<\/metadata>/g, "")
-    .replace(/<(sodipodi|inkscape):namedview[\s\S]*?(\/>|<\/\1:namedview>)/g, "")
-    .replace(/\s(?:inkscape|sodipodi):[\w-]+="[^"]*"/g, "");
+  let out = stripEditorCruft(ART[id] ?? ART.default);
   /* peel the <svg> wrapper: chrome renders markup inside our own <svg> */
   const open = out.match(/<svg[^>]*>/)?.index;
   if (open !== undefined) {
