@@ -13,7 +13,7 @@ import type {
   RegistryEntry,
   Tag,
 } from "../types";
-import { CostBars } from "./Card";
+import { CardBadge, CardRules, CostBars } from "./Card";
 
 type Tab = "cards" | "keywords" | "generate" | "sleeves";
 
@@ -40,9 +40,12 @@ function CardTile({
       style={style}
     >
       <div className="card-plane-strip" />
+      <span className="card-watermark" aria-hidden="true">
+        {meta.code}
+      </span>
       <div className="card-top">
         <CostBars cost={c.cost} />
-        <span className="card-plane-tag">{meta.label}</span>
+        <CardBadge plane={c.plane} rarity={c.rarity} />
       </div>
       <div className="card-name">{c.name}</div>
       <div className="card-type">{c.type}</div>
@@ -75,6 +78,8 @@ function CardTile({
           ))}
         </div>
       )}
+      <CardRules text={c.rules} className="codex-rules" />
+      {c.flavor && <div className="codex-flavor">“{c.flavor}”</div>}
       {c.type === "BROADCAST" && (
         <div className="card-stats">
           <span className="stat atk">{c.atk}</span>
@@ -82,8 +87,6 @@ function CardTile({
           <span className="stat def">{c.def}</span>
         </div>
       )}
-      <div className="codex-rules">{c.rules}</div>
-      {c.flavor && <div className="codex-flavor">“{c.flavor}”</div>}
     </div>
   );
 }

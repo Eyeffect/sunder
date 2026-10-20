@@ -66,7 +66,7 @@ export function BoardRow({
             <Card
               key={card.serial}
               card={card}
-              size="lg"
+              size="md"
               className={cls}
               sleeve={player.sleeve}
               onClick={() => onCardClick?.(card)}
@@ -79,7 +79,7 @@ export function BoardRow({
           );
         })}
         {Array.from({ length: emptySlots }).map((_, i) => (
-          <div key={`slot${i}`} className="slot empty size-lg" />
+          <div key={`slot${i}`} className="slot empty size-md" />
         ))}
       </div>
       <DeckStack sleeve={player.sleeve} count={player.playlist_count} size="board" />

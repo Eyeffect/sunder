@@ -126,6 +126,20 @@ describe("App", () => {
     expect(screen.getByText(/Your turn/)).toBeInTheDocument();
   });
 
+  it("signals playability on the hand cost bars", () => {
+    render(<App />);
+    pump(
+      snapshot({
+        hand: [
+          handCard({ serial: 11, is_playable: true }),
+          handCard({ serial: 12, name: "Final Wave", cost: 6, is_playable: false }),
+        ],
+      }),
+    );
+    expect(screen.getByTitle("Cost 3 — playable")).toBeInTheDocument();
+    expect(screen.getByTitle("Cost 6 — not playable")).toBeInTheDocument();
+  });
+
   it("plays a no-target card on click", () => {
     render(<App />);
     pump(snapshot({ hand: [handCard()] }));
@@ -222,12 +236,16 @@ describe("App", () => {
   });
 
   it("opens the codex view with the c key", () => {
-    render(<App />);
+    const { container } = render(<App />);
     pump(snapshot());
+    const bg = () => container.querySelector(".shader-bg") as HTMLElement;
+    expect(bg().dataset.codex).toBe("false");
     fireEvent.keyDown(window, { key: "c" });
     expect(screen.getByRole("button", { name: "CARDS" })).toBeInTheDocument();
+    expect(bg().dataset.codex).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "DUEL" }));
     expect(screen.getByText(/Your turn/)).toBeInTheDocument();
+    expect(bg().dataset.codex).toBe("false");
   });
 
   it("opens the changelog when clicking the version and returns via DUEL", () => {

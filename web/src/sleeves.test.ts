@@ -10,7 +10,7 @@ import { importServerManifest } from "./test-manifest";
 
 const defs: SleeveDef[] = [
   { id: "alpha", label: "Alpha",
-    palette: { ink: "amber", glow: "cinder", paper: "panel" }, emblem: "A" },
+    palette: { ink: "amber", glow: "cinder", paper: "panel" } },
   { id: "beta", label: "Beta",
     palette: { ink: "cyan", glow: "green", paper: "voidDeep" } },
 ];
@@ -51,7 +51,6 @@ describe("sleeve registry", () => {
       const live = byId.get(fb.id);
       expect(live, `${fb.id} missing from server manifest`).toBeTruthy();
       expect(live!.palette).toEqual(fb.palette);
-      expect(live!.emblem).toBe(fb.emblem);
     }
   });
 

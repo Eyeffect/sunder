@@ -37,7 +37,7 @@ def test_deck_bound_defaults():
     manifest = load_manifest()
     neon = load_card_file(CARDS_DIR / "neon_frequency.json")
     cinder = load_card_file(CARDS_DIR / "cinderworks.json")
-    assert seat_sleeve(manifest, neon, 0) == "neonfreq"
+    assert seat_sleeve(manifest, neon, 0) == "ember"
     assert seat_sleeve(manifest, cinder, 1) == "cinderworks"
 
 
@@ -54,7 +54,7 @@ def test_state_uses_deck_bound_sleeves():
         load_card_file(CARDS_DIR / "cinderworks.json"),
         seed=1,
     )
-    assert gs.players[0].sleeve == "neonfreq"
+    assert gs.players[0].sleeve == "ember"
     assert gs.players[1].sleeve == "cinderworks"
 
 

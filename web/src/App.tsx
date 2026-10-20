@@ -152,7 +152,10 @@ export default function App() {
 
   return (
     <>
-      <BackgroundShader turnSide={snapshot?.can_act ?? null} />
+      <BackgroundShader
+        turnSide={snapshot?.can_act ?? null}
+        codex={view === "codex"}
+      />
       <div className="layout">
       <header className="sunder-header">
         <div className="wordmark">

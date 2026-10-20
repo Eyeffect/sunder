@@ -21,7 +21,7 @@ export function CardBack({
   return (
     <div className={cls} style={style} aria-hidden="true">
       <CardBackArt sleeve={s} />
-      {s.emblem && <span className="card-back-emblem">{secret ? "?" : s.emblem}</span>}
+      {secret && <span className="card-back-secret">?</span>}
     </div>
   );
 }

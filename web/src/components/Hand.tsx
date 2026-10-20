@@ -39,6 +39,7 @@ export function Hand({ hand, activeSerial, onCardClick, onHover }: HandProps) {
             <Card
               card={card}
               size="md"
+              playable={card.is_playable}
               className={`hand-card ${cls}`}
               onClick={() => onCardClick?.(card)}
               onHover={() => onHover?.(card)}

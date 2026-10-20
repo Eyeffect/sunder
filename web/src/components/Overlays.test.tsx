@@ -35,5 +35,6 @@ describe("Inspector", () => {
     expect(
       screen.getByText(/Deal 1 Noise when a Broadcast airs/),
     ).toBeInTheDocument();
+    expect(screen.getByText(/Stay tuned/)).toBeInTheDocument();
   });
 });

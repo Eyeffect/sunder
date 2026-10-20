@@ -66,6 +66,13 @@ describe("CodexView", () => {
     ).toBeInTheDocument();
   });
 
+  it("marks rarity and paints the plane-code watermark", async () => {
+    render(<CodexView />);
+    await screen.findByText("Cinder Hound");
+    expect(screen.getAllByRole("img", { name: "Rarity: COMMON" })).toHaveLength(2);
+    expect(document.querySelector(".card-watermark")?.textContent).toBe("FM");
+  });
+
   it("filters cards when a keyword pill is clicked", async () => {
     render(<CodexView />);
     await screen.findByText("Cinder Hound");

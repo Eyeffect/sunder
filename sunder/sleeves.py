@@ -14,14 +14,11 @@ SLEEVE_PATH = CARDS_DIR / "sleeves.json"
 
 _FALLBACK_SLEEVES = [
     {"id": "default", "label": "Frequency",
-     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
-     "emblem": "◉"},
+     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"}},
     {"id": "ember", "label": "Ember",
-     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"},
-     "emblem": "◉"},
+     "palette": {"ink": "amber", "glow": "amber", "paper": "voidDeep"}},
     {"id": "static", "label": "Static",
-     "palette": {"ink": "magenta", "glow": "magenta", "paper": "voidDeep"},
-     "emblem": "◉"},
+     "palette": {"ink": "magenta", "glow": "magenta", "paper": "voidDeep"}},
 ]
 
 

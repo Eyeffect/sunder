@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { planeMeta } from "../planes";
 import { CardBack } from "./CardBack";
 
@@ -16,20 +17,83 @@ export interface CardLike {
   def?: number;
   rules?: string;
   plane?: string;
+  rarity?: string;
   fuse?: number | null;
   fuse_ticks?: number;
 }
 
-export function CostBars({ cost }: { cost?: number }) {
+export function ClampedText({
+  text,
+  className = "card-rules",
+}: {
+  text: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [clipped, setClipped] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setClipped(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(check);
+    ro?.observe(el);
+    document.fonts?.ready.then(check).catch(() => {});
+    return () => ro?.disconnect();
+  }, [text]);
+
+  return (
+    <div className={className} data-clipped={clipped ? "true" : undefined} ref={ref}>
+      {text}
+    </div>
+  );
+}
+
+export function CardRules({ text, className }: { text: string; className?: string }) {
+  return <ClampedText text={text} className={className} />;
+}
+
+export function CardBadge({ plane, rarity }: { plane?: string; rarity?: string }) {
+  const meta = planeMeta(plane);
+  const style = {
+    "--rarity-color": rarity ? `var(--${rarity.toLowerCase()})` : undefined,
+  } as CSSProperties;
+  return (
+    <span className="card-badge" style={style}>
+      <span className="badge-edition">
+        <span className="plane-code">{meta.code}</span>
+        <span className="plane-name">{meta.label}</span>
+      </span>
+      {rarity && (
+        <span
+          className="badge-rarity"
+          role="img"
+          aria-label={`Rarity: ${rarity}`}
+          title={`Rarity: ${rarity}`}
+        >
+          {rarity}
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function CostBars({ cost, playable }: { cost?: number; playable?: boolean }) {
   const bars = [1, 2, 3, 4, 5];
   const filled = Math.min(5, Math.ceil(((cost ?? 0) / 10) * 5) || 1);
+  const state = playable === undefined ? "" : playable ? " playable" : " unplayable";
   return (
-    <div className="cost-bars" title={`Cost ${cost ?? "?"}`}>
+    <div
+      className={"cost-bars" + state}
+      title={`Cost ${cost ?? "?"}${playable === undefined ? "" : playable ? " — playable" : " — not playable"}`}
+    >
       {bars.map((b) => (
         <span
           key={b}
           className={"cost-bar" + (b <= filled ? " on" : "")}
-          style={{ height: `${b * 3 + 4}px` }}
+          style={{ height: `${b * 2.6 + 4}px` }}
         />
       ))}
       <span className="cost-num">{cost ?? "—"}</span>
@@ -82,6 +146,7 @@ interface CardProps {
   onLeave?: () => void;
   className?: string;
   size?: "sm" | "md" | "lg";
+  playable?: boolean;
   sleeve?: string;
   fxHurt?: boolean;
   fxRevealed?: boolean;
@@ -95,6 +160,7 @@ export function Card({
   onLeave,
   className,
   size = "md",
+  playable,
   sleeve,
   fxHurt,
   fxRevealed,
@@ -139,9 +205,12 @@ export function Card({
       ) : (
         <>
           <div className="card-plane-strip" />
+          <span className="card-watermark" aria-hidden="true">
+            {meta.code}
+          </span>
           <div className="card-top">
-            <CostBars cost={card.cost} />
-            <span className="card-plane-tag">{meta.label}</span>
+            <CostBars cost={card.cost} playable={playable} />
+            <CardBadge plane={card.plane} rarity={card.rarity} />
           </div>
           <div className="card-name">{card.name}</div>
           {typeLine && <div className="card-type">{typeLine}</div>}
@@ -163,7 +232,7 @@ export function Card({
               FUSE {card.fuse_ticks ?? 0}/{card.fuse}
             </div>
           )}
-          {card.rules && <div className="card-rules">{card.rules}</div>}
+          {card.rules && <CardRules text={card.rules} />}
           {card.type === "BROADCAST" && card.atk != null && (
             <div className="card-stats">
               <span className="stat atk">{card.atk}</span>

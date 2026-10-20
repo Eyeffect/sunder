@@ -12,20 +12,15 @@ import type { Sleeve } from "./sleeves";
 import artDefault from "./art/sleeves/default.svg?raw";
 import artEmber from "./art/sleeves/ember.svg?raw";
 import artStatic from "./art/sleeves/static.svg?raw";
-import artNeonfreq from "./art/sleeves/neonfreq.svg?raw";
 import artCinderworks from "./art/sleeves/cinderworks.svg?raw";
 import artDriftglass from "./art/sleeves/driftglass.svg?raw";
 import artSpool from "./art/sleeves/spool.svg?raw";
-import artSporewake from "./art/sleeves/sporewake.svg?raw";
 import artMixtape from "./art/sleeves/mixtape.svg?raw";
-import artVhs from "./art/sleeves/vhs.svg?raw";
 import artTopo from "./art/sleeves/topo.svg?raw";
 import artBarcode from "./art/sleeves/barcode.svg?raw";
 
 const W = 90;
 const H = 120;
-const CX = W / 2;
-const CY = H / 2;
 
 /** Sentinel hexes painted inside the source SVG files; mapped to the
   sleeve's resolved palette channels at import time. */
@@ -39,13 +34,10 @@ const ART: Record<string, string> = {
   default: artDefault,
   ember: artEmber,
   static: artStatic,
-  neonfreq: artNeonfreq,
   cinderworks: artCinderworks,
   driftglass: artDriftglass,
   spool: artSpool,
-  sporewake: artSporewake,
   mixtape: artMixtape,
-  vhs: artVhs,
   topo: artTopo,
   barcode: artBarcode,
 };
@@ -125,11 +117,6 @@ export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
         </radialGradient>
       </defs>
       <rect width={W} height={H} fill={`url(#vig-${uid})`} />
-      <rect x="3.5" y="3.5" width={W - 7} height={H - 7} fill="none" stroke={sleeve.css.ink} strokeWidth="2" />
-      {[[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]].map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="1.5" fill={sleeve.css.ink} opacity="0.7" />
-      ))}
-      <circle cx={CX} cy={CY} r="12.5" fill="none" stroke={sleeve.css.ink} strokeWidth="1" opacity="0.3" />
     </svg>
   );
 }

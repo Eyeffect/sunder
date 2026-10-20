@@ -9,7 +9,6 @@ const serverDefs: SleeveDef[] = importServerManifest().map((s) => ({
   id: s.id,
   label: s.label,
   palette: s.palette,
-  emblem: s.emblem,
 }));
 
 describe("SleeveGallery", () => {
@@ -55,7 +54,7 @@ describe("SleeveGallery", () => {
 });
 
 describe("CardBack gallery rendering", () => {
-  it("renders hydrated manifest sleeves with their emblems", () => {
+  it("renders hydrated manifest sleeves with their art", () => {
     for (const s of importServerManifest()) {
       const { container, unmount } = render(<CardBack sleeve={s.id} />);
       expect(

@@ -13,6 +13,7 @@ precision highp float;
 uniform vec2 iResolution;
 uniform float iTime;
 uniform float uTurnT;      // eased 0..1, 0 = rival's turn, 1 = your turn, 0.5 = neutral
+uniform float uCodexT;     // eased 0..1, 0 = duel, 1 = codex (fades the field to blue)
 uniform float uSpinAngle;  // accumulated rotation angle in radians, integrated in JS
 
 out vec4 fragColor;
@@ -103,6 +104,11 @@ void mainImage(out vec4 Color, in vec2 Coord) {
     vec3 baseColor = mix(amber, magenta, colorShift);
     vec3 glowColor = mix(magenta, amber, colorShift) * 1.1; // offset phase, slightly brighter
 
+    // Codex tabs cool the whole field down to blue. uCodexT is eased in JS
+    // so opening/closing a codex tab is a gradual fade, not a snap.
+    baseColor = mix(baseColor, vec3(0.18, 0.35, 1.0), uCodexT);
+    glowColor = mix(glowColor, vec3(0.45, 0.70, 1.0) * 1.1, uCodexT);
+
 
     // ------------------------------------------------------------
     // 7. COMBINE COLOR + GRAIN + GLOW
@@ -128,16 +134,23 @@ void main() {
 
 interface BackgroundShaderProps {
   turnSide?: boolean | null; // true = your turn, false = rival's turn, null = neutral
+  codex?: boolean;           // true = a codex tab is open (fade the field to blue)
 }
 
-export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
+export function BackgroundShader({ turnSide = null, codex = false }: BackgroundShaderProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const turnRef = useRef<boolean | null>(turnSide);
+  const codexRef = useRef<boolean>(codex);
+  const reducedRef = useRef<boolean>(false);
+  const drawRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     turnRef.current = turnSide;
-  }, [turnSide]);
+    codexRef.current = codex;
+    /* reduced motion has no animation loop — repaint on state changes */
+    if (reducedRef.current) drawRef.current?.();
+  }, [turnSide, codex]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -183,17 +196,20 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
     const resLoc = gl.getUniformLocation(prog, "iResolution");
     const timeLoc = gl.getUniformLocation(prog, "iTime");
     const turnLoc = gl.getUniformLocation(prog, "uTurnT");
+    const codexLoc = gl.getUniformLocation(prog, "uCodexT");
     const spinAngleLoc = gl.getUniformLocation(prog, "uSpinAngle");
 
     const reduced =
       (typeof window.matchMedia === "function" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches) ||
       false;
+    reducedRef.current = reduced;
 
     let hidden = document.hidden;
     let stopped = false;
 
     let turnVal = 0.5;
+    let codexVal = 0;
     let spinAngle = 0;
     let lastFrameTime = performance.now();
     const spinSpeed = 0.15; // radians/sec at full commitment (spinDirection = ±1); lower = slower spin
@@ -211,6 +227,18 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
     };
     resize();
 
+    /** Draw one frame from the current refs (reduced-motion path). */
+    const drawNow = () => {
+      turnVal = turnRef.current === null ? 0.5 : turnRef.current ? 1 : 0;
+      codexVal = codexRef.current ? 1 : 0;
+      gl.uniform1f(timeLoc, performance.now() / 1000);
+      gl.uniform1f(turnLoc, turnVal);
+      gl.uniform1f(codexLoc, codexVal);
+      gl.uniform1f(spinAngleLoc, spinAngle);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+    drawRef.current = drawNow;
+
     const frame = () => {
       if (stopped || hidden) return;
 
@@ -225,6 +253,9 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
       turnVal += (target - turnVal) * 0.025;
       gl.uniform1f(turnLoc, turnVal);
 
+      codexVal += ((codexRef.current ? 1 : 0) - codexVal) * 0.06;
+      gl.uniform1f(codexLoc, codexVal);
+
       // Integrate spin angle each frame using delta time — NOT iTime directly —
       // so angular speed stays constant no matter how long the session runs.
       const spinDirection = turnVal * 2.0 - 1.0; // -1 (rival) .. 0 (neutral) .. 1 (your turn)
@@ -236,10 +267,7 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
     };
 
     if (reduced) {
-      gl.uniform1f(timeLoc, 0);
-      gl.uniform1f(turnLoc, turnRef.current === true ? 1 : 0);
-      gl.uniform1f(spinAngleLoc, 0);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      drawNow();
     } else {
       lastFrameTime = performance.now();
       rafRef.current = requestAnimationFrame(frame);
@@ -259,6 +287,7 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
 
     return () => {
       stopped = true;
+      drawRef.current = null;
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
       if (rafRef.current !== null) {
@@ -269,7 +298,7 @@ export function BackgroundShader({ turnSide = null }: BackgroundShaderProps) {
   }, []);
 
   return (
-    <div className="shader-bg" aria-hidden="true">
+    <div className="shader-bg" data-codex={codex ? "true" : "false"} aria-hidden="true">
       <canvas ref={canvasRef} />
     </div>
   );

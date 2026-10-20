@@ -103,7 +103,8 @@ Version bumps are **three-file** (visible to users, CI, and packaging):
    `current: true`, player-voiced changes; strip `current` from the
    previous entry)
 2. `pyproject.toml` `version` — packaging/readme source of truth
-3. `web/package.json` `version` — header readout (`App.tsx` imports it)
+3. `web/package.json` `version` — header readout (`App.tsx` imports it);
+   keep the two root `version` fields in `web/package-lock.json` in sync
 
 Rules text, prompts, and engine semantics need care, because generation
 prompts quote engine vocabulary. Changing triggers/effects/scalings/targets
@@ -122,7 +123,7 @@ edits to the file. The client fetches the same manifest for the SLEEVES
 gallery in the codex and falls back to a hard-coded 3-sleeve list offline.
 
 1. Add an entry: `{"id": "mineral", "label": "Mineral", "palette": {"ink":
-   "cyan", "glow": "green", "paper": "voidDeep"}, "emblem": "◆"}`.
+   "cyan", "glow": "green", "paper": "voidDeep"}}`.
 2. Create the art file `web/src/art/sleeves/mineral.svg` — a 90×120 SVG
    with a single root element (see *Editing card-back art* below). Every
    manifest sleeve needs exactly one art file; the TS test suite asserts
@@ -144,12 +145,38 @@ gallery in the codex and falls back to a hard-coded 3-sleeve list offline.
    (deck-bound defaults), and `tests/test_web.py` (endpoint + `set_sleeve`
    acceptance + manifest schema).
 
+## Card faces
+
+Every face uses the 2.5×3.5 playing-card ratio (5:7) at `--card-w` width;
+hand, board, and codex share one layout:
+
+`cost bars + edition/rarity badge → name → type → keyword chips/tags →
+rules → flavor (codex only) → power/health`, with stats pinned to the
+bottom.
+
+- Rules clamp to 5 lines in hand/board and 4 in the codex. Firefox ignores
+  `-webkit-line-clamp`, so the cap is an explicit `max-height`; when the
+  text overflows, `ClampedText` sets `data-clipped` and the bottom fades.
+- `CardBadge` prints the two-letter station code (`NF`/`CW`/`DG`/`SW`,
+  fallback `FM`) above the rarity; codex `size-lg` cards swap in the full
+  plane name. The same code is painted as the translucent
+  `.card-watermark` in the bottom-right corner.
+- Flavor is **not** printed on hand or board faces — hovering shows it in
+  the inspector. The codex keeps its flavor line for reference.
+- Playability lives on the hand cost bars, not on card opacity: the
+  `playable` class paints the bars and cost in `--plane-color`, while
+  `unplayable` greys them. `.hand-card` must stay fully opaque.
+- Board cards render at `size="md"` (max 124px) so six slots fit; the
+  single-column breakpoint is 1200px.
+
 ## Editing card-back art (Inkscape)
 
 Card art is **hand-editable SVG source**, one file per sleeve:
-`web/src/art/sleeves/<sleeve-id>.svg` (90×120 viewBox). The rim, rivets,
-vignette and emblem stay in code (`web/src/backPatterns.tsx`), so files
-only carry the interior art.
+`web/src/art/sleeves/<sleeve-id>.svg` (90×120 viewBox). The rim and
+vignette stay in code (`web/src/backPatterns.tsx`), so files only carry
+the interior art. Cards display at the standard 2.5×3.5 playing-card
+ratio (5:7); the 3:4 art is center-sliced, so keep critical detail away
+from the extreme left/right edges.
 
 Open in Inkscape, edit, save as **Plain SVG** — the dev server picks the
 change up instantly (`VITE_API_TARGET=http://127.0.0.1:8100 yarn dev` in

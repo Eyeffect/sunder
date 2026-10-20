@@ -8,8 +8,7 @@
         "ink": "amber",
         "glow": "amber",
         "paper": "voidDeep"
-      },
-      "emblem": "◉"
+      }
     },
     {
       "id": "ember",
@@ -18,8 +17,7 @@
         "ink": "amber",
         "glow": "amber",
         "paper": "voidDeep"
-      },
-      "emblem": "◉"
+      }
     },
     {
       "id": "static",
@@ -28,19 +26,7 @@
         "ink": "magenta",
         "glow": "magenta",
         "paper": "voidDeep"
-      },
-      "emblem": "◉"
-    },
-    {
-      "id": "neonfreq",
-      "label": "Neon Frequency",
-      "palette": {
-        "ink": "cyan",
-        "glow": "cyan",
-        "paper": "voidDeep"
-      },
-      "emblem": "≈",
-      "plane": "neon_frequency"
+      }
     },
     {
       "id": "cinderworks",
@@ -50,7 +36,6 @@
         "glow": "cinder",
         "paper": "voidDeep"
       },
-      "emblem": "⌁",
       "plane": "cinderworks"
     },
     {
@@ -61,7 +46,6 @@
         "glow": "green",
         "paper": "voidDeep"
       },
-      "emblem": "◍",
       "plane": "driftglass"
     },
     {
@@ -71,19 +55,7 @@
         "ink": "text",
         "glow": "cyan",
         "paper": "voidDeep"
-      },
-      "emblem": "◎"
-    },
-    {
-      "id": "sporewake",
-      "label": "Sporewake",
-      "palette": {
-        "ink": "green",
-        "glow": "cyan",
-        "paper": "voidDeep"
-      },
-      "emblem": "❋",
-      "plane": "sporewake"
+      }
     },
     {
       "id": "mixtape",
@@ -92,18 +64,7 @@
         "ink": "text",
         "glow": "magenta",
         "paper": "voidDeep"
-      },
-      "emblem": "▤"
-    },
-    {
-      "id": "vhs",
-      "label": "VHS",
-      "palette": {
-        "ink": "green",
-        "glow": "amber",
-        "paper": "voidDeep"
-      },
-      "emblem": "⏵"
+      }
     },
     {
       "id": "topo",
@@ -112,8 +73,7 @@
         "ink": "cyan",
         "glow": "green",
         "paper": "voidDeep"
-      },
-      "emblem": "◬"
+      }
     },
     {
       "id": "barcode",
@@ -122,8 +82,7 @@
         "ink": "text",
         "glow": "amber",
         "paper": "voidDeep"
-      },
-      "emblem": "‖"
+      }
     }
   ]
 }

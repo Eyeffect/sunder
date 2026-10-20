@@ -262,7 +262,7 @@ def test_set_sleeve_updates_station():
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "start", "seed": 1})
         s1 = ws.receive_json()["snapshot"]
-        assert s1["players"]["0"]["sleeve"] == "neonfreq"
+        assert s1["players"]["0"]["sleeve"] == "ember"
         ws.send_json({"type": "set_sleeve", "sleeve": "driftglass"})
         s2 = ws.receive_json()["snapshot"]
         assert s2["players"]["0"]["sleeve"] == "driftglass"
@@ -272,7 +272,7 @@ def test_set_sleeve_rejects_unknown_id():
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "start", "seed": 1})
         s1 = ws.receive_json()["snapshot"]
-        assert s1["players"]["0"]["sleeve"] == "neonfreq"
+        assert s1["players"]["0"]["sleeve"] == "ember"
         ws.send_json({"type": "set_sleeve", "sleeve": "nope"})
         err = ws.receive_json()
         assert err["type"] == "error"

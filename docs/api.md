@@ -64,12 +64,14 @@ Per-player view: `signal`, `max_signal`, `bandwidth`, `max_bandwidth`,
 `hand_count` (foe = count only), `static_count`, `playlist_count`, `board`.
 
 Board cards: effective `atk`/`def`, `damage`, fuse progress, `rules`,
-`flavor` — plus, **for your own cards**, `can_attack` and the resolved
-`attack_targets` (`{"kind":"face"}` / `{"kind":"broadcast","serial":n}`).
+`flavor`, `rarity` — plus, **for your own cards**, `can_attack` and the
+resolved `attack_targets` (`{"kind":"face"}` /
+`{"kind":"broadcast","serial":n}`).
 
-Hand cards carry playability: `is_playable`, `needs_target`, and the exact
-serial `legal_targets` list where a chosen target is required — the client
-never re-implements legality.
+Hand cards carry `rarity` (for the face badge) and playability:
+`is_playable`, `needs_target`, and the exact serial `legal_targets` list
+where a chosen target is required — the client never re-implements
+legality.
 
 Hidden B-SIDEs (opponent view) collapse to `name: "???"`, `type: null`,
 keywords `["B_SIDE"]`.

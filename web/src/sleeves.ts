@@ -17,7 +17,6 @@ export interface SleeveDef {
   id: string;
   label: string;
   palette: { ink: string; glow: string; paper: string };
-  emblem?: string;
   plane?: string;
 }
 
@@ -26,7 +25,6 @@ export interface Sleeve {
   id: string;
   label: string;
   palette: SleevePalette;
-  emblem?: string;
   plane?: string;
   /** concrete CSS color strings for styling hooks */
   css: SleevePalette;
@@ -53,11 +51,11 @@ export const CHANNELS: Record<string, string> = {
 /** Offline/boot fallback mirroring the server manifest. */
 const FALLBACK: SleeveDef[] = [
   { id: "default", label: "Frequency",
-    palette: { ink: "amber", glow: "amber", paper: "voidDeep" }, emblem: "◉" },
+    palette: { ink: "amber", glow: "amber", paper: "voidDeep" } },
   { id: "ember", label: "Ember",
-    palette: { ink: "amber", glow: "amber", paper: "voidDeep" }, emblem: "◉" },
+    palette: { ink: "amber", glow: "amber", paper: "voidDeep" } },
   { id: "static", label: "Static",
-    palette: { ink: "magenta", glow: "magenta", paper: "voidDeep" }, emblem: "◉" },
+    palette: { ink: "magenta", glow: "magenta", paper: "voidDeep" } },
 ];
 
 let manifest: SleeveDef[] = FALLBACK;

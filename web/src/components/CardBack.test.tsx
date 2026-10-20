@@ -4,9 +4,14 @@ import { artIds } from "../backPatterns";
 import { CardBack } from "./CardBack";
 
 describe("CardBack", () => {
-  it("renders the sleeve emblem for a known sleeve", () => {
-    render(<CardBack sleeve="ember" />);
-    expect(screen.getByText("◉")).toBeTruthy();
+  it("draws no chrome ornament or emblem", () => {
+    const { container } = render(<CardBack sleeve="ember" />);
+    expect(container.querySelector(".card-back-secret")).toBeNull();
+    const art = container.querySelector(".card-back-art")!;
+    const chromeCircles = [...art.children].filter(
+      (n) => n.tagName.toLowerCase() === "circle",
+    );
+    expect(chromeCircles).toHaveLength(0);
   });
 
   it("renders a secret marker when secret", () => {

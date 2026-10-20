@@ -1,59 +1,268 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- SUNDER card-back art — sleeve "barcode".
      Paint ONLY with these palette swatches (they are remapped at runtime):
        ink   #ffb545  -> var(--sleeve-ink)
        glow  #5ff2e0  -> var(--sleeve-glow)
        paper #030304  -> var(--sleeve-paper)
      Keep the 90x120 viewBox. Save as Plain SVG. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 120">
-<g>
-<rect x="0" y="0" width="90" height="120" fill="#030304">
-</rect>
-<defs>
-<radialGradient id="bc" cx="0.5" cy="0.45" r="0.55">
-<stop offset="0" stop-color="#5ff2e0" stop-opacity="0.1">
-</stop>
-<stop offset="1" stop-color="#5ff2e0" stop-opacity="0">
-</stop>
-</radialGradient>
-</defs>
-<rect width="90" height="120" fill="url(#bc)">
-</rect>
-<rect x="16" y="46" width="1.5361360035836695" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="18.73613600358367" y="46" width="3.024500610679388" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="22.96063661426306" y="46" width="2.4634791933000084" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="26.62411580756307" y="46" width="4.019111468642951" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="31.84322727620602" y="46" width="3.9601474769413474" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="37.00337475314737" y="46" width="4.103107311576605" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="42.30648206472397" y="46" width="2.9010662384331227" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="46.40754830315709" y="46" width="1.4827609099447727" height="30" fill="#ffb545" opacity="0.3">
-</rect>
-<rect x="49.09030921310187" y="46" width="2.565184646099806" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="52.85549385920167" y="46" width="2.0451707862317563" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="56.100664645433426" y="46" width="2.0925728529691696" height="30" fill="#ffb545" opacity="0.3">
-</rect>
-<rect x="59.3932374984026" y="46" width="3.82314413562417" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="64.41638163402676" y="46" width="3.243397734314203" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="68.85977936834097" y="46" width="2.789531011134386" height="30" fill="#ffb545" opacity="0.7">
-</rect>
-<rect x="72.84931037947536" y="46" width="2.6825699977576734" height="30" fill="#ffb545" opacity="0.3">
-</rect>
-<text x="45" y="86" text-anchor="middle" font-family="var(--font-mono)" font-size="7" letter-spacing="2" fill="#ffb545" opacity="0.65">10130 FM</text>
-<text x="45" y="95" text-anchor="middle" font-family="var(--font-mono)" font-size="4.5" letter-spacing="1" fill="#5ff2e0" opacity="0.5">PROPERTY OF STATION ONE</text>
-<line x1="14" y1="42" x2="76" y2="42" stroke="#ffb545" stroke-width="0.7" opacity="0.25">
-</line>
-<line x1="14" y1="80" x2="76" y2="80" stroke="#ffb545" stroke-width="0.7" opacity="0.25">
-</line>
-</g>
+
+<svg
+   viewBox="0 0 90 120"
+   version="1.1"
+   id="svg19"
+   sodipodi:docname="barcode.svg"
+   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs19" />
+  <sodipodi:namedview
+     id="namedview19"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="6.47"
+     inkscape:cx="34.003091"
+     inkscape:cy="62.828439"
+     inkscape:window-width="1886"
+     inkscape:window-height="1132"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g19" />
+  <g
+     id="g19">
+    <rect
+       x="0"
+       y="0"
+       width="90"
+       height="120"
+       fill="#030304"
+       id="rect1" />
+    <defs
+       id="defs2">
+      <radialGradient
+         id="bc"
+         cx="0.5"
+         cy="0.45"
+         r="0.55">
+        <stop
+           offset="0"
+           stop-color="#5ff2e0"
+           stop-opacity="0.1"
+           id="stop1" />
+        <stop
+           offset="1"
+           stop-color="#5ff2e0"
+           stop-opacity="0"
+           id="stop2" />
+      </radialGradient>
+    </defs>
+    <rect
+       width="90"
+       height="120"
+       fill="url(#bc)"
+       id="rect2" />
+    <rect
+       x="12"
+       y="34.099998"
+       width="1.7159379"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect3"
+       style="stroke-width:1.05631" />
+    <rect
+       x="15.056391"
+       y="34.099998"
+       width="3.3785131"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect4"
+       style="stroke-width:1.05631" />
+    <rect
+       x="19.77536"
+       y="34.099998"
+       width="2.7518251"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect5"
+       style="stroke-width:1.05631" />
+    <rect
+       x="23.867643"
+       y="34.099998"
+       width="3.2450967"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect6"
+       style="stroke-width:0.898058" />
+    <rect
+       x="29.697643"
+       y="34.099998"
+       width="4.4236755"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect7"
+       style="stroke-width:1.05631" />
+    <rect
+       x="35.461803"
+       y="34.099998"
+       width="0.85003591"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect8"
+       style="stroke-width:0.454902" />
+    <rect
+       x="28"
+       y="34"
+       width="0.85003591"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect8-1"
+       style="stroke-width:0.454902" />
+    <rect
+       x="41.38562"
+       y="34.099998"
+       width="3.2406309"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect9"
+       style="stroke-width:1.05631" />
+    <rect
+       x="37.288887"
+       y="34.099998"
+       width="3.2406309"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect9-2"
+       style="stroke-width:1.05631" />
+    <rect
+       x="45.966705"
+       y="34.099998"
+       width="1.6563153"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.3"
+       id="rect10"
+       style="stroke-width:1.05631" />
+    <rect
+       x="48.96349"
+       y="34.099998"
+       width="2.8654346"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect11"
+       style="stroke-width:1.05631" />
+    <rect
+       x="53.169384"
+       y="34.099998"
+       width="2.2845545"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect12"
+       style="stroke-width:1.05631" />
+    <rect
+       x="56.794388"
+       y="34.099998"
+       width="2.3375051"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.3"
+       id="rect13"
+       style="stroke-width:1.05631" />
+    <rect
+       x="60.472347"
+       y="34.099998"
+       width="4.2706356"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect14"
+       style="stroke-width:1.05631" />
+    <rect
+       x="66.083458"
+       y="34.099998"
+       width="3.6230319"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect15"
+       style="stroke-width:1.05631" />
+    <rect
+       x="71.046928"
+       y="34.099998"
+       width="3.1160402"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.7"
+       id="rect16"
+       style="stroke-width:1.05631" />
+    <rect
+       x="75.503441"
+       y="34.099998"
+       width="2.9965596"
+       height="29.965763"
+       fill="#ffb545"
+       opacity="0.3"
+       id="rect17"
+       style="stroke-width:1.05631" />
+    <text
+       x="45"
+       y="81.18"
+       text-anchor="middle"
+       font-family="'var(--font-mono)'"
+       font-size="7px"
+       letter-spacing="2"
+       fill="#ffb545"
+       opacity="0.65"
+       id="text17">103.60FM</text>
+    <text
+       x="45"
+       y="95"
+       text-anchor="middle"
+       font-family="var(--font-mono)"
+       font-size="4.5"
+       letter-spacing="1"
+       fill="#5ff2e0"
+       opacity="0.5"
+       id="text18">PROPERTY OF STATION ONE</text>
+    <line
+       x1="10"
+       y1="30.371685"
+       x2="80.000015"
+       y2="30.371685"
+       stroke="#ffb545"
+       stroke-width="0.743367"
+       opacity="0.25"
+       id="line18" />
+    <line
+       x1="10"
+       y1="68.328316"
+       x2="80.000015"
+       y2="68.328316"
+       stroke="#ffb545"
+       stroke-width="0.743367"
+       opacity="0.25"
+       id="line19" />
+    <path
+       style="fill:#ffb545;fill-opacity:0.35;stroke-width:0.0888889"
+       d="M 23.911111,49.066667 V 34.133333 h 1.6 1.6 V 49.066667 64 h -1.6 -1.6 z"
+       id="path19" />
+  </g>
 </svg>

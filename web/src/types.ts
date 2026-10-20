@@ -16,6 +16,7 @@ export interface BoardCard {
   is_token: boolean;
   cost?: number;
   plane?: string;
+  rarity?: Rarity;
   atk?: number;
   def?: number;
   damage?: number;
@@ -33,6 +34,7 @@ export interface HandCard {
   name: string;
   cost: number;
   plane?: string;
+  rarity?: Rarity;
   type: CardType;
   keywords: string[];
   tags?: string[];
