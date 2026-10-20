@@ -253,7 +253,6 @@ export function CardBackArt({ sleeve }: { sleeve: Sleeve }) {
       </defs>
       <rect width={W} height={H} fill={`url(#vig-${uid})`} />
       <rect x="3.5" y="3.5" width={W - 7} height={H - 7} fill="none" stroke={sleeve.css.ink} strokeWidth="2" />
-      <rect x="8" y="8" width={W - 16} height={H - 16} fill="none" stroke={sleeve.css.ink} strokeWidth="0.7" opacity="0.35" />
       {[[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]].map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r="1.5" fill={sleeve.css.ink} opacity="0.7" />
       ))}
