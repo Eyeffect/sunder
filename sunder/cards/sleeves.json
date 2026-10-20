@@ -6,7 +6,11 @@
     "staticNoise",
     "circuit",
     "vinyl",
-    "spool"
+    "spool",
+    "mixtape",
+    "vhs",
+    "topo",
+    "barcode"
   ],
   "sleeves": [
     {
@@ -18,7 +22,7 @@
         "glow": "amber",
         "paper": "voidDeep"
       },
-      "emblem": "\u25c9"
+      "emblem": "◉"
     },
     {
       "id": "ember",
@@ -29,7 +33,7 @@
         "glow": "amber",
         "paper": "voidDeep"
       },
-      "emblem": "\u25c9"
+      "emblem": "◉"
     },
     {
       "id": "static",
@@ -40,7 +44,7 @@
         "glow": "magenta",
         "paper": "voidDeep"
       },
-      "emblem": "\u25c9"
+      "emblem": "◉"
     },
     {
       "id": "neonfreq",
@@ -51,7 +55,7 @@
         "glow": "cyan",
         "paper": "voidDeep"
       },
-      "emblem": "\u2248",
+      "emblem": "≈",
       "plane": "neon_frequency"
     },
     {
@@ -63,7 +67,7 @@
         "glow": "cinder",
         "paper": "voidDeep"
       },
-      "emblem": "\u2301",
+      "emblem": "⌁",
       "plane": "cinderworks"
     },
     {
@@ -75,7 +79,7 @@
         "glow": "green",
         "paper": "voidDeep"
       },
-      "emblem": "\u25cd",
+      "emblem": "◍",
       "plane": "driftglass"
     },
     {
@@ -87,7 +91,63 @@
         "glow": "cyan",
         "paper": "voidDeep"
       },
-      "emblem": "\u25ce"
+      "emblem": "◎"
+    },
+    {
+      "id": "sporewake",
+      "label": "Sporewake",
+      "pattern": "topo",
+      "palette": {
+        "ink": "green",
+        "glow": "cyan",
+        "paper": "voidDeep"
+      },
+      "emblem": "❋",
+      "plane": "sporewake"
+    },
+    {
+      "id": "mixtape",
+      "label": "Mixtape",
+      "pattern": "mixtape",
+      "palette": {
+        "ink": "text",
+        "glow": "magenta",
+        "paper": "voidDeep"
+      },
+      "emblem": "▤"
+    },
+    {
+      "id": "vhs",
+      "label": "VHS",
+      "pattern": "vhs",
+      "palette": {
+        "ink": "green",
+        "glow": "amber",
+        "paper": "voidDeep"
+      },
+      "emblem": "⏵"
+    },
+    {
+      "id": "topo",
+      "label": "Topograf",
+      "pattern": "topo",
+      "palette": {
+        "ink": "cyan",
+        "glow": "green",
+        "paper": "voidDeep"
+      },
+      "emblem": "◬"
+    },
+    {
+      "id": "barcode",
+      "label": "Call Sign",
+      "pattern": "barcode",
+      "palette": {
+        "ink": "text",
+        "glow": "amber",
+        "paper": "voidDeep"
+      },
+      "emblem": "‖"
     }
   ]
 }

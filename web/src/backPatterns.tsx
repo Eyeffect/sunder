@@ -227,6 +227,133 @@ const PATTERNS: Record<string, PatternFn> = {
       </g>
     );
   },
+
+  mixtape: (s, uid) => (
+    <g>
+      <rect x="0" y="0" width={W} height={H} fill={s.css.paper} />
+      <defs>
+        <radialGradient id={`mt-${uid}`} cx="0.5" cy="0.55" r="0.55">
+          <stop offset="0" stopColor={s.css.ink} stopOpacity="0.1" />
+          <stop offset="1" stopColor={s.css.ink} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width={W} height={H} fill={`url(#mt-${uid})`} />
+      {/* cassette body */}
+      <rect x="13" y="38" width="64" height="46" fill="none" stroke={s.css.ink} strokeWidth="1.6" opacity="0.55" />
+      <rect x="17" y="42" width="56" height="13" fill={s.css.ink} opacity="0.14" />
+      {[18, 71].map((x) => [39, 82].map((y) => (
+        <rect key={`${x}${y}`} x={x} y={y} width="2" height="2" fill={s.css.ink} opacity="0.5" />
+      )))}
+      {/* spool windows */}
+      <circle cx="31" cy="67" r="6.5" fill="none" stroke={s.css.ink} strokeWidth="1.4" opacity="0.5" />
+      <circle cx="59" cy="67" r="6.5" fill="none" stroke={s.css.ink} strokeWidth="1.4" opacity="0.5" />
+      <path d="M37.5 67 H52.5" stroke={s.css.ink} strokeWidth="0.8" opacity="0.25" />
+      <rect x="24" y="59" width="42" height="16" fill="none" stroke={s.css.ink} strokeWidth="0.7" opacity="0.2" />
+      <text x="20" y="51.5" fontFamily="var(--font-mono)" fontSize="6" fill={s.css.ink} opacity="0.55">
+        SIDE B
+      </text>
+      <line x1="24" y1="89" x2="66" y2="89" stroke={s.css.glow} strokeWidth="1.2" opacity="0.4" />
+    </g>
+  ),
+
+  vhs: (s, uid) => (
+    <g>
+      <rect x="0" y="0" width={W} height={H} fill={s.css.paper} />
+      <defs>
+        <radialGradient id={`vh-${uid}`} cx="0.5" cy="0.5" r="0.55">
+          <stop offset="0" stopColor={s.css.glow} stopOpacity="0.1" />
+          <stop offset="1" stopColor={s.css.glow} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width={W} height={H} fill={`url(#vh-${uid})`} />
+      {/* cassette shell */}
+      <rect x="11" y="34" width="68" height="52" fill="none" stroke={s.css.ink} strokeWidth="1.6" opacity="0.55" />
+      <line x1="11" y1="66" x2="79" y2="66" stroke={s.css.ink} strokeWidth="0.8" opacity="0.3" />
+      {/* label sticker */}
+      <rect x="16" y="39" width="58" height="22" fill={s.css.ink} opacity="0.12" />
+      <text x="20" y="54" fontFamily="var(--font-mono)" fontSize="6.5" fill={s.css.ink} opacity="0.6">
+        LP 240 MIN
+      </text>
+      {/* tape windows */}
+      <circle cx="34" cy="78" r="5.5" fill="none" stroke={s.css.ink} strokeWidth="1.3" opacity="0.5" />
+      <circle cx="56" cy="78" r="5.5" fill="none" stroke={s.css.ink} strokeWidth="1.3" opacity="0.5" />
+      {starburstRays(4, 34, 78, 2, 5, s.css.ink)}
+      {starburstRays(4, 56, 78, 2, 5, s.css.ink)}
+      {/* tracking stripes */}
+      <line x1="16" y1="92" x2="74" y2="92" stroke={s.css.glow} strokeWidth="1" opacity="0.35" strokeDasharray="6 3" />
+      <line x1="16" y1="96" x2="74" y2="96" stroke={s.css.ink} strokeWidth="0.6" opacity="0.18" strokeDasharray="2 4" />
+    </g>
+  ),
+
+  topo: (s, uid) => {
+    const rnd = mulberry32(2401);
+    const contours: ReactNode[] = [];
+    for (let r = 10; r <= 58; r += 6) {
+      const pts: string[] = [];
+      const jitter = rnd() * 6.28;
+      for (let i = 0; i < 26; i++) {
+        const a = (i / 26) * Math.PI * 2;
+        const rr = r + Math.sin(a * 3 + jitter) * 2.2;
+        pts.push(`${(CX + Math.cos(a) * rr).toFixed(1)},${(CY + Math.sin(a) * rr * 1.1).toFixed(1)}`);
+      }
+      contours.push(
+        <polygon
+          key={r}
+          points={pts.join(" ")}
+          fill="none"
+          stroke={r === 28 ? s.css.glow : s.css.ink}
+          strokeWidth={r === 28 ? 1.4 : 0.7}
+          opacity={r === 28 ? 0.5 : 0.28}
+        />,
+      );
+    }
+    return (
+      <g>
+        <rect x="0" y="0" width={W} height={H} fill={s.css.paper} />
+        <defs>
+          <radialGradient id={`tp-${uid}`} cx="0.5" cy="0.5" r="0.55">
+            <stop offset="0" stopColor={s.css.ink} stopOpacity="0.09" />
+            <stop offset="1" stopColor={s.css.ink} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width={W} height={H} fill={`url(#tp-${uid})`} />
+        {contours}
+        <circle cx={CX} cy={CY} r="2" fill={s.css.glow} opacity="0.8" />
+      </g>
+    );
+  },
+
+  barcode: (s, uid) => {
+    const rnd = mulberry32(7777);
+    const bars: ReactNode[] = [];
+    let x = 16;
+    while (x < W - 16) {
+      const w = 1.4 + rnd() * 3.2;
+      bars.push(<rect key={x} x={x} y="46" width={w} height="30" fill={s.css.ink} opacity={rnd() > 0.25 ? 0.7 : 0.3} />);
+      x += w + 1.2;
+    }
+    return (
+      <g>
+        <rect x="0" y="0" width={W} height={H} fill={s.css.paper} />
+        <defs>
+          <radialGradient id={`bc-${uid}`} cx="0.5" cy="0.45" r="0.55">
+            <stop offset="0" stopColor={s.css.glow} stopOpacity="0.1" />
+            <stop offset="1" stopColor={s.css.glow} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width={W} height={H} fill={`url(#bc-${uid})`} />
+        {bars}
+        <text x={CX} y="86" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="7" letterSpacing="2" fill={s.css.ink} opacity="0.65">
+          10130 FM
+        </text>
+        <text x={CX} y="95" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="4.5" letterSpacing="1" fill={s.css.glow} opacity="0.5">
+          PROPERTY OF STATION ONE
+        </text>
+        <line x1="14" y1="42" x2={W - 14} y2="42" stroke={s.css.ink} strokeWidth="0.7" opacity="0.25" />
+        <line x1="14" y1="80" x2={W - 14} y2="80" stroke={s.css.ink} strokeWidth="0.7" opacity="0.25" />
+      </g>
+    );
+  },
 };
 
 export function patternNames(): string[] {
