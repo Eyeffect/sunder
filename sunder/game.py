@@ -56,7 +56,8 @@ class CardInstance:
         return key in self.card.keywords or key in self.granted_keywords
 
     def label(self) -> str:
-        return self.card.name
+        # Log text is shown to both stations — never name a hidden B-SIDE.
+        return "Hidden B-SIDE" if self.hidden else self.card.name
 
 
 class Player:
@@ -109,6 +110,8 @@ class GameState:
         self.resolving: set[int] = set()
         self.last_track_stack: list[CardInstance] = []
         self.winner: int | None = None
+        # "signal" | "concede" | "timeout" | "disconnect" once the game ends.
+        self.end_reason: str | None = None
         self.sleeves = sleeves if sleeves is not None else load_manifest()
         self.avatars = avatars if avatars is not None else load_avatars()
         self.players = [Player(0, deck1, self), Player(1, deck2, self)]
@@ -439,11 +442,27 @@ class GameState:
         elif self.players[0].signal <= 0:
             self.winner = 1
         if self.winner is not None:
+            self.end_reason = "signal"
             self.log_line(
                 f"Station {self.winner + 1} cuts the rival off the air.",
                 kind="win",
                 station=self.winner,
             )
+
+    def forfeit(self, station: int, reason: str) -> None:
+        """End the game with `station` losing for a non-Signal `reason`
+        (concede / timeout / disconnect). No-op once the game is over."""
+        if self.game_over:
+            return
+        if station not in (0, 1):
+            raise ValueError("no such station")
+        self.winner = 1 - station
+        self.end_reason = reason
+        self.log_line(
+            f"Station {station + 1} goes off the air ({reason}).",
+            kind="win",
+            station=self.winner,
+        )
 
     def status(self) -> str:
         return (f"Turn {self.turn} | Station {self.cur.index + 1} | "

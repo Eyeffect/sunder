@@ -75,10 +75,22 @@ installed in the image layer above the source layer, so code-only changes
 rebuild fast. `.dockerignore` keeps node_modules, local dist, caches, and
 development docs out of the build context.
 
+### Runtime settings
+
+| Env var | Default | |
+|---|---|---|
+| `SUNDER_TURN_SECONDS` | `75` | versus turn clock (`0`/`off` = untimed) |
+| `SUNDER_GRACE_SECONDS` | `60` | versus reconnect window before a disconnect forfeits |
+| `SUNDER_LLM_*` | see README | card-generation gateway |
+
+Versus rooms are held **in memory in one process**: keep uvicorn at a single
+worker (the image's default) and expect a restart/redeploy to end live
+matches until Phase 2 persistence lands — see
+[multiplayer.md](multiplayer.md#configuration).
+
 ### Homelab (efx-lab) flow
 
-The lab host consumes a tar-over-ssh stream (no rsync, no clone needed — the
-repo is private):
+The lab host consumes a tar-over-ssh stream (no rsync, no clone needed):
 
 ```bash
 tar -czf - --exclude='.git' --exclude='web/node_modules' \

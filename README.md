@@ -33,6 +33,10 @@ npm install && npm run build --prefix web
 npm run test     --prefix web         # frontend tests
 ```
 
+**Versus:** open the VERSUS tab, create a room and send the invite link —
+two humans, server-authoritative, with a turn clock, concede and
+reconnect-on-refresh ([docs/multiplayer.md](docs/multiplayer.md)).
+
 Right now matches pit the two starter decks (`neon_frequency` vs `cinderworks`) against each other; the AI is a greedy heuristic opponent — no search, no LLM. Going second gets a **Signal Spike** (a free Track that grants +1 Bandwidth this turn) as second-player compensation — the coin analog.
 
 ## CLI
@@ -80,7 +84,8 @@ FastAPI app (`sunder/server/app.py`), docs at `/api/docs`:
 - `POST /api/registry`                                    — propose a tag
 - `POST /api/registry/{kind}/{id}/approve`                — approve a proposal
 - `POST /api/generate`                                    — run `generate_pack` (async thread)
-- `WS   /ws` — the match protocol: `start` / `restart` / `play {hand, target?}` / `attack {board, target}` / `end_turn`, all answers as full `state` snapshots
+- `GET  /api/rooms/{code}`                                 — versus room status (never exposes tokens)
+- `WS   /ws` — the match protocol: `start` / `restart` / `play {hand, target?}` / `attack {board, target}` / `end_turn` / `concede`, plus the versus lobby `create_room` / `join_room` / `resume` / `leave_room`; every mutation answers each seat with its own `state` snapshot
 
 Snapshots (`state.py`) are viewer-aware: opponent hand is a count, hidden B-SIDEs are masked AND precomputed server-side (`is_playable`, `attack_targets`, `legal_targets`) — the client stays dumb.
 
@@ -137,6 +142,7 @@ Full documentation lives in [docs/](docs/index.md):
 - [Architecture](docs/architecture.md) — module map, closed vocabulary, engine design
 - [Card format](docs/cards.md) — JSON schema, budget model, registry governance
 - [Card generation](docs/generation.md) — the LLM pipeline + review gate
+- [Multiplayer](docs/multiplayer.md) — versus rooms, clocks, resume, server authority, roadmap
 - [Server API](docs/api.md) — REST + WebSocket protocol, snapshot shape
 - [Developing](docs/developing.md) — setup, tests, lint, CI, Docker/homelab deploy
 
@@ -150,9 +156,11 @@ pytest tests -x
 - **Match** — AI vs AI across seeds: every match terminates, every seed is deterministic
 - **Generation** — every module in isolation (client/SSE, profile, sampler, ledger, humanizer, legality, end-to-end with a `FakeLLM` double), including graceful-degradation paths
 - **Web** — API routes, tag registry, WS loop
+- **Versus** — seat-aware rooms, clocks, grace/resume, lobby protocol, full PvP match over two sockets
 
 ## Status / notes
 
+- v0.4.0 — **Versus.** Invite-code PvP rooms with server-side turn clocks, concede, and resume-on-refresh; every match runs in a seat-aware `MatchRoom` (the bot is just another seat). Fixes a Station-1-win bug (`winner == 0` read as "no winner") and hidden B-SIDE names leaking through the log.
 - v0.3.7.5 — card faces redrawn at the standard 5:7 ratio, with an edition/rarity badge, a station watermark, clamped rules, and a playability signal on the hand cost bars; flavor moves to the inspector. Profile icons are a separate pick from sleeves: the station avatar opens an emblem grid, and the glyph takes your sleeve's ink.
 - v0.3.6.1 — changelog inside the game UI (Changelog tab) with a short roadmap.
 - Card backs are hand-editable SVG art (`web/src/art/sleeves/*.svg`), one file per sleeve, themed via palette channels from `sunder/cards/sleeves.json`. Browse + pick in the codex (SLEEVES tab), carried server-side per station so opponents see your back too. Adding a sleeve = one JSON entry + one SVG.

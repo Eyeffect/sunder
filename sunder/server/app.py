@@ -8,6 +8,8 @@ full state snapshot plus the newly appended log lines.
 from __future__ import annotations
 
 import json
+import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -19,6 +21,7 @@ from ..game import GameState
 from ..lore import rules_text
 from ..schema import load_card_file
 from ..sleeves import load_manifest
+from .lobby import Connection, Lobby, LobbyError
 from .match import BotSeat, HumanSeat, MatchRoom
 
 SERVER_DIR = Path(__file__).parent
@@ -45,14 +48,48 @@ def _card_json(c) -> dict:
     }
 
 
-def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> FastAPI:
+def _env_seconds(name: str, default: float | None) -> float | None:
+    """Read a duration from the environment; `0`/`off` disables the clock."""
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    if raw.strip().lower() in ("0", "off", "none"):
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
+def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4, *,
+               turn_seconds: float | None = None, grace_seconds: float | None = None,
+               afk_limit: int = 3, finished_ttl: float = 300) -> FastAPI:
     """Build the app. `ai_think`/`ai_delay` are the base seconds for the
     rival's thinking pause and per-action delay (randomized around them);
-    pass 0 to make AI turns instant (tests)."""
+    pass 0 to make AI turns instant (tests).
+
+    PvP clocks (docs/multiplayer.md): `turn_seconds` (default 75, env
+    `SUNDER_TURN_SECONDS`) and `grace_seconds` (default 60, env
+    `SUNDER_GRACE_SECONDS`). Pass/set `0` to disable a clock."""
     decks = tuple(decks) if decks else default_decks()
     sleeves = load_manifest()
     avatars = load_avatars()
-    app = FastAPI(title="SUNDER", docs_url="/api/docs")
+    if turn_seconds is None:
+        turn_seconds = _env_seconds("SUNDER_TURN_SECONDS", 75)
+    if grace_seconds is None:
+        grace_seconds = _env_seconds("SUNDER_GRACE_SECONDS", 60)
+    lobby = Lobby(decks, sleeves=sleeves, avatars=avatars,
+                  turn_seconds=turn_seconds or None,
+                  grace_seconds=grace_seconds if grace_seconds else None,
+                  afk_limit=afk_limit, finished_ttl=finished_ttl)
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        yield
+        await lobby.shutdown()
+
+    app = FastAPI(title="SUNDER", docs_url="/api/docs", lifespan=lifespan)
+    app.state.lobby = lobby
 
     @app.get("/api/cards")
     def api_cards():
@@ -150,24 +187,32 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
     def api_health():
         return {"ok": True}
 
+    @app.get("/api/rooms/{code}")
+    def api_room(code: str):
+        """Public room lookup for invite links — never exposes tokens."""
+        code = lobby.normalize(code)
+        if code in lobby.pending:
+            return {"code": code, "status": "waiting"}
+        if code in lobby.live:
+            over = lobby.live[code].room.gs.game_over
+            return {"code": code, "status": "over" if over else "live"}
+        return JSONResponse({"error": "no such room"}, status_code=404)
+
     @app.websocket("/ws")
     async def ws_endpoint(ws: WebSocket):
-        """Serve a station-0 human against a bot, replacing the room on restart.
-
-        Reply to invalid JSON, non-object messages, and pre-game actions with
-        errors; answer pings only after a game starts. Mark the seat disconnected
-        and cancel its room's bot task when the receive loop exits. Catch
-        WebSocketDisconnect; other receive-loop errors propagate after cleanup.
-        """
         await ws.accept()
-        # Single-human server for now: this socket is seat 0 vs a bot seat.
-        # A PvP lobby will build the same MatchRoom with two HumanSeats.
-        seat = HumanSeat(0, ws)
-        room: MatchRoom | None = None
+        conn = Connection(ws)
+
+        async def send(payload: dict) -> None:
+            await ws.send_text(json.dumps(payload))
 
         async def send_error(message: str) -> None:
-            """Send an error response to this socket's human seat."""
-            await seat.send({"type": "error", "message": message})
+            await send({"type": "error", "message": message})
+
+        async def end_bot_room() -> None:
+            if conn.room is not None and conn.entry is None:
+                await conn.room.close()
+                conn.clear()
 
         try:
             while True:
@@ -182,32 +227,71 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                     continue
                 mtype = msg.get("type")
 
-                if mtype == "start" or mtype == "restart":
-                    if room is not None:
-                        await room.close()
-                    gs = GameState(*decks, seed=msg.get("seed"),
-                                   sleeves=sleeves, avatars=avatars)
-                    gs.start_game()
-                    room = MatchRoom(gs, [seat, BotSeat(1, think=ai_think, delay=ai_delay)])
-                    await room.send_state(seat)
-                    room.kick()
+                try:
+                    if mtype == "ping":
+                        await send({"type": "pong"})
 
-                elif room is None:
-                    await send_error("send {type:start} first")
+                    elif mtype in ("start", "restart"):
+                        # Practice match vs the bot. Never silently abandons a
+                        # live PvP match — that needs an explicit concede/leave.
+                        if conn.in_live_pvp:
+                            await send_error("you're in a PvP match — concede or leave first")
+                            continue
+                        await lobby.leave(conn)
+                        await end_bot_room()
+                        gs = GameState(*decks, seed=msg.get("seed"),
+                                       sleeves=sleeves, avatars=avatars)
+                        gs.start_game()
+                        human = HumanSeat(0, ws)
+                        conn.room, conn.seat = MatchRoom(
+                            gs, [human, BotSeat(1, think=ai_think, delay=ai_delay)]), 0
+                        await conn.room.send_state(human)
+                        conn.room.start()
 
-                elif mtype == "ping":
-                    await seat.send({"type": "pong"})
+                    elif mtype == "create_room":
+                        if conn.in_live_pvp:
+                            await send_error("you're in a PvP match — concede or leave first")
+                            continue
+                        await lobby.leave(conn)
+                        await end_bot_room()
+                        pr = lobby.create(conn)
+                        await send(lobby.room_msg(pr.code, None, None, "waiting"))
 
-                else:
-                    err = await room.handle(seat, msg, sleeves=sleeves, avatars=avatars)
-                    if err:
-                        await send_error(err)
+                    elif mtype == "join_room":
+                        if conn.in_live_pvp:
+                            await send_error("you're in a PvP match — concede or leave first")
+                            continue
+                        code = lobby.check_joinable(conn, msg.get("code"))
+                        await lobby.leave(conn)
+                        await end_bot_room()
+                        await lobby.join(conn, code)
+
+                    elif mtype == "resume":
+                        await end_bot_room()
+                        if conn.pending is not None:
+                            lobby.cancel_pending(conn)
+                        await lobby.resume(conn, msg.get("code"), msg.get("token"))
+
+                    elif mtype == "leave_room":
+                        await lobby.leave(conn)
+                        await end_bot_room()
+                        await send({"type": "room_closed", "reason": "left"})
+
+                    elif conn.room is None:
+                        await send_error("send {type:start} first")
+
+                    else:
+                        err = await conn.room.handle(conn.room.seats[conn.seat], msg,
+                                                     sleeves=sleeves, avatars=avatars)
+                        if err:
+                            await send_error(err)
+                except LobbyError as exc:
+                    await send_error(str(exc))
         except WebSocketDisconnect:
             return
         finally:
-            seat.connected = False
-            if room is not None:
-                await room.close()
+            await lobby.disconnect(conn)
+            await end_bot_room()
 
     if DIST_DIR.exists():
         app.mount("/", StaticFiles(directory=str(DIST_DIR), html=True), name="spa")

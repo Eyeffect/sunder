@@ -18,6 +18,9 @@ interface GameViewProps {
   onEndTurn: () => void;
   onRestart: () => void;
   onSetAvatar: (id: string) => void;
+  /** Extra line on the end screen (e.g. "The rival conceded."). */
+  endNote?: string;
+  restartLabel?: string;
 }
 
 export function GameView(props: GameViewProps) {
@@ -141,7 +144,12 @@ export function GameView(props: GameViewProps) {
         />
       )}
       {snapshot.winner !== null && (
-        <EndGameOverlay snapshot={snapshot} onRestart={props.onRestart} />
+        <EndGameOverlay
+          snapshot={snapshot}
+          onRestart={props.onRestart}
+          note={props.endNote}
+          restartLabel={props.restartLabel}
+        />
       )}
     </div>
   );

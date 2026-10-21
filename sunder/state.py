@@ -116,6 +116,7 @@ def snapshot(gs: GameState, viewer: int = 0) -> dict:
         "current": gs.current,
         "phase": gs.phase,
         "winner": gs.winner,
+        "end_reason": gs.end_reason,
         "status": gs.status(),
         "viewer": viewer,
         "can_act": gs.winner is None and gs.current == viewer,

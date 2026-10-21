@@ -36,18 +36,23 @@ export function Inspector({ card }: { card: CardInfo | null }) {
 export function EndGameOverlay({
   snapshot,
   onRestart,
+  note,
+  restartLabel = "Play again",
 }: {
   snapshot: Snapshot;
   onRestart: () => void;
+  note?: string;
+  restartLabel?: string;
 }) {
   const won = snapshot.winner === snapshot.viewer;
   return (
     <div className="overlay">
       <div className={`overlay-card ${won ? "overlay-win" : "overlay-loss"}`}>
         <h1>{won ? "You cut the rival off the air." : "You were cut off the air."}</h1>
+        {note && <p className="overlay-note">{note}</p>}
         <p>{snapshot.status}</p>
         <button className="btn btn-primary" onClick={onRestart}>
-          Play again
+          {restartLabel}
         </button>
       </div>
     </div>

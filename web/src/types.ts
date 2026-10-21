@@ -97,6 +97,7 @@ export interface Snapshot {
   current: number;
   phase: string;
   winner: number | null;
+  end_reason?: EndReason | null;
   status: string;
   viewer: number;
   can_act: boolean;
@@ -173,10 +174,40 @@ export interface GeneratedPack {
   mode: "llm" | "deterministic";
 }
 
+export type EndReason = "signal" | "concede" | "timeout" | "disconnect";
+
+/** Per-seat match info that rides next to every `state` snapshot. */
+export interface MatchMeta {
+  mode: "bot" | "pvp";
+  code: string | null;
+  seat: number;
+  opponent_connected: boolean;
+  turn_seconds: number | null;
+  turn_remaining: number | null;
+}
+
+/** Lobby status for this connection (docs/multiplayer.md). */
+export interface RoomInfo {
+  mode: "pvp";
+  code: string;
+  seat: number | null;
+  token: string | null;
+  status: "waiting" | "live" | "over";
+}
+
 export interface ServerMsg {
-  type: "state" | "error" | "pong";
+  type: "state" | "error" | "pong" | "room" | "room_closed";
   snapshot?: Snapshot;
+  match?: MatchMeta;
   message?: string;
+  // room
+  mode?: "pvp";
+  code?: string;
+  seat?: number | null;
+  token?: string | null;
+  status?: RoomInfo["status"];
+  // room_closed
+  reason?: string;
 }
 
 export type ClientMsg =
@@ -187,4 +218,9 @@ export type ClientMsg =
   | { type: "end_turn"; turn: number }
   | { type: "set_sleeve"; sleeve: string }
   | { type: "set_avatar"; avatar: string }
-  | { type: "ping" };
+  | { type: "ping" }
+  | { type: "create_room" }
+  | { type: "join_room"; code: string }
+  | { type: "resume"; code: string; token: string }
+  | { type: "leave_room" }
+  | { type: "concede" };
