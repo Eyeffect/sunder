@@ -270,10 +270,12 @@ class MatchRoom:
         await self.broadcast()
 
     async def detach(self, index: int, ws=None) -> None:
-        """Drop seat `index`'s socket (only if it is still `ws`, when given).
+        """Drop seat `index`'s socket unless a different socket is attached.
         In a live PvP game this starts the disconnect grace clock."""
         seat = self.seats[index]
-        if not isinstance(seat, HumanSeat) or (ws is not None and seat.ws is not ws):
+        if not isinstance(seat, HumanSeat):
+            return
+        if ws is not None and seat.ws is not None and seat.ws is not ws:
             return
         seat.ws = None
         if self.mode == "pvp" and not self.gs.game_over and self.grace_seconds is not None:

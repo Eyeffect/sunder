@@ -8,6 +8,7 @@ full state snapshot plus the newly appended log lines.
 from __future__ import annotations
 
 import json
+import math
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -56,9 +57,12 @@ def _env_seconds(name: str, default: float | None) -> float | None:
     if raw.strip().lower() in ("0", "off", "none"):
         return None
     try:
-        return float(raw)
+        seconds = float(raw)
     except ValueError:
         return default
+    if not math.isfinite(seconds) or seconds < 0:
+        return default
+    return seconds if seconds else None
 
 
 def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4, *,

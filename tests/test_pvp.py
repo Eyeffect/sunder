@@ -2,17 +2,39 @@
 
 import asyncio
 import contextlib
+import json
 import time
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from sunder.game import GameState
-from sunder.server.app import create_app, default_decks
+from sunder.server.app import _env_seconds, create_app, default_decks
 from sunder.server.lobby import CODE_ALPHABET, CODE_LENGTH
 from sunder.server.match import HumanSeat, MatchRoom, Seat
 from sunder.state import snapshot
 from tests.conftest import card, make_gs, put_board, put_hand
+
+
+@pytest.mark.parametrize("raw", [None, "", "  ", "bad", "-1", "nan", "NaN",
+                                 "inf", "-inf", "Infinity", "1e309"])
+@pytest.mark.parametrize("default", [75, None])
+def test_env_seconds_falls_back(monkeypatch, raw, default):
+    if raw is None:
+        monkeypatch.delenv("SUNDER_TURN_SECONDS", raising=False)
+    else:
+        monkeypatch.setenv("SUNDER_TURN_SECONDS", raw)
+    assert _env_seconds("SUNDER_TURN_SECONDS", default) == default
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("0", None), ("0.0", None), ("-0.0", None), ("  OFF ", None), ("none", None),
+    ("0.25", 0.25), (" 75 ", 75), ("1e2", 100),
+])
+def test_env_seconds_accepts_disabled_and_positive_values(monkeypatch, raw, expected):
+    monkeypatch.setenv("SUNDER_TURN_SECONDS", raw)
+    assert _env_seconds("SUNDER_TURN_SECONDS", 60) == expected
 
 # ---------------------------------------------------------------- engine
 
@@ -73,16 +95,20 @@ def test_revealed_bside_is_named_again():
 # ---------------------------------------------------------------- room clocks
 
 
+class FakeSocket:
+    def __init__(self, inbox):
+        self.inbox = inbox
+
+    async def send_text(self, text):
+        self.inbox.append(json.loads(text))
+
+
 class FakeSeat(HumanSeat):
-    """A HumanSeat with an in-memory 'socket'."""
+    """A HumanSeat with an in-memory socket, using the real send path."""
 
     def __init__(self, index):
-        super().__init__(index, ws=object())
         self.inbox = []
-
-    async def send(self, payload):
-        if self.ws is not None:
-            self.inbox.append(payload)
+        super().__init__(index, ws=FakeSocket(self.inbox))
 
     @property
     def last(self):
@@ -167,13 +193,54 @@ def test_disconnect_grace_forfeits():
     assert gs.winner == 0 and gs.end_reason == "disconnect"
 
 
+def test_send_failure_still_starts_disconnect_grace(monkeypatch):
+    gs, room, a, b = _room(grace_seconds=0.01)
+    ws = b.ws
+    failed_send = AsyncMock(side_effect=RuntimeError("socket closed"))
+    monkeypatch.setattr(ws, "send_text", failed_send)
+
+    async def go():
+        try:
+            await room.broadcast()
+            failed_send.assert_awaited_once()
+            assert b.ws is None
+            a.inbox.clear()
+            await room.detach(1, ws)
+            assert a.last["match"]["opponent_connected"] is False
+            await asyncio.wait_for(room._grace[1], timeout=1)
+            assert a.last["snapshot"]["winner"] == 0
+            assert a.last["snapshot"]["end_reason"] == "disconnect"
+        finally:
+            await room.close()
+    asyncio.run(go())
+    assert gs.winner == 0 and gs.end_reason == "disconnect"
+
+
+def test_detach_old_socket_keeps_current_connection():
+    gs, room, a, b = _room(grace_seconds=0.01)
+    old_ws = b.ws
+    new_ws = FakeSocket(b.inbox)
+
+    async def go():
+        try:
+            await room.attach(1, new_ws)
+            a.inbox.clear()
+            await room.detach(1, old_ws)
+            assert b.ws is new_ws
+            assert not room._grace and not a.inbox
+            assert not gs.game_over
+        finally:
+            await room.close()
+    asyncio.run(go())
+
+
 def test_reconnect_within_grace_keeps_game():
     gs, room, a, b = _room(grace_seconds=0.1)
 
     async def go():
         await room.detach(1)
         await asyncio.sleep(0.03)
-        await room.attach(1, object())
+        await room.attach(1, FakeSocket(b.inbox))
         await asyncio.sleep(0.15)
         await room.close()
     asyncio.run(go())
