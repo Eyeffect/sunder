@@ -16,13 +16,15 @@ def play_turn(gs) -> None:
 
 
 def iter_turn(gs):
-    """Run the heuristic AI turn, yielding after each discrete action so the
-    server can pace/stage the moves (one snapshot per action)."""
+    """Run the current station's AI turn, yielding None after each play or attack.
+
+    Stop when the game ends; otherwise end the turn without a final yield.
+    """
     yield from _main_phase(gs)
-    if gs.winner:
+    if gs.game_over:
         return
     yield from _combat(gs)
-    if gs.winner:
+    if gs.game_over:
         return
     gs.end_turn()
 
@@ -30,7 +32,11 @@ def iter_turn(gs):
 # ------------------------------------------------------------------ main
 
 def _main_phase(gs):
-    while not gs.winner:
+    """Play heuristic card choices, yielding None after each successful play.
+
+    Stop on game over, no available choice, or a ValueError from a play.
+    """
+    while not gs.game_over:
         play = _choose_play(gs)
         if play is None:
             return
@@ -96,9 +102,13 @@ def _track_target(gs, inst):
 # ------------------------------------------------------------------ combat
 
 def _combat(gs):
+    """Attempt one attack per eligible Broadcast, yielding None after each attack.
+
+    Stop on game over; attack errors propagate to the caller.
+    """
     p = gs.cur
     for attacker in list(p.board):
-        if gs.winner:
+        if gs.game_over:
             return
         if not gs.can_attack(attacker):
             continue

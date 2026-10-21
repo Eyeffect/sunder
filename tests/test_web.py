@@ -336,3 +336,17 @@ def test_sleeves_manifest_schema():
         assert all(isinstance(v, str) and v for v in palette.values()), s["id"]
     ids = [s["id"] for s in sleeves]
     assert len(ids) == len(set(ids)), "duplicate sleeve ids"
+
+
+def test_ws_restart_mid_ai_turn_is_clean():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "start", "seed": 1})
+        s1 = ws.receive_json()["snapshot"]
+        ws.send_json({"type": "end_turn", "turn": s1["turn"]})
+        ws.send_json({"type": "restart", "seed": 2})
+        for _ in range(50):
+            s = ws.receive_json()["snapshot"]
+            if s["turn"] == 1 and s["can_act"]:
+                break
+        else:
+            raise AssertionError("never got a fresh game")

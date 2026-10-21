@@ -115,6 +115,12 @@ class GameState:
 
     # ------------------------------------------------------------------ setup
 
+    @property
+    def game_over(self) -> bool:
+        """True once a station has won. Use this, never `if self.winner:` —
+        station 0 winning is `winner == 0`, which is falsy."""
+        return self.winner is not None
+
     def make_instance(self, card: Card, controller: int) -> CardInstance:
         self.serial += 1
         return CardInstance(card, self.serial, controller)
@@ -202,7 +208,11 @@ class GameState:
         )
 
     def end_turn(self) -> None:
-        if self.winner:
+        """Resolve end-of-turn effects, switch stations, and begin the next turn.
+
+        Do nothing if a winner has already been recorded.
+        """
+        if self.game_over:
             return
         engine.end_turn(self)
         self.current = 1 - self.current
@@ -228,7 +238,14 @@ class GameState:
     # ------------------------------------------------------------------ play
 
     def play_card(self, hand_index: int, chosen: CardInstance | None = None) -> CardInstance:
-        if self.winner:
+        """Spend bandwidth to play the current station's card and return its instance.
+
+        `hand_index` is zero-based. `chosen` is passed to targeting abilities;
+        its legality is not checked here. Resolve effects and check for a winner.
+        Raise ValueError if the game is over, the index is out of range, bandwidth
+        is insufficient, or a non-Track would exceed the board cap.
+        """
+        if self.game_over:
             raise ValueError("game over")
         p = self.cur
         if not (0 <= hand_index < len(p.hand)):
@@ -296,7 +313,11 @@ class GameState:
         return out
 
     def is_playable(self, inst: CardInstance) -> bool:
-        if self.winner or inst not in self.cur.hand:
+        """Check hand membership, cost, board space, and Track target availability.
+
+        Return False after game over; this does not validate a chosen target.
+        """
+        if self.game_over or inst not in self.cur.hand:
             return False
         if inst.card.cost > self.cur.bandwidth:
             return False
@@ -327,7 +348,12 @@ class GameState:
         return (atk, def_)
 
     def can_attack(self, attacker: CardInstance) -> bool:
-        if self.winner or attacker.controller != self.current:
+        """Check whether a live Broadcast on the current station's board may attack.
+
+        Honor LOUD, RUSH, and FEEDBACK limits; return False after game over.
+        Target restrictions are checked separately by `legal_attack_targets`.
+        """
+        if self.game_over or attacker.controller != self.current:
             return False
         if attacker.card.type is not CardType.BROADCAST:
             return False
@@ -367,7 +393,13 @@ class GameState:
         return targets
 
     def attack(self, attacker: CardInstance, target: tuple) -> None:
-        if self.winner or attacker.controller != self.current:
+        """Resolve an attack, consume an attack allowance, and check for a winner.
+
+        `target` is ('FACE', None) or ('BROADCAST', instance). Do nothing if
+        the game is over or the attacker cannot attack. Otherwise, raise
+        ValueError for a target outside `legal_attack_targets`.
+        """
+        if self.game_over or attacker.controller != self.current:
             return
         if not self.can_attack(attacker):
             return
@@ -395,7 +427,12 @@ class GameState:
     # ------------------------------------------------------------------ end
 
     def check_win(self) -> None:
-        if self.winner:
+        """Record a winner when either station's Signal is at or below zero.
+
+        Station 0 wins if both qualify. Preserve an existing winner, recording
+        the win event only when a winner is first assigned.
+        """
+        if self.game_over:
             return
         if self.players[1].signal <= 0:
             self.winner = 0

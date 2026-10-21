@@ -7,22 +7,19 @@ full state snapshot plus the newly appended log lines.
 
 from __future__ import annotations
 
-import asyncio
 import json
-import random
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .. import ai as ai_mod
 from ..avatars import load_avatars
 from ..game import GameState
 from ..lore import rules_text
 from ..schema import load_card_file
 from ..sleeves import load_manifest
-from ..state import snapshot
+from .match import BotSeat, HumanSeat, MatchRoom
 
 SERVER_DIR = Path(__file__).parent
 CARDS_DIR = SERVER_DIR.parent / "cards"
@@ -155,23 +152,22 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.websocket("/ws")
     async def ws_endpoint(ws: WebSocket):
+        """Serve a station-0 human against a bot, replacing the room on restart.
+
+        Reply to invalid JSON, non-object messages, and pre-game actions with
+        errors; answer pings only after a game starts. Mark the seat disconnected
+        and cancel its room's bot task when the receive loop exits. Catch
+        WebSocketDisconnect; other receive-loop errors propagate after cleanup.
+        """
         await ws.accept()
-        gs: GameState | None = None
-
-        def human_turn() -> bool:
-            return gs is not None and gs.winner is None and gs.current == 0
-
-        def my_station() -> int:
-            # Single-human server: the connected client always sits at
-            # station 0. A future 2-human socket server derives this from
-            # the connection's assigned seat.
-            return 0
-
-        async def send_state() -> None:
-            await ws.send_text(json.dumps({"type": "state", "snapshot": snapshot(gs)}))
+        # Single-human server for now: this socket is seat 0 vs a bot seat.
+        # A PvP lobby will build the same MatchRoom with two HumanSeats.
+        seat = HumanSeat(0, ws)
+        room: MatchRoom | None = None
 
         async def send_error(message: str) -> None:
-            await ws.send_text(json.dumps({"type": "error", "message": message}))
+            """Send an error response to this socket's human seat."""
+            await seat.send({"type": "error", "message": message})
 
         try:
             while True:
@@ -181,87 +177,37 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
                 except json.JSONDecodeError:
                     await send_error("malformed message")
                     continue
+                if not isinstance(msg, dict):
+                    await send_error("malformed message")
+                    continue
                 mtype = msg.get("type")
 
                 if mtype == "start" or mtype == "restart":
+                    if room is not None:
+                        await room.close()
                     gs = GameState(*decks, seed=msg.get("seed"),
                                    sleeves=sleeves, avatars=avatars)
                     gs.start_game()
-                    await send_state()
+                    room = MatchRoom(gs, [seat, BotSeat(1, think=ai_think, delay=ai_delay)])
+                    await room.send_state(seat)
+                    room.kick()
 
-                elif gs is None:
+                elif room is None:
                     await send_error("send {type:start} first")
 
-                elif mtype == "play":
-                    if not human_turn():
-                        await send_error("not your turn")
-                        continue
-                    try:
-                        idx = int(msg["hand"])
-                        chosen = None
-                        target = msg.get("target")
-                        if target is not None:
-                            chosen = next((i for i in gs.opp.board if i.serial == target), None)
-                        gs.play_card(idx, chosen)
-                        await send_state()
-                    except (IndexError, ValueError) as exc:
-                        await send_error(str(exc))
-
-                elif mtype == "attack":
-                    if not human_turn():
-                        await send_error("not your turn")
-                        continue
-                    try:
-                        attacker = gs.cur.board[int(msg["board"])]
-                        target = msg.get("target")
-                        if target == "face":
-                            t: tuple = ("FACE", None)
-                        else:
-                            inst = next((i for i in gs.opp.board if i.serial == target), None)
-                            if inst is None:
-                                await send_error("bad target")
-                                continue
-                            t = ("BROADCAST", inst)
-                        gs.attack(attacker, t)
-                        await send_state()
-                    except (IndexError, ValueError) as exc:
-                        await send_error(str(exc))
-
-                elif mtype == "end_turn":
-                    if gs.winner is None and gs.current == 0 and msg.get("turn") == gs.turn:
-                        gs.end_turn()
-                        await send_state()
-                        if gs.winner is None and gs.current == 1:
-                            await asyncio.sleep(ai_think * random.uniform(0.8, 1.2))
-                            for _ in ai_mod.iter_turn(gs):
-                                await send_state()
-                                await asyncio.sleep(ai_delay * random.uniform(0.6, 1.3))
-                            await asyncio.sleep(ai_delay * random.uniform(0.4, 0.8))
-                    await send_state()
-
-                elif mtype == "set_sleeve":
-                    sid = msg.get("sleeve")
-                    if not isinstance(sid, str) or sid not in sleeves:
-                        await send_error("unknown sleeve")
-                        continue
-                    gs.players[my_station()].sleeve = sid
-                    await send_state()
-
-                elif mtype == "set_avatar":
-                    aid = msg.get("avatar")
-                    if not isinstance(aid, str) or aid not in avatars:
-                        await send_error("unknown avatar")
-                        continue
-                    gs.players[my_station()].avatar = aid
-                    await send_state()
-
                 elif mtype == "ping":
-                    await ws.send_text(json.dumps({"type": "pong"}))
+                    await seat.send({"type": "pong"})
 
                 else:
-                    await send_error(f"unknown type {mtype!r}")
+                    err = await room.handle(seat, msg, sleeves=sleeves, avatars=avatars)
+                    if err:
+                        await send_error(err)
         except WebSocketDisconnect:
             return
+        finally:
+            seat.connected = False
+            if room is not None:
+                await room.close()
 
     if DIST_DIR.exists():
         app.mount("/", StaticFiles(directory=str(DIST_DIR), html=True), name="spa")
