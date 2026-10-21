@@ -115,6 +115,12 @@ class GameState:
 
     # ------------------------------------------------------------------ setup
 
+    @property
+    def game_over(self) -> bool:
+        """True once a station has won. Use this, never `if self.winner:` —
+        station 0 winning is `winner == 0`, which is falsy."""
+        return self.winner is not None
+
     def make_instance(self, card: Card, controller: int) -> CardInstance:
         self.serial += 1
         return CardInstance(card, self.serial, controller)
@@ -202,7 +208,7 @@ class GameState:
         )
 
     def end_turn(self) -> None:
-        if self.winner:
+        if self.game_over:
             return
         engine.end_turn(self)
         self.current = 1 - self.current
@@ -228,7 +234,7 @@ class GameState:
     # ------------------------------------------------------------------ play
 
     def play_card(self, hand_index: int, chosen: CardInstance | None = None) -> CardInstance:
-        if self.winner:
+        if self.game_over:
             raise ValueError("game over")
         p = self.cur
         if not (0 <= hand_index < len(p.hand)):
@@ -296,7 +302,7 @@ class GameState:
         return out
 
     def is_playable(self, inst: CardInstance) -> bool:
-        if self.winner or inst not in self.cur.hand:
+        if self.game_over or inst not in self.cur.hand:
             return False
         if inst.card.cost > self.cur.bandwidth:
             return False
@@ -327,7 +333,7 @@ class GameState:
         return (atk, def_)
 
     def can_attack(self, attacker: CardInstance) -> bool:
-        if self.winner or attacker.controller != self.current:
+        if self.game_over or attacker.controller != self.current:
             return False
         if attacker.card.type is not CardType.BROADCAST:
             return False
@@ -367,7 +373,7 @@ class GameState:
         return targets
 
     def attack(self, attacker: CardInstance, target: tuple) -> None:
-        if self.winner or attacker.controller != self.current:
+        if self.game_over or attacker.controller != self.current:
             return
         if not self.can_attack(attacker):
             return
@@ -395,7 +401,7 @@ class GameState:
     # ------------------------------------------------------------------ end
 
     def check_win(self) -> None:
-        if self.winner:
+        if self.game_over:
             return
         if self.players[1].signal <= 0:
             self.winner = 0

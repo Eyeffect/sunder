@@ -19,10 +19,10 @@ def iter_turn(gs):
     """Run the heuristic AI turn, yielding after each discrete action so the
     server can pace/stage the moves (one snapshot per action)."""
     yield from _main_phase(gs)
-    if gs.winner:
+    if gs.game_over:
         return
     yield from _combat(gs)
-    if gs.winner:
+    if gs.game_over:
         return
     gs.end_turn()
 
@@ -30,7 +30,7 @@ def iter_turn(gs):
 # ------------------------------------------------------------------ main
 
 def _main_phase(gs):
-    while not gs.winner:
+    while not gs.game_over:
         play = _choose_play(gs)
         if play is None:
             return
@@ -98,7 +98,7 @@ def _track_target(gs, inst):
 def _combat(gs):
     p = gs.cur
     for attacker in list(p.board):
-        if gs.winner:
+        if gs.game_over:
             return
         if not gs.can_attack(attacker):
             continue
