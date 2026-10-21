@@ -1,4 +1,4 @@
-import type { ClientMsg, ServerMsg, Snapshot } from "./types";
+import type { ClientMsg, MatchMeta, RoomInfo, ServerMsg, Snapshot } from "./types";
 
 export class GameSocket {
   private ws: WebSocket | null = null;
@@ -6,8 +6,10 @@ export class GameSocket {
   private closing = false;
   private readonly url: string;
 
-  onState: (snapshot: Snapshot) => void = () => {};
+  onState: (snapshot: Snapshot, match?: MatchMeta) => void = () => {};
   onError: (message: string) => void = () => {};
+  onRoom: (room: RoomInfo) => void = () => {};
+  onRoomClosed: (reason: string) => void = () => {};
   onOpen: () => void = () => {};
 
   constructor() {
@@ -29,8 +31,17 @@ export class GameSocket {
       } catch {
         return;
       }
-      if (msg.type === "state" && msg.snapshot) this.onState(msg.snapshot);
+      if (msg.type === "state" && msg.snapshot) this.onState(msg.snapshot, msg.match);
       else if (msg.type === "error" && msg.message) this.onError(msg.message);
+      else if (msg.type === "room" && msg.code && msg.status) {
+        this.onRoom({
+          mode: "pvp",
+          code: msg.code,
+          seat: msg.seat ?? null,
+          token: msg.token ?? null,
+          status: msg.status,
+        });
+      } else if (msg.type === "room_closed") this.onRoomClosed(msg.reason ?? "");
     };
     this.ws.onclose = () => {
       this.ws = null;

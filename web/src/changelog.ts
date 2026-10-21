@@ -37,6 +37,7 @@ export const MILESTONES: Milestone[] = [
   { label: "ENGINE", status: "done" },
   { label: "WEB UI", status: "done" },
   { label: "GENERATION", status: "active" },
+  { label: "VERSUS", status: "active" },
   { label: "COLLECTION & STREAM", status: "planned" },
 ];
 
@@ -55,10 +56,24 @@ export interface VersionEntry {
 
 export const VERSIONS: VersionEntry[] = [
   {
+    version: "0.4.0",
+    codename: "Two-Way Radio",
+    date: "2026-10-21",
+    current: true,
+    changes: [
+      { type: "added", text: "VERSUS: host a room, send the invite link, and duel another human — the server referees every move" },
+      { type: "added", text: "Turn clock in versus: run out and your turn ends; three idle turns in a row forfeit" },
+      { type: "added", text: "Refresh-proof matches: reload or drop your connection and you rejoin your seat; your rival sees when your signal is lost" },
+      { type: "added", text: "Concede from the match bar (with a confirm), and the end screen says how the match was won" },
+      { type: "fixed", text: "When Station 1 won, the game could keep running behind the end screen" },
+      { type: "fixed", text: "A hidden B-SIDE's name no longer slips into the log when area Noise hits it" },
+      { type: "changed", text: "The rival's turn no longer freezes the connection — restart mid-turn works instantly" },
+    ],
+  },
+  {
     version: "0.3.7.5",
     codename: "Face Value",
     date: "2026-10-20",
-    current: true,
     changes: [
       { type: "changed", text: "Card faces redrawn at true 2.5×3.5 playing-card proportions — tighter type, a 5-line rules window, and one layout across hand, board, and codex" },
       { type: "added", text: "Every face prints its edition and rarity in the top-right badge, with the station code watermarked in the corner" },

@@ -68,7 +68,43 @@ describe("GameSocket", () => {
     sock.connect();
     const fake = FakeWS.instances.at(-1)!;
     fake.onmessage?.({ data: JSON.stringify({ type: "state", snapshot: { turn: 1 } }) });
-    expect(onState).toHaveBeenCalledWith({ turn: 1 });
+    expect(onState).toHaveBeenCalledWith({ turn: 1 }, undefined);
+    sock.close();
+  });
+
+  it("passes match meta alongside the snapshot", () => {
+    vi.useFakeTimers();
+    const sock = new GameSocket();
+    const onState = vi.fn();
+    sock.onState = onState;
+    sock.connect();
+    const match = { mode: "pvp", code: "ABC234", seat: 1 };
+    FakeWS.instances.at(-1)!.onmessage?.({
+      data: JSON.stringify({ type: "state", snapshot: { turn: 2 }, match }),
+    });
+    expect(onState).toHaveBeenCalledWith({ turn: 2 }, match);
+    sock.close();
+  });
+
+  it("dispatches room and room_closed messages", () => {
+    vi.useFakeTimers();
+    const sock = new GameSocket();
+    const onRoom = vi.fn();
+    const onRoomClosed = vi.fn();
+    sock.onRoom = onRoom;
+    sock.onRoomClosed = onRoomClosed;
+    sock.connect();
+    const fake = FakeWS.instances.at(-1)!;
+    fake.onmessage?.({
+      data: JSON.stringify({
+        type: "room", mode: "pvp", code: "ABC234", seat: 0, token: "t", status: "live",
+      }),
+    });
+    expect(onRoom).toHaveBeenCalledWith({
+      mode: "pvp", code: "ABC234", seat: 0, token: "t", status: "live",
+    });
+    fake.onmessage?.({ data: JSON.stringify({ type: "room_closed", reason: "left" }) });
+    expect(onRoomClosed).toHaveBeenCalledWith("left");
     sock.close();
   });
 

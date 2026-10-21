@@ -17,6 +17,8 @@ sunder/
   codex.py        CLI card browser
   cards/          JSON sets + registry.json
   server/         FastAPI app (REST + WS) + uvicorn launcher
+    match.py      MatchRoom + seats (HumanSeat / BotSeat), clocks
+    lobby.py      versus rooms: invite codes, seat tokens, resume
   gen/            LLM card-generation pipeline
 web/              React + TypeScript + Vite SPA (served from web/dist)
 tests/            ~20 Python modules + vitest suite in web/
@@ -73,6 +75,21 @@ Card JSON ──parse_card()──▶ Card ──▶ CardInstance (zone-aware ru
   counter effects can CUT a track mid-cast; `resolving` guards re-entrancy
   (`COPY_LAST_TRACK` can't copy itself).
 
+## Match rooms
+
+`game.py` has no notion of sockets or players-as-people; the server wraps
+each `GameState` in a `MatchRoom` with one **seat** per station. Seats are
+pluggable — `HumanSeat` (a WebSocket) or `BotSeat` (the heuristic AI run
+as a background task) — so practice and versus share one code path. The
+room validates every action against the sender's station, serializes
+mutations behind one lock, and broadcasts a per-viewer snapshot to each
+seat. Versus rooms add a turn clock, AFK strikes and a disconnect grace;
+the in-memory `Lobby` pairs connections via invite codes. Details:
+[multiplayer.md](multiplayer.md).
+
+Game end is always `winner` (0/1) + `end_reason`; use `gs.game_over`,
+never truthiness of `winner` (station 0 winning is `winner == 0`).
+
 ## Snapshot masks
 
 * Viewer's own board: full — `atk`/`def` are *effective* values, `damage`,
@@ -80,6 +97,8 @@ Card JSON ──parse_card()──▶ Card ──▶ CardInstance (zone-aware ru
 * Hidden B-SIDE (opponent view): name `???`, type `None`, only the B-SIDE
   keyword. The owner additionally sees its resolved rules text.
 * Rival hand: a count only.
+* Log/history text: a hidden B-SIDE is named "Hidden B-SIDE" until revealed
+  (`CardInstance.label()`), so damage/death lines can't leak it.
 
 ## Resource model
 

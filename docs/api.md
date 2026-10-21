@@ -20,38 +20,52 @@ by the test suite). The module also exposes a ready `app = create_app()` for
 | GET | `/api/health` | `{"ok": true}` |
 | GET | `/api/sleeves` | card-back manifest from `sunder/cards/sleeves.json` |
 | GET | `/api/avatars` | profile-icon manifest from `sunder/cards/avatars.json` |
+| GET | `/api/rooms/{code}` | versus room status: `{code, status: "waiting" \| "live" \| "over"}`, `404` if unknown — never exposes seat tokens ([multiplayer](multiplayer.md)) |
 
 The built SPA is served at `/` **iff `web/dist` exists** (StaticFiles, html
 mode). Rails: dev frontend via `npm run dev` in `web/` proxies `/api` + `/ws`.
 
 ## WebSocket `/ws`
 
-One match per connection; client-driven request/response; every mutation
-answers with a full `state` snapshot. Protocol:
+Every connection is routed through a `MatchRoom` (`sunder/server/match.py`).
+A practice match is Human(seat 0) vs `BotSeat`; a versus match is two
+`HumanSeat`s created by the lobby (see [multiplayer.md](multiplayer.md)).
+Actions are validated against **the sender's seat**, and every mutation is
+answered with a `state` to **each** seat, built for that seat's viewpoint.
 
 | Client → | Payload | Effect |
 |---|---|---|
-| `start` / `restart` | `{seed?}` | new GameState + deal; answers a fresh state |
-| `play` | `{hand: <index>, target?: <serial>}` | play hand card (indexes into *your* hand); `target` auto-looked up on the enemy board |
+| `start` / `restart` | `{seed?}` | new practice match vs the bot (refused while a live PvP match is running) |
+| `play` | `{hand: <index>, target?: <serial>}` | play a card from *your* hand; `target` must be one of the card's `legal_targets` (friendly or enemy), else `bad target`. A target sent for an untargeted card is ignored |
 | `attack` | `{board: <index>, target: <serial> \| "face"}` | attack (indexes into your board) |
-| `end_turn` | `{turn: <n>}` | guarded — a stale turn number is ignored; then the AI's turn is **staged**: before it speaks (director pause), then one snapshot per AI action, paced by the jitter windows |
+| `end_turn` | `{turn: <n>}` | guarded — a stale turn number or out-of-turn request is ignored (answered with a fresh state). Against the bot, its turn then runs as a background task: a think pause, then one `state` per AI action, paced by the jitter windows |
+| `concede` | — | forfeit the current match (`end_reason: "concede"`) |
+| `create_room` / `join_room {code}` / `resume {code, token}` / `leave_room` | | versus lobby — see [multiplayer.md](multiplayer.md#protocol) |
 | `set_sleeve` | `{sleeve: "<id>"}` | set your station's card back; id validated against the sleeve manifest (invalid → error, no state change); the opponent sees the new sleeve in `players.{}.sleeve` |
 | `set_avatar` | `{avatar: "<id>"}` | set your station's profile icon; id validated against `avatars.json` (invalid → error, no state change); glyph + sleeve ink ride the snapshot |
 | `ping` | — | answers `{"type": "pong"}` |
 
 Server →:
 
-* `{"type": "state", "snapshot": {...}}`
+* `{"type": "state", "snapshot": {...}, "match": {...}}` — `match` is
+  per-seat: `mode` (`"bot"`/`"pvp"`), `code`, `seat`,
+  `opponent_connected`, `turn_seconds`, `turn_remaining`
+* `{"type": "room", ...}` / `{"type": "room_closed", "reason": ...}` — versus lobby
 * `{"type": "error", "message": "…"}` — never closes the socket
+
+While the bot is playing, the socket stays responsive: a `play` sent during
+its turn gets `not your turn` immediately, and `restart` cancels the bot's
+turn cleanly.
 
 ## Snapshot shape (`state.py`)
 
-Viewer-aware (`viewer = 0` for the human station):
+Viewer-aware — each seat gets `snapshot(gs, viewer=<its station>)`:
 
 ```jsonc
 {
   "turn": 1, "current": 0, "phase": "MAIN",
-  "winner": null, "status": "Turn 1 | …",
+  "winner": null, "end_reason": null,   // "signal" | "concede" | "timeout" | "disconnect"
+  "status": "Turn 1 | …",
   "viewer": 0,
   "can_act": true,          // winner is None AND it is your turn
   "players": {"0": {...}, "1": {...}},
