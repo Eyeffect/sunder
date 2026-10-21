@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 
 
 def _needs_target(inst) -> bool:
+    """Return whether any card ability uses CHOSEN or ENEMY_BROADCAST targeting."""
     # Mirrors state.hand_view's `needs_target`.
     return any(ab.target in (Target.CHOSEN, Target.ENEMY_BROADCAST)
                for ab in inst.card.abilities)
@@ -40,11 +41,13 @@ class Seat:
     is_bot = False
 
     def __init__(self, index: int):
+        """Assign a station, raising ValueError unless `index` is 0 or 1."""
         if index not in (0, 1):
             raise ValueError("seat index must be 0 or 1")
         self.index = index
 
     async def send(self, payload: dict) -> None:  # pragma: no cover - interface
+        """Deliver a server message; the base implementation raises NotImplementedError."""
         raise NotImplementedError
 
 
@@ -53,12 +56,17 @@ class HumanSeat(Seat):
     bot task and the receive loop never interleave a frame."""
 
     def __init__(self, index: int, ws):
+        """Bind a WebSocket to a station, raising ValueError for an invalid index."""
         super().__init__(index)
         self.ws = ws
         self.connected = True
         self._send_lock = asyncio.Lock()
 
     async def send(self, payload: dict) -> None:
+        """Send JSON with serialized socket access, skipping disconnected seats.
+
+        Catch serialization or send exceptions and mark the seat disconnected.
+        """
         if not self.connected:
             return
         async with self._send_lock:
@@ -74,14 +82,24 @@ class BotSeat(Seat):
     is_bot = True
 
     def __init__(self, index: int, think: float = 1.4, delay: float = 1.4):
+        """Set base thinking and action delays in seconds; zero skips the pauses.
+
+        Raise ValueError unless `index` is 0 or 1.
+        """
         super().__init__(index)
         self.think = think
         self.delay = delay
 
     async def send(self, payload: dict) -> None:
+        """Ignore server messages; the bot reads the game state directly."""
         return None  # the bot reads the GameState directly
 
     async def play_turn(self, room: "MatchRoom") -> None:
+        """Play a paced AI turn, broadcasting after each action and turn completion.
+
+        Stop if the room's game changes, the game ends, or this station loses
+        the turn. Cancellation and errors from AI actions or broadcasts propagate.
+        """
         gs = room.gs
         await asyncio.sleep(self.think * random.uniform(0.8, 1.2))
         steps = ai_mod.iter_turn(gs)
@@ -102,6 +120,10 @@ class BotSeat(Seat):
 
 class MatchRoom:
     def __init__(self, gs: GameState, seats: list[Seat]):
+        """Manage `gs` with one seat per station, without starting the game or bot.
+
+        Raise ValueError unless the seats' indices are exactly 0 and 1.
+        """
         if sorted(s.index for s in seats) != [0, 1]:
             raise ValueError("a room needs exactly one seat per station")
         self.gs = gs
@@ -112,9 +134,14 @@ class MatchRoom:
     # ------------------------------------------------------------ output
 
     async def send_state(self, seat: Seat) -> None:
+        """Send a snapshot from the seat's perspective, hiding the opponent's hand.
+
+        Snapshot and seat-send errors propagate unless the seat handles them.
+        """
         await seat.send({"type": "state", "snapshot": snapshot(self.gs, viewer=seat.index)})
 
     async def broadcast(self) -> None:
+        """Send each seat its own state view; stop and propagate any send_state error."""
         for seat in self.seats.values():
             await self.send_state(seat)
 
@@ -129,6 +156,11 @@ class MatchRoom:
             self._bot_task = asyncio.create_task(self._run_bot(seat))
 
     async def _run_bot(self, seat: BotSeat) -> None:
+        """Run consecutive bot turns until game over, a human turn, or no progress.
+
+        Stop if the room's game changes. Bot-turn exceptions end the loop;
+        cancellation propagates.
+        """
         # Loop so bot-vs-bot rooms (tests, future spectating) keep going.
         gs = self.gs
         while not gs.game_over and self.gs is gs:
@@ -147,6 +179,10 @@ class MatchRoom:
                 return
 
     async def close(self) -> None:
+        """Cancel and await an active bot task, clearing the room's task reference.
+
+        Suppress cancellation; other errors from the awaited task propagate.
+        """
         task, self._bot_task = self._bot_task, None
         if task and not task.done():
             task.cancel()
@@ -156,11 +192,26 @@ class MatchRoom:
     # ------------------------------------------------------------ input
 
     def _my_turn(self, seat: Seat) -> bool:
+        """Return whether this seat controls the current station in an unfinished game."""
         return not self.gs.game_over and self.gs.current == seat.index
 
     async def handle(self, seat: Seat, msg: dict, *, sleeves: dict, avatars: dict) -> str | None:
-        """Apply one client message for `seat`. Returns an error message for
-        that seat only, or None on success (state is then broadcast)."""
+        """Apply a seat's play, attack, end-turn, or cosmetic message.
+
+        `hand` and `board` select list positions; card targets use serials,
+        with 'face' selecting the rival station for attacks. Ignore targets
+        on untargeted cards. `sleeves` and `avatars` supply allowed cosmetic IDs.
+        Cosmetics may change out of turn, including after game over.
+
+        Return an error string for the caller to send to this seat. KeyError,
+        TypeError, ValueError, and IndexError during plays or attacks are
+        converted to error strings; other errors, including unhandled snapshot
+        or seat-send errors, propagate. Returned errors do not trigger a broadcast.
+
+        Otherwise broadcast state, start any pending bot turn, and return None.
+        Stale or out-of-turn end-turn messages also take this path without
+        advancing the turn; valid end-turn messages must match `gs.turn`.
+        """
         mtype = msg.get("type")
         async with self.lock:
             gs = self.gs

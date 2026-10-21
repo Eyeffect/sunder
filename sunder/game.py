@@ -208,6 +208,10 @@ class GameState:
         )
 
     def end_turn(self) -> None:
+        """Resolve end-of-turn effects, switch stations, and begin the next turn.
+
+        Do nothing if a winner has already been recorded.
+        """
         if self.game_over:
             return
         engine.end_turn(self)
@@ -234,6 +238,13 @@ class GameState:
     # ------------------------------------------------------------------ play
 
     def play_card(self, hand_index: int, chosen: CardInstance | None = None) -> CardInstance:
+        """Spend bandwidth to play the current station's card and return its instance.
+
+        `hand_index` is zero-based. `chosen` is passed to targeting abilities;
+        its legality is not checked here. Resolve effects and check for a winner.
+        Raise ValueError if the game is over, the index is out of range, bandwidth
+        is insufficient, or a non-Track would exceed the board cap.
+        """
         if self.game_over:
             raise ValueError("game over")
         p = self.cur
@@ -302,6 +313,10 @@ class GameState:
         return out
 
     def is_playable(self, inst: CardInstance) -> bool:
+        """Check hand membership, cost, board space, and Track target availability.
+
+        Return False after game over; this does not validate a chosen target.
+        """
         if self.game_over or inst not in self.cur.hand:
             return False
         if inst.card.cost > self.cur.bandwidth:
@@ -333,6 +348,11 @@ class GameState:
         return (atk, def_)
 
     def can_attack(self, attacker: CardInstance) -> bool:
+        """Check whether a live Broadcast on the current station's board may attack.
+
+        Honor LOUD, RUSH, and FEEDBACK limits; return False after game over.
+        Target restrictions are checked separately by `legal_attack_targets`.
+        """
         if self.game_over or attacker.controller != self.current:
             return False
         if attacker.card.type is not CardType.BROADCAST:
@@ -373,6 +393,12 @@ class GameState:
         return targets
 
     def attack(self, attacker: CardInstance, target: tuple) -> None:
+        """Resolve an attack, consume an attack allowance, and check for a winner.
+
+        `target` is ('FACE', None) or ('BROADCAST', instance). Do nothing if
+        the game is over or the attacker cannot attack. Otherwise, raise
+        ValueError for a target outside `legal_attack_targets`.
+        """
         if self.game_over or attacker.controller != self.current:
             return
         if not self.can_attack(attacker):
@@ -401,6 +427,11 @@ class GameState:
     # ------------------------------------------------------------------ end
 
     def check_win(self) -> None:
+        """Record a winner when either station's Signal is at or below zero.
+
+        Station 0 wins if both qualify. Preserve an existing winner, recording
+        the win event only when a winner is first assigned.
+        """
         if self.game_over:
             return
         if self.players[1].signal <= 0:

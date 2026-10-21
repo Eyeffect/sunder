@@ -152,6 +152,13 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
 
     @app.websocket("/ws")
     async def ws_endpoint(ws: WebSocket):
+        """Serve a station-0 human against a bot, replacing the room on restart.
+
+        Reply to invalid JSON, non-object messages, and pre-game actions with
+        errors; answer pings only after a game starts. Mark the seat disconnected
+        and cancel its room's bot task when the receive loop exits. Catch
+        WebSocketDisconnect; other receive-loop errors propagate after cleanup.
+        """
         await ws.accept()
         # Single-human server for now: this socket is seat 0 vs a bot seat.
         # A PvP lobby will build the same MatchRoom with two HumanSeats.
@@ -159,6 +166,7 @@ def create_app(decks=None, ai_think: float = 1.4, ai_delay: float = 1.4) -> Fast
         room: MatchRoom | None = None
 
         async def send_error(message: str) -> None:
+            """Send an error response to this socket's human seat."""
             await seat.send({"type": "error", "message": message})
 
         try:
